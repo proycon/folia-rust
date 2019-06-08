@@ -204,6 +204,11 @@ pub enum DataType {
     Comment(String),
 }
 
+pub enum BodyType {
+    Text,
+    Speech
+}
+
 pub struct Properties {
     xmltag: String,
     annotationtype: AnnotationType,
@@ -282,13 +287,13 @@ impl FoliaElement {
         }
     }
 
-    pub fn append(&mut self, elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<(), FoliaError> {
+    pub fn append(&mut self, elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<(), FoliaError> {
         let element  = FoliaElement::new(elementtype, attribs, data)?;
         self.data.push(DataType::Element(element));
         Ok(())
     }
 
-    pub fn append_get_mut(&mut self, elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<&mut DataType, FoliaError> {
+    pub fn append_get_mut(&mut self, elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<&mut DataType, FoliaError> {
         self.append(elementtype, attribs, data)?;
         self.get_mut_last().ok_or(FoliaError::IndexError)
     }
@@ -311,8 +316,8 @@ impl FoliaElement {
         self.data.get(index)
     }
 
-    pub fn new(elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<FoliaElement, FoliaError> {
-        Ok(Self { elementtype: elementtype, attribs: attribs, data: data })
+    pub fn new(elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<FoliaElement, FoliaError> {
+        Ok(Self { elementtype: elementtype, attribs: attribs.unwrap_or(Vec::new()), data: data.unwrap_or(Vec::new()) })
     }
 
 }
@@ -324,9 +329,13 @@ struct Document {
 }
 
 impl Document {
-    fn new(id: &String) -> Result<Self, Box<dyn Error>> {
-        let data = Vec::new();
-        Ok(Self { id: id.clone(), filename: None, data: data })
+    fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
+        let mut data = Vec::new();
+        data.push(match bodytype{
+            BodyType::Text => FoliaElement::new(ElementType::Text, None, None).unwrap(),
+            BodyType::Speech => FoliaElement::new(ElementType::Speech, None, None).unwrap(),
+        });
+        Ok(Self { id: id.to_string(), filename: None, data: data })
     }
 
     //fn load(filename: &String) -> Result<Self, Box<dyn Error>> {
@@ -335,5 +344,5 @@ impl Document {
 }
 
 fn main() {
-    println!("Hello, world!");
+    let mut doc = Document::new("example", BodyType::Text);
 }
