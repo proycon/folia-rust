@@ -5,3 +5,4 @@ authors = ["Maarten van Gompel <proycon@anaproy.nl>"]
 edition = "2018"
 
 [dependencies]
+quick-xml = "0.14.0"

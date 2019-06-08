@@ -1,5 +1,10 @@
+extern crate quick_xml;
 
-enum ElementType {
+use quick_xml::Reader;
+use quick_xml::events::Event;
+use std::error::Error;
+
+pub enum ElementType {
     ActorFeature,
     Alternative,
     AlternativeLayers,
@@ -116,7 +121,7 @@ pub enum AttribType {
     ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR
 }
 
-fn attribtypeclass(atype: AttribType) -> AttribType {
+pub fn attribtypeclass(atype: AttribType) -> AttribType {
     match atype {
         AttribType::SET => AttribType::CLASS,
         AttribType::PROCESSOR => AttribType::ANNOTATOR,
@@ -125,7 +130,7 @@ fn attribtypeclass(atype: AttribType) -> AttribType {
     }
 }
 
-enum Attribute {
+pub enum Attribute {
     Id(String),
     Set(String),
     Class(String),
@@ -146,17 +151,17 @@ enum Attribute {
     Href(String),
 }
 
-enum AnnotationType {
+pub enum AnnotationType {
     TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN
 }
 
-enum DataType {
+pub enum DataType {
     Text(String),
     Element(FoliaElement),
     Comment(String),
 }
 
-struct Properties {
+pub struct Properties {
     xmltag: String,
     annotationtype: AnnotationType,
     accepted_data: Vec<ElementType>,
@@ -179,7 +184,7 @@ struct Properties {
     wrefable: bool //Indicates whether this element is referable as a token/word (applies only to a very select few elements, such as w, morpheme, and phoneme)
 }
 
-struct FoliaElement {
+pub struct FoliaElement {
     elementtype: ElementType,
     data: Vec<DataType>,
     attribs: Vec<Attribute>,
@@ -230,12 +235,28 @@ impl FoliaElement {
 
     pub fn processor(&self) -> Option<&String> {
         match self.attrib(AttribType::PROCESSOR) {
-            Some(Attribute::Processor(value)) => Some(&value),
-            _ => None
+            Some(Attribute::Processor(value)) => Some(&value), _ => None
         }
     }
 
+    pub fn append(&mut self, elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<(), Box<dyn Error>> {
+        let element  = FoliaElement::new(elementtype, attribs, data)?;
+        self.data.push(DataType::Element(element));
+        Ok(())
+    }
 
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut DataType> {
+        self.data.get_mut(index)
+    }
+
+    pub fn get_mut_last(&mut self) -> Option<&mut DataType> {
+        let index = self.data.len() - 1;
+        self.data.get_mut(index)
+    }
+
+    pub fn new(elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<FoliaElement, Box<dyn Error>> {
+        Ok(Self { elementtype: elementtype, attribs: attribs, data: data })
+    }
 
 }
 
@@ -246,8 +267,14 @@ struct Document {
 }
 
 impl Document {
-    fn new(self, filename: Option<String>, id: Option<String>) {
+    fn new(id: &String) -> Result<Self, Box<dyn Error>> {
+        let data = Vec::new();
+        Ok(Self { id: id.clone(), filename: None, data: data })
     }
+
+    //fn load(filename: &String) -> Result<Self, Box<dyn Error>> {
+    //}
+
 }
 
 fn main() {
