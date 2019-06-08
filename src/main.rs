@@ -3,6 +3,49 @@ extern crate quick_xml;
 use quick_xml::Reader;
 use quick_xml::events::Event;
 use std::error::Error;
+use std::fmt;
+use std::io;
+
+// ------------------------------ ERROR DEFINITIONS & IMPLEMENTATIONS -------------------------------------------------------------
+//
+#[derive(Debug)]
+pub enum FoliaError {
+    IoError(io::Error),
+    IndexError,
+}
+
+impl From<io::Error> for FoliaError {
+    fn from(err: io::Error) -> FoliaError {
+        FoliaError::IoError(err)
+    }
+}
+
+impl Error for FoliaError {
+    fn description(&self) -> &str {
+        match *self {
+            FoliaError::IoError(ref err) => err.description(),
+            FoliaError::IndexError => "invalid index",
+        }
+    }
+
+    fn cause(&self)  -> Option<&Error> {
+        match *self {
+            FoliaError::IoError(ref err) => Some(err as &Error),
+            FoliaError::IndexError => None,
+        }
+    }
+}
+
+impl fmt::Display for FoliaError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            FoliaError::IoError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------
 
 pub enum ElementType {
     ActorFeature,
@@ -239,10 +282,19 @@ impl FoliaElement {
         }
     }
 
-    pub fn append(&mut self, elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<(), Box<dyn Error>> {
+    pub fn append(&mut self, elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<(), FoliaError> {
         let element  = FoliaElement::new(elementtype, attribs, data)?;
         self.data.push(DataType::Element(element));
         Ok(())
+    }
+
+    pub fn append_get_mut(&mut self, elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<&mut DataType, FoliaError> {
+        self.append(elementtype, attribs, data)?;
+        self.get_mut_last().ok_or(FoliaError::IndexError)
+    }
+
+    pub fn get(&self, index: usize) -> Option<&DataType> {
+        self.data.get(index)
     }
 
     pub fn get_mut(&mut self, index: usize) -> Option<&mut DataType> {
@@ -254,7 +306,12 @@ impl FoliaElement {
         self.data.get_mut(index)
     }
 
-    pub fn new(elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<FoliaElement, Box<dyn Error>> {
+    pub fn get_last(&self) -> Option<&DataType> {
+        let index = self.data.len() - 1;
+        self.data.get(index)
+    }
+
+    pub fn new(elementtype: ElementType, attribs: Vec<Attribute>, data: Vec<DataType>) -> Result<FoliaElement, FoliaError> {
         Ok(Self { elementtype: elementtype, attribs: attribs, data: data })
     }
 
