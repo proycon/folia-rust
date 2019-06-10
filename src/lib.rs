@@ -342,6 +342,28 @@ impl FoliaElement {
         Ok(Self { elementtype: elementtype, attribs: attribs.unwrap_or(Vec::new()), data: data.unwrap_or(Vec::new()) })
     }
 
+    fn parseattributes(reader: &Reader<BufReader<File>>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
+        let mut attributes: Vec<Attribute> = Vec::new();
+        for attrib in attribiter {
+            let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
+            match attrib.key {
+                b"id" => {
+                    attributes.push(Attribute::Id(attrib.unescape_and_decode_value(&reader).expect("Unable to parse ID")));
+                },
+                b"set" => {
+                    attributes.push(Attribute::Set(attrib.unescape_and_decode_value(&reader).expect("Unable to parse set")));
+                },
+                b"class" => {
+                    attributes.push(Attribute::Class(attrib.unescape_and_decode_value(&reader).expect("Unable to parse class")));
+                },
+                b"processor" => {
+                    attributes.push(Attribute::Processor(attrib.unescape_and_decode_value(&reader).expect("Unable to parse processor")));
+                },
+                _ => {}
+            }
+        }
+        Ok(attributes)
+    }
 }
 
 pub struct Document {
@@ -352,6 +374,7 @@ pub struct Document {
 
 struct ParseResult {
     id: String,
+    data: Vec<FoliaElement>,
 }
 
 
@@ -377,9 +400,12 @@ impl Document {
     }
 
     fn parse(reader: &mut Reader<BufReader<File>>) -> Result<ParseResult, FoliaError> {
+        let mut data: Vec<FoliaElement> = Vec::new();
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
         let mut id: String = String::new();
+
+        //parse root
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
             match e {
@@ -395,7 +421,7 @@ impl Document {
                                     _ => {}
                                 };
                             }
-                            return Ok(ParseResult { id: id });
+                            break;
                         },
                         (Some(NSFOLIA), _) => {
                             return Err(FoliaError::ParseError("Unknown tag".to_string()));
@@ -410,8 +436,42 @@ impl Document {
                 }
                 (_,_) => {}
             }
-        }
+        };
+        //parse metadata
+
+        //find body
+        loop {
+            let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
+            match e {
+                (ref ns, Event::Start(ref e)) => {
+                    match (*ns, e.local_name())  {
+                        (Some(NSFOLIA), b"text") => {
+                            if let Ok(attribs)  =  FoliaElement::parseattributes(&reader, e.attributes()) {
+                                data.push(FoliaElement { elementtype: ElementType::Text, data: Vec::new(), attribs: attribs });
+                            }
+                            break;
+                        },
+                        (Some(NSFOLIA), b"speech") => {
+                            //TODO break;
+                        },
+                        (Some(NSFOLIA), _) => {
+                            return Err(FoliaError::ParseError("Unknown tag".to_string()));
+                        },
+                        (_ns,_tag) => {
+                            return Err(FoliaError::ParseError("Expected FoLiA namespace".to_string()));
+                        }
+                    }
+                },
+                (_, Event::Eof) => {
+                    return Err(FoliaError::ParseError("Premature end of document".to_string()));
+                }
+                (_,_) => {}
+            }
+        };
+
+        return Ok(ParseResult { id: id, data: data });
     }
+
 
     pub fn id(&self) -> &str { &self.id }
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
