@@ -1,3 +1,5 @@
+pub mod folia {
+
 extern crate quick_xml;
 
 use quick_xml::Reader;
@@ -5,6 +7,7 @@ use quick_xml::events::Event;
 use std::error::Error;
 use std::fmt;
 use std::io;
+
 
 // ------------------------------ ERROR DEFINITIONS & IMPLEMENTATIONS -------------------------------------------------------------
 //
@@ -322,14 +325,14 @@ impl FoliaElement {
 
 }
 
-struct Document {
+pub struct Document {
     id: String,
     filename: Option<String>,
     data: Vec<FoliaElement>
 }
 
 impl Document {
-    fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
+    pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
         let mut data = Vec::new();
         data.push(match bodytype{
             BodyType::Text => FoliaElement::new(ElementType::Text, None, None).unwrap(),
@@ -338,11 +341,12 @@ impl Document {
         Ok(Self { id: id.to_string(), filename: None, data: data })
     }
 
+    pub fn id(&self) -> &str { &self.id }
+    pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
+
     //fn load(filename: &String) -> Result<Self, Box<dyn Error>> {
     //}
 
 }
 
-fn main() {
-    let mut doc = Document::new("example", BodyType::Text);
-}
+}//mod
