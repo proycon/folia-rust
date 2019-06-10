@@ -5,15 +5,22 @@ extern crate quick_xml;
 use quick_xml::Reader;
 use quick_xml::events::Event;
 use std::error::Error;
+use std::path::{Path};
 use std::fmt;
 use std::io;
+use std::io::BufReader;
+use std::fs::File;
 
+
+const NSFOLIA: &[u8] = b"http://ilk.uvt.nl/folia";
 
 // ------------------------------ ERROR DEFINITIONS & IMPLEMENTATIONS -------------------------------------------------------------
 //
 #[derive(Debug)]
 pub enum FoliaError {
     IoError(io::Error),
+    XmlError(quick_xml::Error),
+    ParseError(String),
     IndexError,
 }
 
@@ -23,10 +30,18 @@ impl From<io::Error> for FoliaError {
     }
 }
 
+impl From<quick_xml::Error> for FoliaError {
+    fn from(err: quick_xml::Error) -> FoliaError {
+        FoliaError::XmlError(err)
+    }
+}
+
 impl Error for FoliaError {
     fn description(&self) -> &str {
         match *self {
             FoliaError::IoError(ref err) => err.description(),
+            FoliaError::XmlError(ref err) => "XML Error",
+            FoliaError::ParseError(ref err) => err,
             FoliaError::IndexError => "invalid index",
         }
     }
@@ -34,6 +49,8 @@ impl Error for FoliaError {
     fn cause(&self)  -> Option<&Error> {
         match *self {
             FoliaError::IoError(ref err) => Some(err as &Error),
+            FoliaError::XmlError(ref err) => None,
+            FoliaError::ParseError(ref err) => None, //TODO
             FoliaError::IndexError => None,
         }
     }
@@ -43,6 +60,8 @@ impl fmt::Display for FoliaError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             FoliaError::IoError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::XmlError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::ParseError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
         }
     }
@@ -331,6 +350,12 @@ pub struct Document {
     data: Vec<FoliaElement>
 }
 
+struct ParseResult {
+    id: String,
+}
+
+
+
 impl Document {
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
         let mut data = Vec::new();
@@ -341,12 +366,66 @@ impl Document {
         Ok(Self { id: id.to_string(), filename: None, data: data })
     }
 
+    pub fn fromfile(filename: &str) -> Result<Self, FoliaError> {
+        let mut reader = Reader::from_file(Path::new(filename))?;
+        reader.trim_text(true);
+        let mut data = Vec::new();
+        match Self::parse(&mut reader) {
+            Ok(id) => Ok(Self { id: "TODO".to_string(), filename: Some(filename.to_string()), data: data }),
+            Err(err) => Err(err),
+        }
+    }
+
+    fn parse(reader: &mut Reader<BufReader<File>>) -> Result<ParseResult, FoliaError> {
+        let mut buf = Vec::new();
+        let mut nsbuf = Vec::new();
+        let mut id: String = String::new();
+        loop {
+            let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
+            match e {
+                (ref ns, Event::Start(ref e)) => {
+                    match (*ns, e.local_name())  {
+                        (Some(NSFOLIA), b"FoLiA") => {
+                            for attrib in e.attributes() {
+                                let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
+                                match attrib.key {
+                                    b"id" => {
+                                        id = attrib.unescape_and_decode_value(&reader).expect("Unable to parse ID")
+                                    }
+                                    _ => {}
+                                };
+                            }
+                        },
+                        (Some(NSFOLIA), _) => {
+                            return Err(FoliaError::ParseError("Unknown tag".to_string()));
+                        },
+                        (_ns,_tag) => {
+                            return Err(FoliaError::ParseError("Expected FoLiA namespace".to_string()));
+                        }
+                    }
+                },
+                (_, Event::Eof) => {
+                    return Err(FoliaError::ParseError("Premature end of document".to_string()));
+                }
+                (_,_) => {}
+            }
+        }
+    }
+
     pub fn id(&self) -> &str { &self.id }
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
+    pub fn get_body(&self) -> Option<&FoliaElement> {
+        self.data.get(0)
+    }
+
+    pub fn get_mut_body(&mut self) -> Option<&mut FoliaElement> {
+        self.data.get_mut(0)
+    }
     //fn load(filename: &String) -> Result<Self, Box<dyn Error>> {
     //}
 
 }
+
 
 }//mod
