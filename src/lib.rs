@@ -371,7 +371,7 @@ impl Document {
         reader.trim_text(true);
         let mut data = Vec::new();
         match Self::parse(&mut reader) {
-            Ok(id) => Ok(Self { id: "TODO".to_string(), filename: Some(filename.to_string()), data: data }),
+            Ok(parseresult) => Ok(Self { id: parseresult.id, filename: Some(filename.to_string()), data: data }),
             Err(err) => Err(err),
         }
     }
@@ -395,6 +395,7 @@ impl Document {
                                     _ => {}
                                 };
                             }
+                            return Ok(ParseResult { id: id });
                         },
                         (Some(NSFOLIA), _) => {
                             return Err(FoliaError::ParseError("Unknown tag".to_string()));
