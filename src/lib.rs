@@ -9,6 +9,7 @@ use std::path::{Path};
 use std::fmt;
 use std::io;
 use std::str;
+use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
 
@@ -236,7 +237,7 @@ impl FoliaElement {
         Ok(Self { elementtype: elementtype, attribs: attribs.unwrap_or(Vec::new()), data: data.unwrap_or(Vec::new()) })
     }
 
-    fn parseattributes(reader: &Reader<BufReader<File>>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
+    fn parseattributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
             let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
@@ -259,7 +260,7 @@ impl FoliaElement {
         Ok(attributes)
     }
 
-    fn parse(reader: &Reader<BufReader<File>>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+    fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
         let attributes: Vec<Attribute> = FoliaElement::parseattributes(reader, event.attributes())?;
         let elementtype = getelementtype(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement { elementtype: elementtype, attribs: attributes, data: Vec::new() })
@@ -628,9 +629,9 @@ fn annotationtype2xml(annotationtype: AnnotationType) -> &'static str {
 }
 
 pub struct Document {
-    id: String,
-    filename: Option<String>,
-    body: Option<FoliaElement>,
+    pub id: String,
+    pub filename: Option<String>,
+    pub body: Option<FoliaElement>,
 }
 
 
@@ -646,7 +647,7 @@ impl Document {
     }
 
     ///Load a FoliA document from file
-    pub fn fromfile(filename: &str) -> Result<Self, FoliaError> {
+    pub fn from_file(filename: &str) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_file(Path::new(filename))?;
         reader.trim_text(true);
         let mut result = Self::parse(&mut reader);
@@ -657,8 +658,14 @@ impl Document {
         return result;
     }
 
+    pub fn from_str(data: &str) -> Result<Self, FoliaError> {
+        let mut reader = Reader::from_str(data);
+        reader.trim_text(true);
+        Self::parse(&mut reader)
+    }
+
     ///Parse a FoLiA document
-    fn parse(reader: &mut Reader<BufReader<File>>) -> Result<Self, FoliaError> {
+    fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
         let mut body: Option<FoliaElement> = None;
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
@@ -746,7 +753,7 @@ impl Document {
         }
     }
 
-    fn parsebody(&mut self, reader: &mut Reader<BufReader<File>>, mut buf: &mut Vec<u8>) -> Result<(), FoliaError> {
+    fn parsebody<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>) -> Result<(), FoliaError> {
         let mut body: FoliaElement  = self.body.take().unwrap();
         let mut stack = vec![body];
         let mut nsbuf = Vec::new(); //will creating a new one do or do we need to pass it explicitly?

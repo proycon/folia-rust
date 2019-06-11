@@ -13,7 +13,7 @@ fn instantiate() {
 fn append() {
     if let Ok(doc) = folia::Document::new("example", folia::BodyType::Text) {
         let attribs = vec![ folia::Attribute::Id("s.1".to_string()) ];
-        doc.body.append(folia::ElementType::Sentence, Some(attribs), None  );
+        doc.body.unwrap().append(folia::ElementType::Sentence, Some(attribs), None  );
     } else {
         assert!(false);
     }
