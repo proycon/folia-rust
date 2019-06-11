@@ -630,12 +630,7 @@ fn annotationtype2xml(annotationtype: AnnotationType) -> &'static str {
 pub struct Document {
     id: String,
     filename: Option<String>,
-    body: FoliaElement,
-}
-
-struct ParseResult {
-    id: String,
-    body: FoliaElement,
+    body: Option<FoliaElement>,
 }
 
 
@@ -644,8 +639,8 @@ impl Document {
     ///Create a new FoLiA document from scratch
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
         let body = match bodytype {
-            BodyType::Text => FoliaElement::new(ElementType::Text, None, None).unwrap(),
-            BodyType::Speech => FoliaElement::new(ElementType::Speech, None, None).unwrap(),
+            BodyType::Text => Some(FoliaElement::new(ElementType::Text, None, None).unwrap()),
+            BodyType::Speech => Some(FoliaElement::new(ElementType::Speech, None, None).unwrap()),
         };
         Ok(Self { id: id.to_string(), filename: None, body: body })
     }
@@ -742,8 +737,8 @@ impl Document {
         };
 
 
-        if let Some(body) = body {
-            let mut doc = Self { id: id, body: body, filename: None };
+        let mut doc = Self { id: id, body: body, filename: None };
+        if doc.body.is_some() {
             doc.parsebody(reader, &mut buf)?;
             Ok(doc)
         } else {
@@ -752,7 +747,8 @@ impl Document {
     }
 
     fn parsebody(&mut self, reader: &mut Reader<BufReader<File>>, mut buf: &mut Vec<u8>) -> Result<(), FoliaError> {
-        let mut stack = vec![&mut self.body];
+        let mut body: FoliaElement  = self.body.take().unwrap();
+        let mut stack = vec![body];
         let mut nsbuf = Vec::new(); //will creating a new one do or do we need to pass it explicitly?
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
@@ -764,7 +760,7 @@ impl Document {
                 },
                 (Some(NSFOLIA), Event::Start(ref e)) => {
                     let mut elem = FoliaElement::parse(reader, e)?;
-                    stack.push(&mut elem);
+                    stack.push(elem);
                 },
                 (Some(NSFOLIA), Event::End(ref e)) => {
                     if stack.len() <= 1 {
@@ -776,7 +772,7 @@ impl Document {
                         if elem.elementtype != getelementtype(str::from_utf8(e.local_name()).expect("Tag is not valid utf-8")).expect("Unknown tag") {
                             return Err(FoliaError::ParseError("Malformed XML? Invalid element closed".to_string()));
                         }
-                        to.data.push(DataType::Element(*elem));
+                        to.data.push(DataType::Element(elem));
                     }
                 },
                 (None, Event::Text(s)) => {
@@ -806,6 +802,7 @@ impl Document {
                 (_,_) => {}
             }
         };
+        self.body = Some(stack.pop().unwrap());
         Ok(())
     }
 
