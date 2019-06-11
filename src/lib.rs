@@ -70,6 +70,7 @@ impl fmt::Display for FoliaError {
 
 // -------------------------------------------------------------------------------------------
 
+//foliaspec:elementtype
 pub enum ElementType {
     ActorFeature,
     Alternative,
@@ -183,7 +184,7 @@ pub enum ElementType {
 }
 
 #[derive(Debug,Copy,Clone)]
-pub enum AttribType {
+pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
     ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR
 }
 
@@ -217,6 +218,7 @@ pub enum Attribute {
     Href(String),
 }
 
+//foliaspec:annotationtype
 pub enum AnnotationType {
     TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN
 }
@@ -348,7 +350,7 @@ impl FoliaElement {
         for attrib in attribiter {
             let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
             match attrib.key {
-                b"id" => {
+                b"xml:id" => {
                     attributes.push(Attribute::Id(attrib.unescape_and_decode_value(&reader).expect("Unable to parse ID")));
                 },
                 b"set" => {
@@ -366,8 +368,40 @@ impl FoliaElement {
         Ok(attributes)
     }
 
-    /*fn parse(reader: &Reader<BufReader<File>>) -> Result<FoliaElement, FoliaError> {
-    }*/
+    fn parse(reader: &Reader<BufReader<File>>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+        let mut attributes: Vec<Attribute> = FoliaElement::parseattributes(reader, event.attributes())?;
+        let elementtype = getelementtype(str::from_utf8(event.local_name()).unwrap())?;
+        let element = Element::new(name, prefix, namespaces, attributes, Vec::new());
+        Ok(FoliaElement { elementtype: elementtype, attribs: attributes, data: data })
+    }
+}
+
+fn getelementtype(tag: &str) -> Result<ElementType, FoliaError> {
+    //foliaspec:elementtype_string_map
+    match tag {
+        "text" => Ok(ElementType::Text),
+        _ => Err(FoliaError::ParseError(format!("Unknown FoLiA element: {}", tag)))
+    }
+
+}
+
+fn getelementname(elementtype: ElementType) -> &'static str {
+    //foliaspec:string_elementtype_map
+    match elementtype {
+        ElementType::Text => "text",
+    }
+
+}
+
+fn annotationtype2elementtype(annotationtype: AnnotationType) -> ElementType {
+    //foliaspec:annotationtype_elementtype_map
+    XXX
+
+}
+
+fn annotationtype2elementtype(annotationtype: AnnotationType) -> &'static str {
+    //foliaspec:annotationtype_xml_map
+    XXX
 
 }
 
@@ -423,7 +457,7 @@ impl Document {
                             for attrib in e.attributes() {
                                 let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
                                 match attrib.key {
-                                    b"id" => {
+                                    b"xml:id" => {
                                         id = attrib.unescape_and_decode_value(&reader).expect("Unable to parse ID")
                                     }
                                     _ => {}
