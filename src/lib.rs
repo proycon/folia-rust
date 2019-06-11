@@ -725,8 +725,8 @@ impl Document {
                             }
                             break;
                         },
-                        (Some(NSFOLIA), tag) => {
-                            return Err(FoliaError::ParseError(format!("Unknown tag: {}",str::from_utf8(tag).expect("invalid utf-8 in tag")).to_string()));
+                        (Some(NSFOLIA), _) => {
+                            //just ignore everything else for now
                         },
                         (Some(ns),tag) => {
                             return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got namespace {} with tag {}", str::from_utf8(ns).expect("invalid utf-8 in namespace"), str::from_utf8(tag).expect("invalid utf-8 in tag")).to_string()));
@@ -746,17 +746,16 @@ impl Document {
 
         let mut doc = Self { id: id, body: body, filename: None };
         if doc.body.is_some() {
-            doc.parsebody(reader, &mut buf)?;
+            doc.parsebody(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
             Err(FoliaError::ParseError("No body found".to_string()))
         }
     }
 
-    fn parsebody<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>) -> Result<(), FoliaError> {
+    fn parsebody<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
         let mut body: FoliaElement  = self.body.take().unwrap();
         let mut stack = vec![body];
-        let mut nsbuf = Vec::new(); //will creating a new one do or do we need to pass it explicitly?
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
             match e {
