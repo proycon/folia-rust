@@ -41,7 +41,7 @@ impl Error for FoliaError {
     fn description(&self) -> &str {
         match *self {
             FoliaError::IoError(ref err) => err.description(),
-            FoliaError::XmlError(ref err) => "XML Error",
+            FoliaError::XmlError(ref _err) => "XML Error",
             FoliaError::ParseError(ref err) => err,
             FoliaError::IndexError => "invalid index",
         }
@@ -50,8 +50,8 @@ impl Error for FoliaError {
     fn cause(&self)  -> Option<&Error> {
         match *self {
             FoliaError::IoError(ref err) => Some(err as &Error),
-            FoliaError::XmlError(ref err) => None,
-            FoliaError::ParseError(ref err) => None, //TODO
+            FoliaError::XmlError(ref _err) => None,
+            FoliaError::ParseError(ref _err) => None, //TODO
             FoliaError::IndexError => None,
         }
     }
@@ -260,7 +260,7 @@ impl FoliaElement {
     }
 
     fn parse(reader: &Reader<BufReader<File>>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
-        let mut attributes: Vec<Attribute> = FoliaElement::parseattributes(reader, event.attributes())?;
+        let attributes: Vec<Attribute> = FoliaElement::parseattributes(reader, event.attributes())?;
         let elementtype = getelementtype(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement { elementtype: elementtype, attribs: attributes, data: Vec::new() })
     }
@@ -759,7 +759,7 @@ impl Document {
                     stack.last_mut().unwrap().data.push(DataType::Element(elem));
                 },
                 (Some(NSFOLIA), Event::Start(ref e)) => {
-                    let mut elem = FoliaElement::parse(reader, e)?;
+                    let elem = FoliaElement::parse(reader, e)?;
                     stack.push(elem);
                 },
                 (Some(NSFOLIA), Event::End(ref e)) => {
@@ -778,21 +778,21 @@ impl Document {
                 (None, Event::Text(s)) => {
                     let text = s.unescape_and_decode(reader)?;
                     if text != "" {
-                        let mut current_elem = stack.last_mut().unwrap();
+                        let current_elem = stack.last_mut().unwrap();
                         current_elem.data.push(DataType::Text(text));
                     }
                 },
                 (None, Event::CData(s)) => {
                     let text = reader.decode(&s).into_owned();
                     if text != "" {
-                        let mut current_elem = stack.last_mut().unwrap();
+                        let current_elem = stack.last_mut().unwrap();
                         current_elem.data.push(DataType::Text(text));
                     }
                 },
                 (None, Event::Comment(s)) => {
                     let comment = reader.decode(&s).into_owned();
                     if comment != "" {
-                        let mut current_elem = stack.last_mut().unwrap();
+                        let current_elem = stack.last_mut().unwrap();
                         current_elem.data.push(DataType::Comment(comment));
                     }
                 },
