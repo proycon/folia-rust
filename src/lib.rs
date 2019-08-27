@@ -2,8 +2,6 @@ pub mod folia {
 
 extern crate quick_xml;
 
-use quick_xml::Reader;
-use quick_xml::events::Event;
 use std::error::Error;
 use std::path::{Path};
 use std::fmt;
@@ -12,6 +10,10 @@ use std::str;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
+use std::borrow::Cow;
+
+use quick_xml::Reader;
+use quick_xml::events::Event;
 
 
 const NSFOLIA: &[u8] = b"http://ilk.uvt.nl/folia";
@@ -75,25 +77,19 @@ impl fmt::Display for FoliaError {
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR
+    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET
 }
 
-pub fn attribtypeclass(atype: AttribType) -> AttribType {
-    match atype {
-        AttribType::SET => AttribType::CLASS,
-        AttribType::PROCESSOR => AttribType::ANNOTATOR,
-        AttribType::ANNOTATORTYPE => AttribType::ANNOTATOR,
-        _  => atype,
-    }
-}
+
 
 pub enum Attribute {
     Id(String),
     Set(String),
     Class(String),
     Annotator(String),
+    AnnotatorType(String),
     Confidence(f64),
     N(String),
     DateTime(String),
@@ -104,12 +100,69 @@ pub enum Attribute {
     Textclass(String),
     Metadata(String),
     Idref(String),
-    Space(String),
+    Space(bool),
 
     Processor(String),
     Href(String),
     Format(String),
     Subset(String),
+}
+
+impl Attribute {
+    pub fn unwrap(&self) -> Cow<str> {
+        match self {
+            Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
+            Attribute::AnnotatorType(s) | Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
+            Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s)
+                => Cow::Borrowed(s),
+            Attribute::Confidence(f) => Cow::Owned(f.to_string()),
+            Attribute::Space(b) => { if *b { Cow::Borrowed("yes") } else { Cow::Borrowed("no") } }
+        }
+    }
+
+    pub fn sametype(&self, other: &Attribute) -> bool {
+        self.attribtype() == other.attribtype()
+    }
+
+    pub fn attribtype(&self) -> AttribType {
+        match self {
+            Attribute::Id(_) => AttribType::ID,
+            Attribute::Set(_) => AttribType::SET,
+            Attribute::Class(_) => AttribType::CLASS,
+            Attribute::Annotator(_) => AttribType::ANNOTATOR,
+            Attribute::AnnotatorType(_) => AttribType::ANNOTATORTYPE,
+            Attribute::Confidence(_) => AttribType::CONFIDENCE,
+            Attribute::N(_) => AttribType::N,
+            Attribute::DateTime(_) => AttribType::DATETIME,
+            Attribute::BeginTime(_) => AttribType::BEGINTIME,
+            Attribute::EndTime(_) => AttribType::ENDTIME,
+            Attribute::Src(_) => AttribType::SRC,
+            Attribute::Speaker(_) => AttribType::SPEAKER,
+            Attribute::Textclass(_) => AttribType::TEXTCLASS,
+            Attribute::Metadata(_) => AttribType::METADATA,
+            Attribute::Idref(_) => AttribType::IDREF,
+            Attribute::Space(_) => AttribType::SPACE,
+            Attribute::Processor(_) => AttribType::PROCESSOR,
+            Attribute::Href(_) => AttribType::HREF,
+            Attribute::Format(_) => AttribType::FORMAT,
+            Attribute::Subset(_) => AttribType::SUBSET,
+        }
+    }
+
+    ///The attribute type class is a generalisation of the attrib type, some inter-dependent attrib types are part
+    ///of the same attribute type class, which themselves are just a subset of the attribute types
+    ///and are used in the required_attribs and optional_attribs properties.
+    pub fn attribtypeclass(&self) -> AttribType {
+        let attribtype = self.attribtype();
+        match attribtype {
+            AttribType::SET => AttribType::CLASS,
+            AttribType::PROCESSOR => AttribType::ANNOTATOR,
+            AttribType::ANNOTATORTYPE => AttribType::ANNOTATOR,
+            _  => attribtype,
+        }
+    }
+
 }
 
 //foliaspec:annotationtype
@@ -161,50 +214,54 @@ impl FoliaElement {
     pub fn select(&self, elementtype: ElementType, set: Option<String>, recursive: bool, ignore: bool) {
     }
 
+    ///Get Attribute
     pub fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
-        //Get attribute
         for attribute in self.attribs.iter() {
-            let result = match (attribute, atype) {
+            let matched = match (attribute, atype) {
                 (Attribute::Id(_), AttribType::ID) => Some(attribute),
                 (Attribute::Set(_), AttribType::SET) => Some(attribute),
                 (Attribute::Class(_), AttribType::CLASS) => Some(attribute),
                 (Attribute::Processor(_), AttribType::PROCESSOR) => Some(attribute),
+                //TODO: add the rest
                 (_,_) => None,
             };
-            if result.is_some() {
-                return result;
+            if matched.is_some() {
+                return matched;
             }
         }
         None
     }
 
-    //attribute getters
-    pub fn id(&self) -> Option<&String> {
-        match self.attrib(AttribType::ID) {
-            Some(Attribute::Id(value)) => Some(&value),
-            _ => None
+    ///Get attribute value as a string reference, only works for attributes that are strings
+    pub fn attrib_str(&self, atype: AttribType) -> Option<&str> {
+        if let Some(attrib) = self.attrib(atype) {
+            if let Cow::Borrowed(s) = attrib.unwrap() {
+                Some(s)
+            }  else {
+                None
+            }
+        } else {
+            None
         }
     }
 
-    pub fn class(&self) -> Option<&String> {
-        match self.attrib(AttribType::CLASS) {
-            Some(Attribute::Class(value)) => Some(&value),
-            _ => None
-        }
+    ///Check if the attribute exists
+    pub fn has_attrib(&self, atype: AttribType) {
+
+
     }
 
-    pub fn set(&self) -> Option<&String> {
-        match self.attrib(AttribType::SET) {
-            Some(Attribute::Set(value)) => Some(&value),
-            _ => None
-        }
+    pub fn set_attrib(&mut self, attrib: Attribute) {
+
+
+
     }
 
-    pub fn processor(&self) -> Option<&String> {
-        match self.attrib(AttribType::PROCESSOR) {
-            Some(Attribute::Processor(value)) => Some(&value), _ => None
-        }
-    }
+    //attribute getters (shortcuts)
+    pub fn id(&self) -> Option<&str> { self.attrib_str(AttribType::ID)  }
+    pub fn class(&self) -> Option<&str> { self.attrib_str(AttribType::CLASS)  }
+    pub fn set(&self) -> Option<&str> { self.attrib_str(AttribType::SET)  }
+    pub fn processor(&self) -> Option<&str> { self.attrib_str(AttribType::PROCESSOR)  }
 
     pub fn append(&mut self, elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<(), FoliaError> {
         let element  = FoliaElement::new(elementtype, attribs, data)?;
