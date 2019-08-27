@@ -78,7 +78,9 @@ fn append() {
 #[test]
 fn parse() {
     match folia::Document::from_str(str::from_utf8(example).expect("invalid utf-8 in example")) {
-        Ok(_) => assert!(true),
+        Ok(doc) => {
+            assert_eq!(doc.id(), "example");
+        }
         Err(err) => {
             println!("{}", err);
             assert!(false);

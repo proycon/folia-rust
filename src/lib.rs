@@ -108,6 +108,8 @@ pub enum Attribute {
 
     Processor(String),
     Href(String),
+    Format(String),
+    Subset(String),
 }
 
 //foliaspec:annotationtype
@@ -658,6 +660,7 @@ impl Document {
         return result;
     }
 
+    ///Load a FoliA document from XML string representation
     pub fn from_str(data: &str) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_str(data);
         reader.trim_text(true);
@@ -754,7 +757,7 @@ impl Document {
     }
 
     fn parsebody<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
-        let mut body: FoliaElement  = self.body.take().unwrap();
+        let mut body: FoliaElement  = self.body.take().unwrap(); //we take ownership, we will put it back in self.body after we're done
         let mut stack = vec![body];
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
