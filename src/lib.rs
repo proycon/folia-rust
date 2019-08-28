@@ -11,9 +11,11 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
 use std::borrow::Cow;
+use std::str::FromStr;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
+
 
 
 const NSFOLIA: &[u8] = b"http://ilk.uvt.nl/folia";
@@ -163,6 +165,80 @@ impl Attribute {
         }
     }
 
+    ///Parse an XML attribute into a FoLiA Attribute
+    pub fn parse<R: BufRead>(reader: &Reader<R>, attrib: &quick_xml::events::attributes::Attribute) -> Result<Attribute,FoliaError> {
+        if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+            match attrib.key {
+                b"xml:id" => {
+                    Ok(Attribute::Id(value))
+                },
+                b"set" => {
+                    Ok(Attribute::Set(value))
+                },
+                b"class" => {
+                    Ok(Attribute::Class(value))
+                },
+                b"processor" => {
+                    Ok(Attribute::Processor(value))
+                },
+                b"annotator" => {
+                    Ok(Attribute::Annotator(value))
+                },
+                b"annotatortype" => {
+                    Ok(Attribute::AnnotatorType(value))
+                },
+                b"subset" => {
+                    Ok(Attribute::Subset(value))
+                },
+                b"xlink:format" => {
+                    Ok(Attribute::Format(value))
+                },
+                b"xlink:href" => {
+                    Ok(Attribute::Href(value))
+                },
+                b"speaker" => {
+                    Ok(Attribute::Speaker(value))
+                },
+                b"src" => {
+                    Ok(Attribute::Src(value))
+                },
+                b"n" => {
+                    Ok(Attribute::N(value))
+                },
+                b"datetime" => {
+                    Ok(Attribute::DateTime(value))
+                },
+                b"begintime" => {
+                    Ok(Attribute::BeginTime(value))
+                },
+                b"endtime" => {
+                    Ok(Attribute::EndTime(value))
+                },
+                b"textclass" => {
+                    Ok(Attribute::Textclass(value))
+                },
+                b"metadata" => {
+                    Ok(Attribute::Metadata(value))
+                },
+                b"idref" => {
+                    Ok(Attribute::Idref(value))
+                },
+                b"confidence" => {
+                    if let Ok(value) = f64::from_str(&value) {
+                        Ok(Attribute::Confidence(value))
+                    } else {
+                        Err(FoliaError::ParseError(format!("Invalid confidence value: '{}'", value)))
+                    }
+                },
+                _ => {
+                    //TODO: handle feature/subset attributes
+                    Err(FoliaError::ParseError(format!("Unknown attribute: '{}'", std::str::from_utf8(attrib.key).expect("unable to parse attribute name"))))
+                }
+            }
+        } else {
+            Err(FoliaError::ParseError("Unable to parse attribute value (invalid utf-8?)".to_string()))
+        }
+    }
 }
 
 //foliaspec:annotationtype
@@ -217,16 +293,8 @@ impl FoliaElement {
     ///Get Attribute
     pub fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
         for attribute in self.attribs.iter() {
-            let matched = match (attribute, atype) {
-                (Attribute::Id(_), AttribType::ID) => Some(attribute),
-                (Attribute::Set(_), AttribType::SET) => Some(attribute),
-                (Attribute::Class(_), AttribType::CLASS) => Some(attribute),
-                (Attribute::Processor(_), AttribType::PROCESSOR) => Some(attribute),
-                //TODO: add the rest
-                (_,_) => None,
-            };
-            if matched.is_some() {
-                return matched;
+            if attribute.attribtype() == atype {
+                return Some(attribute);
             }
         }
         None
@@ -246,15 +314,26 @@ impl FoliaElement {
     }
 
     ///Check if the attribute exists
-    pub fn has_attrib(&self, atype: AttribType) {
-
-
+    pub fn has_attrib(&self, atype: AttribType) -> bool {
+        self.attribs.iter().find(|&a| a.attribtype() == atype).is_some()
     }
 
+    ///Deletes (and returns) the specified attribute
+    pub fn del_attrib(&mut self, atype: AttribType) -> Option<Attribute> {
+        let position = self.attribs.iter().position(|a| a.attribtype() == atype);
+        if let Some(position) = position {
+            Some(self.attribs.remove(position))
+        } else {
+            None
+        }
+    }
+
+    ///Sets/adds and attribute
     pub fn set_attrib(&mut self, attrib: Attribute) {
-
-
-
+        //ensure we don't insert duplicates
+        self.del_attrib(attrib.attribtype());
+        //add the attribute
+        self.attribs.push(attrib);
     }
 
     //attribute getters (shortcuts)
@@ -299,21 +378,9 @@ impl FoliaElement {
     fn parseattributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
-            let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
-            match attrib.key {
-                b"xml:id" => {
-                    attributes.push(Attribute::Id(attrib.unescape_and_decode_value(&reader).expect("Unable to parse ID")));
-                },
-                b"set" => {
-                    attributes.push(Attribute::Set(attrib.unescape_and_decode_value(&reader).expect("Unable to parse set")));
-                },
-                b"class" => {
-                    attributes.push(Attribute::Class(attrib.unescape_and_decode_value(&reader).expect("Unable to parse class")));
-                },
-                b"processor" => {
-                    attributes.push(Attribute::Processor(attrib.unescape_and_decode_value(&reader).expect("Unable to parse processor")));
-                },
-                _ => {}
+            match Attribute::parse(&reader, &attrib.unwrap()) {
+                Ok(attrib) => { attributes.push(attrib); },
+                Err(e) => { return Err(e); }
             }
         }
         Ok(attributes)
