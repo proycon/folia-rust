@@ -286,9 +286,46 @@ pub struct FoliaElement {
     attribs: Vec<Attribute>,
 }
 
-impl FoliaElement {
-    pub fn select(&self, elementtype: ElementType, set: Option<String>, recursive: bool, ignore: bool) {
+
+#[derive(Debug,Copy,Clone)]
+pub struct Selector<'a> {
+    pub elementtype: TypeSelector,
+    pub set: SetSelector<'a>,
+    pub recursive: bool,
+}
+
+#[derive(Debug,Copy,Clone)]
+pub enum SetSelector<'a> {
+    SomeSet(&'a str),
+    AnySet,
+    NoSet
+}
+
+#[derive(Debug,Copy,Clone)]
+pub enum TypeSelector {
+    SomeType(ElementType),
+    MultiType(Vec<ElementType>),
+    AnyType,
+}
+
+pub struct SelectIterator<'a> {
+    selector: Selector<'a>,
+    element: &'a FoliaElement,
+}
+
+impl<'a> Iterator for SelectIterator<'a> {
+    type Item = DataType;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        //TODO
     }
+}
+
+pub trait Selecting {
+    fn select(&self, selector: Selector) -> SelectIterator;
+}
+
+impl FoliaElement {
 
     ///Get Attribute
     pub fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
@@ -375,7 +412,7 @@ impl FoliaElement {
         Ok(Self { elementtype: elementtype, attribs: attribs.unwrap_or(Vec::new()), data: data.unwrap_or(Vec::new()) })
     }
 
-    fn parseattributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
+    fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
             match Attribute::parse(&reader, &attrib.unwrap()) {
@@ -387,10 +424,14 @@ impl FoliaElement {
     }
 
     fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
-        let attributes: Vec<Attribute> = FoliaElement::parseattributes(reader, event.attributes())?;
+        let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
         let elementtype = getelementtype(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement { elementtype: elementtype, attribs: attributes, data: Vec::new() })
     }
+}
+
+impl Selector for FoliaElement {
+    //TODO: implement
 }
 
 fn getelementtype(tag: &str) -> Result<ElementType, FoliaError> {
