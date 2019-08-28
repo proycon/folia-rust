@@ -2,7 +2,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
 use std::borrow::Cow;
-use std::str::FromStr;
+use std::str;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
@@ -89,7 +89,8 @@ impl<'a> Iterator for SelectIterator<'a> {
     type Item = DataType;
 
     fn next(&mut self) -> Option<Self::Item> {
-        //TODO
+        unimplemented!(); //TODO
+        None
     }
 }
 
@@ -202,11 +203,13 @@ impl FoliaElement {
     }
 }
 
+/*
 impl Select for FoliaElement {
     fn select(&self, selector: Selector) -> SelectIterator {
-        //TODO: implement
     }
 }
+*/
+
 
 fn getelementtype(tag: &str) -> Result<ElementType, FoliaError> {
     //foliaspec:string_elementtype_map
