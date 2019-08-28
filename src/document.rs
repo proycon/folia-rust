@@ -2,7 +2,7 @@ use std::path::{Path};
 use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
-use std::str::FromStr;
+use std::str;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;

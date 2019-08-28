@@ -54,9 +54,9 @@ pub struct Properties {
 }
 
 pub struct FoliaElement {
-    elementtype: ElementType,
-    data: Vec<DataType>,
-    attribs: Vec<Attribute>,
+    pub elementtype: ElementType,
+    pub data: Vec<DataType>,
+    pub attribs: Vec<Attribute>,
 }
 
 #[derive(Debug,Clone)]
@@ -185,7 +185,7 @@ impl FoliaElement {
         Ok(Self { elementtype: elementtype, attribs: attribs.unwrap_or(Vec::new()), data: data.unwrap_or(Vec::new()) })
     }
 
-    fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
+    pub fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
             match Attribute::parse(&reader, &attrib.unwrap()) {
@@ -196,7 +196,7 @@ impl FoliaElement {
         Ok(attributes)
     }
 
-    fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
         let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
         let elementtype = getelementtype(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement { elementtype: elementtype, attribs: attributes, data: Vec::new() })
@@ -211,7 +211,7 @@ impl Select for FoliaElement {
 */
 
 
-fn getelementtype(tag: &str) -> Result<ElementType, FoliaError> {
+pub fn getelementtype(tag: &str) -> Result<ElementType, FoliaError> {
     //foliaspec:string_elementtype_map
     match tag {
       "actor" =>  Ok(ElementType::ActorFeature),
@@ -446,7 +446,7 @@ fn getelementname(elementtype: ElementType) -> &'static str {
 
 }
 
-fn annotationtype2elementtype(annotationtype: AnnotationType) -> ElementType {
+pub fn annotationtype2elementtype(annotationtype: AnnotationType) -> ElementType {
     //foliaspec:annotationtype_elementtype_map
     //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
     match annotationtype {
@@ -509,7 +509,7 @@ fn annotationtype2elementtype(annotationtype: AnnotationType) -> ElementType {
 
 }
 
-fn annotationtype2xml(annotationtype: AnnotationType) -> &'static str {
+pub fn annotationtype2xml(annotationtype: AnnotationType) -> &'static str {
     //foliaspec:annotationtype_xml_map
     //A mapping from annotation types to xml tags (strings)
     match annotationtype {
