@@ -242,6 +242,9 @@ impl Document {
 
     pub fn xml(&self) {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
+        self.store.select(Selector::new(TypeSelector::AnyType, SetSelector::AnySet))
+
+
     }
 
 

@@ -5,32 +5,104 @@ use crate::attrib::*;
 use crate::elementstore::*;
 
 #[derive(Debug,Clone)]
-pub struct Selector<'a> {
-    pub elementtype: TypeSelector,
-    pub set: SetSelector<'a>,
-    pub recursive: bool,
+pub struct Selector {
+    pub typeselector: TypeSelector,
+    pub setselector: SetSelector,
+    pub next: Option<Box<Selector>>
 }
 
-#[derive(Debug,Copy,Clone)]
-pub enum SetSelector<'a> {
-    SomeSet(&'a str),
+impl Selector {
+    pub fn new(typeselector: TypeSelector, setselector: SetSelector) -> Selector {
+        Selector { typeselector: typeselector, setselector: setselector, next: None }
+    }
+
+    pub fn and(mut self, selector: Selector) -> Self {
+        self.next = Some(Box::new(selector));
+        self
+    }
+
+    pub fn matches(&self, store: &ElementStore, item: &DataType) -> bool {
+        //we attempt to falsify the match
+        let matches = match item {
+            DataType::Element(intid) => {
+                if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
+                    false
+                } else if let Some(element) = store.get(*intid) {
+                    match self.setselector {
+                         SetSelector::SomeSet(set) => {
+                             if let Some(set2) = element.set() {
+                                 set == set2
+                             } else {
+                                 false
+                             }
+                         },
+                         SetSelector::NoSet => {
+                             element.set().is_none()
+                         },
+                         SetSelector::AnySet => true,
+                    }
+                } else {
+                    //element does not exist, can never match
+                    false
+                }
+            },
+            DataType::Text(_) => {
+                if let TypeSelector::AnyType | TypeSelector::Text  = self.typeselector {
+                    true
+                } else {
+                    false
+                }
+            },
+            DataType::Comment(_) => {
+                if let TypeSelector::AnyType | TypeSelector::Comment  = self.typeselector {
+                    true
+                } else {
+                    false
+                }
+            }
+        };
+        if let Some(next) = self.next {
+            matches || next.matches(store, item)
+        } else {
+            matches
+        }
+    }
+}
+
+
+
+#[derive(Debug,Clone)]
+pub enum SetSelector {
+    SomeSet(String),
     AnySet,
     NoSet
 }
 
 #[derive(Debug,Clone)]
 pub enum TypeSelector {
-    SomeType(ElementType),
-    MultiType(Vec<ElementType>),
+    SomeElement(ElementType),
+    AnyElement,
     AnyType,
+    Text,
+    Comment,
 }
 
 pub struct SelectIterator<'a> {
     store: &'a ElementStore,
-    selector: Selector<'a>,
-    element: &'a FoliaElement,
+    selector: Selector,
     ///The current stack, containing the element and cursor within that element
     stack: Vec<(IntId,usize)>,
+}
+
+impl<'a> SelectIterator<'a> {
+    pub fn new(store: &'a ElementStore, selector: Selector, intid: IntId) -> SelectIterator<'a> {
+        SelectIterator {
+            store: store,
+            selector: selector,
+            stack: vec![(intid,0)]
+        }
+    }
+
 }
 
 impl<'a> Iterator for SelectIterator<'a> {
@@ -45,7 +117,7 @@ impl<'a> Iterator for SelectIterator<'a> {
                     Some(DataType::Element(intid)) => {
                         self.stack.push((*intid,0));
                     },
-                    Some(x) => {
+                    Some(_) => {
                         //temporarily pop the last element of the stack
                         self.stack.pop();
                         //increment the cursor
@@ -60,7 +132,11 @@ impl<'a> Iterator for SelectIterator<'a> {
                     }
                 };
                 //return the current one
-                item
+                if self.selector.matches(self.store, item) {
+                    item
+                } else {
+                    self.next()
+                }
             } else {
                 unreachable!();
             }
@@ -71,6 +147,12 @@ impl<'a> Iterator for SelectIterator<'a> {
 
 }
 
-pub trait Select {
-    fn select(&self, selector: Selector) -> SelectIterator;
+pub trait Select<'a> {
+    fn select(&'a self, intid: IntId, selector: Selector, recursive: bool) -> SelectIterator<'a>;
+}
+
+impl<'a> Select<'a> for ElementStore {
+    fn select(&'a self, intid: IntId, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+        SelectIterator::new(self, selector, intid)
+    }
 }
