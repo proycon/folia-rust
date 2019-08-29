@@ -110,37 +110,38 @@ impl<'a> Iterator for SelectIterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((intid,cursor)) = self.stack.last().map(|(x,y)| (*x,*y)) {
-            if let Some(element) = self.store.get(intid) {
-                let item = element.get(cursor);
-                //compute the next element
-                match item {
-                    Some(DataType::Element(intid)) => {
-                        self.stack.push((*intid,0));
-                    },
-                    Some(_) => {
-                        //temporarily pop the last element of the stack
-                        self.stack.pop();
-                        //increment the cursor
-                        let cursor = cursor + 1;
-                        //push it back if the cursor does not exceed the length
-                        if cursor < element.len() {
-                            self.stack.push((intid, cursor));
+            if let Some(parent) = self.store.get(intid) {
+                if let Some(item) = parent.get(cursor) {
+                    //compute the next element
+                    match item {
+                        DataType::Element(intid) => {
+                            self.stack.push((*intid,0));
+                        },
+                        _ => {
+                            //temporarily pop the last element of the stack
+                            self.stack.pop();
+                            //increment the cursor
+                            let cursor = cursor + 1;
+                            //push it back if the cursor does not exceed the length
+                            if cursor < parent.len() {
+                                self.stack.push((intid, cursor));
+                            }
                         }
+                    };
+                    //return the current one
+                    if self.selector.matches(self.store, item) {
+                        Some(item)
+                    } else {
+                        self.next()
                     }
-                    None => {
-                        unreachable!();
-                    }
-                };
-                //return the current one
-                if self.selector.matches(self.store, item) {
-                    item
                 } else {
-                    self.next()
+                    unreachable!("selector cursor index out of bounds")
                 }
             } else {
-                unreachable!();
+                unreachable!("selector tried to get an element which no longer exists")
             }
         } else {
+            //stack is empty, we are done (None stops iteration)
             None
         }
     }
