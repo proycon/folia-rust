@@ -1,7 +1,7 @@
 use std::str;
 use folia;
 
-const example: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
+const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 <FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
   <metadata>
       <annotations>
@@ -85,7 +85,7 @@ fn append() {
 
 #[test]
 fn parse() {
-    match folia::Document::from_str(str::from_utf8(example).expect("invalid utf-8 in example")) {
+    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example");
         }

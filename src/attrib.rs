@@ -158,6 +158,13 @@ impl Attribute {
                         Err(FoliaError::ParseError(format!("Invalid confidence value: '{}'", value)))
                     }
                 },
+                b"space" => {
+                    match value.as_str() {
+                        "yes" | "true" => Ok(Attribute::Space(true)),
+                        "no" | "false" => Ok(Attribute::Space(false)),
+                        _ => Err(FoliaError::ParseError(format!("Invalid space value: '{}'", value)))
+                    }
+                },
                 _ => {
                     //TODO: handle feature/subset attributes
                     Err(FoliaError::ParseError(format!("Unknown attribute: '{}'", std::str::from_utf8(attrib.key).expect("unable to parse attribute name"))))
