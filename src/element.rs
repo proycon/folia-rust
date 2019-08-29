@@ -2,32 +2,57 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
 use std::borrow::Cow;
-use std::str;
+use std::str::{FromStr,from_utf8};
+use std::string::ToString;
+use std::fmt;
+use std::collections::HashMap;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
 
+use crate::common::*;
 use crate::error::*;
 use crate::attrib::*;
+use crate::elementstore::*;
+
 
 //foliaspec:elementtype
-#[derive(Debug,Copy,Clone,PartialEq)]
+#[derive(Copy,Clone,PartialEq)]
 pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
 
+#[derive(Debug,PartialEq,Clone)]
 pub enum DataType {
     Text(String),
-    Element(FoliaElement),
+    ///A reference to an element
+    Element(IntId),
     Comment(String),
 }
+
+impl DataType {
+    pub fn text(text: &str) -> DataType {
+        DataType::Text(text.to_string())
+    }
+    pub fn comment(text: &str) -> DataType {
+        DataType::Comment(text.to_string())
+    }
+}
+
 
 pub enum BodyType {
     Text,
     Speech
+}
+
+
+pub enum ValidationStrategy {
+    NoValidation,
+    ShallowValidation,
+    DeepValidation
 }
 
 pub struct Properties {
@@ -55,9 +80,11 @@ pub struct Properties {
 
 pub struct FoliaElement {
     pub elementtype: ElementType,
-    pub data: Vec<DataType>,
     pub attribs: Vec<Attribute>,
+    data: Vec<DataType>,
+    parent: Option<IntId>,
 }
+
 
 #[derive(Debug,Clone)]
 pub struct Selector<'a> {
@@ -110,11 +137,11 @@ impl FoliaElement {
         None
     }
 
-    ///Get attribute value as a string reference, only works for attributes that are strings
-    pub fn attrib_str(&self, atype: AttribType) -> Option<&str> {
+    ///Get attribute value as a string
+    pub fn attrib_string(&self, atype: AttribType) -> Option<String> {
         if let Some(attrib) = self.attrib(atype) {
             if let Cow::Borrowed(s) = attrib.unwrap() {
-                Some(s)
+                Some(s.to_owned())
             }  else {
                 None
             }
@@ -146,27 +173,80 @@ impl FoliaElement {
         self.attribs.push(attrib);
     }
 
+    ///Sets/adds and attribute (builder pattern)
+    pub fn with_attrib(mut self, attrib: Attribute) -> Self {
+        self.set_attrib(attrib);
+        self
+    }
+
+    ///Sets all attributes at once (takes ownership)
+    pub fn set_attribs(&mut self, attribs: Vec<Attribute>) {
+        self.attribs = attribs;
+    }
+
+    ///Sets all attributes at once (takes ownership)
+    pub fn with_attribs(mut self, attribs: Vec<Attribute>) -> Self {
+        self.set_attribs(attribs);
+        self
+    }
+
     //attribute getters (shortcuts)
-    pub fn id(&self) -> Option<&str> { self.attrib_str(AttribType::ID)  }
-    pub fn class(&self) -> Option<&str> { self.attrib_str(AttribType::CLASS)  }
-    pub fn set(&self) -> Option<&str> { self.attrib_str(AttribType::SET)  }
-    pub fn processor(&self) -> Option<&str> { self.attrib_str(AttribType::PROCESSOR)  }
+    pub fn id(&self) -> Option<String> { self.attrib_string(AttribType::ID)  }
+    pub fn class(&self) -> Option<String> { self.attrib_string(AttribType::CLASS)  }
+    pub fn set(&self) -> Option<String> { self.attrib_string(AttribType::SET)  }
+    pub fn processor(&self) -> Option<String> { self.attrib_string(AttribType::PROCESSOR)  }
 
-    pub fn append(&mut self, elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<(), FoliaError> {
-        let element  = FoliaElement::new(elementtype, attribs, data)?;
-        self.data.push(DataType::Element(element));
-        Ok(())
+    ///Low-level add function
+    pub fn push(&mut self, datatype: DataType) {
+        self.data.push(datatype);
     }
 
-    pub fn append_get_mut(&mut self, elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<&mut DataType, FoliaError> {
-        self.append(elementtype, attribs, data)?;
-        self.get_mut_last().ok_or(FoliaError::IndexError)
+    ///Builder variant that adds data
+    pub fn with(mut self, data: DataType) -> Self {
+        self.data.push(data);
+        self
     }
 
+    ///Low-level add function
+    pub fn with_data(mut self, data: Vec<DataType>) -> Self {
+        for dt in data.into_iter() {
+            self.data.push(dt);
+        }
+        self
+    }
+
+    pub fn get_parent(&self) -> Option<IntId> {
+        self.parent
+    }
+
+    pub fn set_parent(&mut self, parent: Option<IntId>) {
+        self.parent = parent;
+    }
+
+    pub fn with_parent(mut self, parent: Option<IntId>) -> Self {
+        self.set_parent(parent);
+        self
+    }
+
+    ///Low-level get function
     pub fn get(&self, index: usize) -> Option<&DataType> {
         self.data.get(index)
     }
 
+    pub fn index(&self, refchild: &DataType) -> Option<usize> {
+        self.data.iter().position(|child| *child == *refchild)
+    }
+
+    ///Remove (and return) the child at the specified index
+    pub fn remove(&mut self, index: usize) -> Option<DataType> {
+        if index >= self.data.len() {
+            None
+        } else {
+            Some(self.data.remove(index))
+        }
+    }
+
+    /*
     pub fn get_mut(&mut self, index: usize) -> Option<&mut DataType> {
         self.data.get_mut(index)
     }
@@ -180,9 +260,11 @@ impl FoliaElement {
         let index = self.data.len() - 1;
         self.data.get(index)
     }
+    */
 
-    pub fn new(elementtype: ElementType, attribs: Option<Vec<Attribute>>, data: Option<Vec<DataType>>) -> Result<FoliaElement, FoliaError> {
-        Ok(Self { elementtype: elementtype, attribs: attribs.unwrap_or(Vec::new()), data: data.unwrap_or(Vec::new()) })
+    ///Simple constructor for an empty element (optionally with attributes)
+    pub fn new(elementtype: ElementType) -> FoliaElement {
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None }
     }
 
     pub fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
@@ -196,10 +278,12 @@ impl FoliaElement {
         Ok(attributes)
     }
 
+    ///Parse this element from XML, note that this does not handle the child elements, those are
+    ///appended by the main parser in Document::parse_body()
     pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
         let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
-        let elementtype = getelementtype(str::from_utf8(event.local_name()).unwrap())?;
-        Ok(FoliaElement { elementtype: elementtype, attribs: attributes, data: Vec::new() })
+        let elementtype = ElementType::from_str(from_utf8(event.local_name()).unwrap())?;
+        Ok(FoliaElement::new(elementtype).with_attribs(attributes))
     }
 }
 
@@ -211,239 +295,257 @@ impl Select for FoliaElement {
 */
 
 
-pub fn getelementtype(tag: &str) -> Result<ElementType, FoliaError> {
-    //foliaspec:string_elementtype_map
-    match tag {
-      "actor" =>  Ok(ElementType::ActorFeature),
-      "alt" =>  Ok(ElementType::Alternative),
-      "altlayers" =>  Ok(ElementType::AlternativeLayers),
-      "begindatetime" =>  Ok(ElementType::BegindatetimeFeature),
-      "caption" =>  Ok(ElementType::Caption),
-      "cell" =>  Ok(ElementType::Cell),
-      "chunk" =>  Ok(ElementType::Chunk),
-      "chunking" =>  Ok(ElementType::ChunkingLayer),
-      "comment" =>  Ok(ElementType::Comment),
-      "content" =>  Ok(ElementType::Content),
-      "coreferencechain" =>  Ok(ElementType::CoreferenceChain),
-      "coreferences" =>  Ok(ElementType::CoreferenceLayer),
-      "coreferencelink" =>  Ok(ElementType::CoreferenceLink),
-      "correction" =>  Ok(ElementType::Correction),
-      "current" =>  Ok(ElementType::Current),
-      "def" =>  Ok(ElementType::Definition),
-      "dependencies" =>  Ok(ElementType::DependenciesLayer),
-      "dependency" =>  Ok(ElementType::Dependency),
-      "dep" =>  Ok(ElementType::DependencyDependent),
-      "desc" =>  Ok(ElementType::Description),
-      "div" =>  Ok(ElementType::Division),
-      "domain" =>  Ok(ElementType::DomainAnnotation),
-      "enddatetime" =>  Ok(ElementType::EnddatetimeFeature),
-      "entities" =>  Ok(ElementType::EntitiesLayer),
-      "entity" =>  Ok(ElementType::Entity),
-      "entry" =>  Ok(ElementType::Entry),
-      "errordetection" =>  Ok(ElementType::ErrorDetection),
-      "event" =>  Ok(ElementType::Event),
-      "ex" =>  Ok(ElementType::Example),
-      "external" =>  Ok(ElementType::External),
-      "feat" =>  Ok(ElementType::Feature),
-      "figure" =>  Ok(ElementType::Figure),
-      "foreign-data" =>  Ok(ElementType::ForeignData),
-      "function" =>  Ok(ElementType::FunctionFeature),
-      "gap" =>  Ok(ElementType::Gap),
-      "head" =>  Ok(ElementType::Head),
-      "headfeature" =>  Ok(ElementType::HeadFeature),
-      "hd" =>  Ok(ElementType::Headspan),
-      "hiddenw" =>  Ok(ElementType::Hiddenword),
-      "t-hbr" =>  Ok(ElementType::Hyphbreak),
-      "label" =>  Ok(ElementType::Label),
-      "lang" =>  Ok(ElementType::LangAnnotation),
-      "lemma" =>  Ok(ElementType::LemmaAnnotation),
-      "level" =>  Ok(ElementType::LevelFeature),
-      "br" =>  Ok(ElementType::Linebreak),
-      "xref" =>  Ok(ElementType::LinkReference),
-      "list" =>  Ok(ElementType::List),
-      "item" =>  Ok(ElementType::ListItem),
-      "metric" =>  Ok(ElementType::Metric),
-      "modality" =>  Ok(ElementType::ModalityFeature),
-      "morpheme" =>  Ok(ElementType::Morpheme),
-      "morphology" =>  Ok(ElementType::MorphologyLayer),
-      "new" =>  Ok(ElementType::New),
-      "note" =>  Ok(ElementType::Note),
-      "observation" =>  Ok(ElementType::Observation),
-      "observations" =>  Ok(ElementType::ObservationLayer),
-      "original" =>  Ok(ElementType::Original),
-      "p" =>  Ok(ElementType::Paragraph),
-      "part" =>  Ok(ElementType::Part),
-      "ph" =>  Ok(ElementType::PhonContent),
-      "phoneme" =>  Ok(ElementType::Phoneme),
-      "phonology" =>  Ok(ElementType::PhonologyLayer),
-      "polarity" =>  Ok(ElementType::PolarityFeature),
-      "pos" =>  Ok(ElementType::PosAnnotation),
-      "predicate" =>  Ok(ElementType::Predicate),
-      "quote" =>  Ok(ElementType::Quote),
-      "ref" =>  Ok(ElementType::Reference),
-      "relation" =>  Ok(ElementType::Relation),
-      "row" =>  Ok(ElementType::Row),
-      "semrole" =>  Ok(ElementType::SemanticRole),
-      "semroles" =>  Ok(ElementType::SemanticRolesLayer),
-      "sense" =>  Ok(ElementType::SenseAnnotation),
-      "s" =>  Ok(ElementType::Sentence),
-      "sentiment" =>  Ok(ElementType::Sentiment),
-      "sentiments" =>  Ok(ElementType::SentimentLayer),
-      "source" =>  Ok(ElementType::Source),
-      "spanrelation" =>  Ok(ElementType::SpanRelation),
-      "spanrelations" =>  Ok(ElementType::SpanRelationLayer),
-      "speech" =>  Ok(ElementType::Speech),
-      "statement" =>  Ok(ElementType::Statement),
-      "statements" =>  Ok(ElementType::StatementLayer),
-      "rel" =>  Ok(ElementType::StatementRelation),
-      "strength" =>  Ok(ElementType::StrengthFeature),
-      "str" =>  Ok(ElementType::String),
-      "style" =>  Ok(ElementType::StyleFeature),
-      "subjectivity" =>  Ok(ElementType::SubjectivityAnnotation),
-      "suggestion" =>  Ok(ElementType::Suggestion),
-      "synset" =>  Ok(ElementType::SynsetFeature),
-      "su" =>  Ok(ElementType::SyntacticUnit),
-      "syntax" =>  Ok(ElementType::SyntaxLayer),
-      "table" =>  Ok(ElementType::Table),
-      "tablehead" =>  Ok(ElementType::TableHead),
-      "target" =>  Ok(ElementType::Target),
-      "term" =>  Ok(ElementType::Term),
-      "text" =>  Ok(ElementType::Text),
-      "t" =>  Ok(ElementType::TextContent),
-      "t-correction" =>  Ok(ElementType::TextMarkupCorrection),
-      "t-error" =>  Ok(ElementType::TextMarkupError),
-      "t-gap" =>  Ok(ElementType::TextMarkupGap),
-      "t-ref" =>  Ok(ElementType::TextMarkupReference),
-      "t-str" =>  Ok(ElementType::TextMarkupString),
-      "t-style" =>  Ok(ElementType::TextMarkupStyle),
-      "time" =>  Ok(ElementType::TimeFeature),
-      "timesegment" =>  Ok(ElementType::TimeSegment),
-      "timing" =>  Ok(ElementType::TimingLayer),
-      "utt" =>  Ok(ElementType::Utterance),
-      "value" =>  Ok(ElementType::ValueFeature),
-      "whitespace" =>  Ok(ElementType::Whitespace),
-      "w" =>  Ok(ElementType::Word),
-      "wref" =>  Ok(ElementType::WordReference),
-        _ => Err(FoliaError::ParseError(format!("Unknown tag has no associated element type: {}",tag).to_string()))
-    }
 
+impl ElementType {
+    fn tagname(&self) -> &'static str {
+        //foliaspec:elementtype_string_map
+        match self {
+          ElementType::ActorFeature => "actor",
+          ElementType::Alternative => "alt",
+          ElementType::AlternativeLayers => "altlayers",
+          ElementType::BegindatetimeFeature => "begindatetime",
+          ElementType::Caption => "caption",
+          ElementType::Cell => "cell",
+          ElementType::Chunk => "chunk",
+          ElementType::ChunkingLayer => "chunking",
+          ElementType::Comment => "comment",
+          ElementType::Content => "content",
+          ElementType::CoreferenceChain => "coreferencechain",
+          ElementType::CoreferenceLayer => "coreferences",
+          ElementType::CoreferenceLink => "coreferencelink",
+          ElementType::Correction => "correction",
+          ElementType::Current => "current",
+          ElementType::Definition => "def",
+          ElementType::DependenciesLayer => "dependencies",
+          ElementType::Dependency => "dependency",
+          ElementType::DependencyDependent => "dep",
+          ElementType::Description => "desc",
+          ElementType::Division => "div",
+          ElementType::DomainAnnotation => "domain",
+          ElementType::EnddatetimeFeature => "enddatetime",
+          ElementType::EntitiesLayer => "entities",
+          ElementType::Entity => "entity",
+          ElementType::Entry => "entry",
+          ElementType::ErrorDetection => "errordetection",
+          ElementType::Event => "event",
+          ElementType::Example => "ex",
+          ElementType::External => "external",
+          ElementType::Feature => "feat",
+          ElementType::Figure => "figure",
+          ElementType::ForeignData => "foreign-data",
+          ElementType::FunctionFeature => "function",
+          ElementType::Gap => "gap",
+          ElementType::Head => "head",
+          ElementType::HeadFeature => "headfeature",
+          ElementType::Headspan => "hd",
+          ElementType::Hiddenword => "hiddenw",
+          ElementType::Hyphbreak => "t-hbr",
+          ElementType::Label => "label",
+          ElementType::LangAnnotation => "lang",
+          ElementType::LemmaAnnotation => "lemma",
+          ElementType::LevelFeature => "level",
+          ElementType::Linebreak => "br",
+          ElementType::LinkReference => "xref",
+          ElementType::List => "list",
+          ElementType::ListItem => "item",
+          ElementType::Metric => "metric",
+          ElementType::ModalityFeature => "modality",
+          ElementType::Morpheme => "morpheme",
+          ElementType::MorphologyLayer => "morphology",
+          ElementType::New => "new",
+          ElementType::Note => "note",
+          ElementType::Observation => "observation",
+          ElementType::ObservationLayer => "observations",
+          ElementType::Original => "original",
+          ElementType::Paragraph => "p",
+          ElementType::Part => "part",
+          ElementType::PhonContent => "ph",
+          ElementType::Phoneme => "phoneme",
+          ElementType::PhonologyLayer => "phonology",
+          ElementType::PolarityFeature => "polarity",
+          ElementType::PosAnnotation => "pos",
+          ElementType::Predicate => "predicate",
+          ElementType::Quote => "quote",
+          ElementType::Reference => "ref",
+          ElementType::Relation => "relation",
+          ElementType::Row => "row",
+          ElementType::SemanticRole => "semrole",
+          ElementType::SemanticRolesLayer => "semroles",
+          ElementType::SenseAnnotation => "sense",
+          ElementType::Sentence => "s",
+          ElementType::Sentiment => "sentiment",
+          ElementType::SentimentLayer => "sentiments",
+          ElementType::Source => "source",
+          ElementType::SpanRelation => "spanrelation",
+          ElementType::SpanRelationLayer => "spanrelations",
+          ElementType::Speech => "speech",
+          ElementType::Statement => "statement",
+          ElementType::StatementLayer => "statements",
+          ElementType::StatementRelation => "rel",
+          ElementType::StrengthFeature => "strength",
+          ElementType::String => "str",
+          ElementType::StyleFeature => "style",
+          ElementType::SubjectivityAnnotation => "subjectivity",
+          ElementType::Suggestion => "suggestion",
+          ElementType::SynsetFeature => "synset",
+          ElementType::SyntacticUnit => "su",
+          ElementType::SyntaxLayer => "syntax",
+          ElementType::Table => "table",
+          ElementType::TableHead => "tablehead",
+          ElementType::Target => "target",
+          ElementType::Term => "term",
+          ElementType::Text => "text",
+          ElementType::TextContent => "t",
+          ElementType::TextMarkupCorrection => "t-correction",
+          ElementType::TextMarkupError => "t-error",
+          ElementType::TextMarkupGap => "t-gap",
+          ElementType::TextMarkupReference => "t-ref",
+          ElementType::TextMarkupString => "t-str",
+          ElementType::TextMarkupStyle => "t-style",
+          ElementType::TimeFeature => "time",
+          ElementType::TimeSegment => "timesegment",
+          ElementType::TimingLayer => "timing",
+          ElementType::Utterance => "utt",
+          ElementType::ValueFeature => "value",
+          ElementType::Whitespace => "whitespace",
+          ElementType::Word => "w",
+          ElementType::WordReference => "wref",
+        }
+    }
 }
 
-fn getelementname(elementtype: ElementType) -> &'static str {
-    //foliaspec:elementtype_string_map
-    match elementtype {
-      ElementType::ActorFeature => "actor",
-      ElementType::Alternative => "alt",
-      ElementType::AlternativeLayers => "altlayers",
-      ElementType::BegindatetimeFeature => "begindatetime",
-      ElementType::Caption => "caption",
-      ElementType::Cell => "cell",
-      ElementType::Chunk => "chunk",
-      ElementType::ChunkingLayer => "chunking",
-      ElementType::Comment => "comment",
-      ElementType::Content => "content",
-      ElementType::CoreferenceChain => "coreferencechain",
-      ElementType::CoreferenceLayer => "coreferences",
-      ElementType::CoreferenceLink => "coreferencelink",
-      ElementType::Correction => "correction",
-      ElementType::Current => "current",
-      ElementType::Definition => "def",
-      ElementType::DependenciesLayer => "dependencies",
-      ElementType::Dependency => "dependency",
-      ElementType::DependencyDependent => "dep",
-      ElementType::Description => "desc",
-      ElementType::Division => "div",
-      ElementType::DomainAnnotation => "domain",
-      ElementType::EnddatetimeFeature => "enddatetime",
-      ElementType::EntitiesLayer => "entities",
-      ElementType::Entity => "entity",
-      ElementType::Entry => "entry",
-      ElementType::ErrorDetection => "errordetection",
-      ElementType::Event => "event",
-      ElementType::Example => "ex",
-      ElementType::External => "external",
-      ElementType::Feature => "feat",
-      ElementType::Figure => "figure",
-      ElementType::ForeignData => "foreign-data",
-      ElementType::FunctionFeature => "function",
-      ElementType::Gap => "gap",
-      ElementType::Head => "head",
-      ElementType::HeadFeature => "headfeature",
-      ElementType::Headspan => "hd",
-      ElementType::Hiddenword => "hiddenw",
-      ElementType::Hyphbreak => "t-hbr",
-      ElementType::Label => "label",
-      ElementType::LangAnnotation => "lang",
-      ElementType::LemmaAnnotation => "lemma",
-      ElementType::LevelFeature => "level",
-      ElementType::Linebreak => "br",
-      ElementType::LinkReference => "xref",
-      ElementType::List => "list",
-      ElementType::ListItem => "item",
-      ElementType::Metric => "metric",
-      ElementType::ModalityFeature => "modality",
-      ElementType::Morpheme => "morpheme",
-      ElementType::MorphologyLayer => "morphology",
-      ElementType::New => "new",
-      ElementType::Note => "note",
-      ElementType::Observation => "observation",
-      ElementType::ObservationLayer => "observations",
-      ElementType::Original => "original",
-      ElementType::Paragraph => "p",
-      ElementType::Part => "part",
-      ElementType::PhonContent => "ph",
-      ElementType::Phoneme => "phoneme",
-      ElementType::PhonologyLayer => "phonology",
-      ElementType::PolarityFeature => "polarity",
-      ElementType::PosAnnotation => "pos",
-      ElementType::Predicate => "predicate",
-      ElementType::Quote => "quote",
-      ElementType::Reference => "ref",
-      ElementType::Relation => "relation",
-      ElementType::Row => "row",
-      ElementType::SemanticRole => "semrole",
-      ElementType::SemanticRolesLayer => "semroles",
-      ElementType::SenseAnnotation => "sense",
-      ElementType::Sentence => "s",
-      ElementType::Sentiment => "sentiment",
-      ElementType::SentimentLayer => "sentiments",
-      ElementType::Source => "source",
-      ElementType::SpanRelation => "spanrelation",
-      ElementType::SpanRelationLayer => "spanrelations",
-      ElementType::Speech => "speech",
-      ElementType::Statement => "statement",
-      ElementType::StatementLayer => "statements",
-      ElementType::StatementRelation => "rel",
-      ElementType::StrengthFeature => "strength",
-      ElementType::String => "str",
-      ElementType::StyleFeature => "style",
-      ElementType::SubjectivityAnnotation => "subjectivity",
-      ElementType::Suggestion => "suggestion",
-      ElementType::SynsetFeature => "synset",
-      ElementType::SyntacticUnit => "su",
-      ElementType::SyntaxLayer => "syntax",
-      ElementType::Table => "table",
-      ElementType::TableHead => "tablehead",
-      ElementType::Target => "target",
-      ElementType::Term => "term",
-      ElementType::Text => "text",
-      ElementType::TextContent => "t",
-      ElementType::TextMarkupCorrection => "t-correction",
-      ElementType::TextMarkupError => "t-error",
-      ElementType::TextMarkupGap => "t-gap",
-      ElementType::TextMarkupReference => "t-ref",
-      ElementType::TextMarkupString => "t-str",
-      ElementType::TextMarkupStyle => "t-style",
-      ElementType::TimeFeature => "time",
-      ElementType::TimeSegment => "timesegment",
-      ElementType::TimingLayer => "timing",
-      ElementType::Utterance => "utt",
-      ElementType::ValueFeature => "value",
-      ElementType::Whitespace => "whitespace",
-      ElementType::Word => "w",
-      ElementType::WordReference => "wref",
-    }
 
+impl fmt::Display for ElementType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.tagname())
+    }
+}
+
+impl fmt::Debug for ElementType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.tagname())
+    }
+}
+
+impl std::str::FromStr for ElementType {
+    type Err = FoliaError;
+
+    fn from_str(tag: &str) -> Result<Self, Self::Err> {
+        //foliaspec:string_elementtype_map
+        match tag {
+          "actor" =>  Ok(ElementType::ActorFeature),
+          "alt" =>  Ok(ElementType::Alternative),
+          "altlayers" =>  Ok(ElementType::AlternativeLayers),
+          "begindatetime" =>  Ok(ElementType::BegindatetimeFeature),
+          "caption" =>  Ok(ElementType::Caption),
+          "cell" =>  Ok(ElementType::Cell),
+          "chunk" =>  Ok(ElementType::Chunk),
+          "chunking" =>  Ok(ElementType::ChunkingLayer),
+          "comment" =>  Ok(ElementType::Comment),
+          "content" =>  Ok(ElementType::Content),
+          "coreferencechain" =>  Ok(ElementType::CoreferenceChain),
+          "coreferences" =>  Ok(ElementType::CoreferenceLayer),
+          "coreferencelink" =>  Ok(ElementType::CoreferenceLink),
+          "correction" =>  Ok(ElementType::Correction),
+          "current" =>  Ok(ElementType::Current),
+          "def" =>  Ok(ElementType::Definition),
+          "dependencies" =>  Ok(ElementType::DependenciesLayer),
+          "dependency" =>  Ok(ElementType::Dependency),
+          "dep" =>  Ok(ElementType::DependencyDependent),
+          "desc" =>  Ok(ElementType::Description),
+          "div" =>  Ok(ElementType::Division),
+          "domain" =>  Ok(ElementType::DomainAnnotation),
+          "enddatetime" =>  Ok(ElementType::EnddatetimeFeature),
+          "entities" =>  Ok(ElementType::EntitiesLayer),
+          "entity" =>  Ok(ElementType::Entity),
+          "entry" =>  Ok(ElementType::Entry),
+          "errordetection" =>  Ok(ElementType::ErrorDetection),
+          "event" =>  Ok(ElementType::Event),
+          "ex" =>  Ok(ElementType::Example),
+          "external" =>  Ok(ElementType::External),
+          "feat" =>  Ok(ElementType::Feature),
+          "figure" =>  Ok(ElementType::Figure),
+          "foreign-data" =>  Ok(ElementType::ForeignData),
+          "function" =>  Ok(ElementType::FunctionFeature),
+          "gap" =>  Ok(ElementType::Gap),
+          "head" =>  Ok(ElementType::Head),
+          "headfeature" =>  Ok(ElementType::HeadFeature),
+          "hd" =>  Ok(ElementType::Headspan),
+          "hiddenw" =>  Ok(ElementType::Hiddenword),
+          "t-hbr" =>  Ok(ElementType::Hyphbreak),
+          "label" =>  Ok(ElementType::Label),
+          "lang" =>  Ok(ElementType::LangAnnotation),
+          "lemma" =>  Ok(ElementType::LemmaAnnotation),
+          "level" =>  Ok(ElementType::LevelFeature),
+          "br" =>  Ok(ElementType::Linebreak),
+          "xref" =>  Ok(ElementType::LinkReference),
+          "list" =>  Ok(ElementType::List),
+          "item" =>  Ok(ElementType::ListItem),
+          "metric" =>  Ok(ElementType::Metric),
+          "modality" =>  Ok(ElementType::ModalityFeature),
+          "morpheme" =>  Ok(ElementType::Morpheme),
+          "morphology" =>  Ok(ElementType::MorphologyLayer),
+          "new" =>  Ok(ElementType::New),
+          "note" =>  Ok(ElementType::Note),
+          "observation" =>  Ok(ElementType::Observation),
+          "observations" =>  Ok(ElementType::ObservationLayer),
+          "original" =>  Ok(ElementType::Original),
+          "p" =>  Ok(ElementType::Paragraph),
+          "part" =>  Ok(ElementType::Part),
+          "ph" =>  Ok(ElementType::PhonContent),
+          "phoneme" =>  Ok(ElementType::Phoneme),
+          "phonology" =>  Ok(ElementType::PhonologyLayer),
+          "polarity" =>  Ok(ElementType::PolarityFeature),
+          "pos" =>  Ok(ElementType::PosAnnotation),
+          "predicate" =>  Ok(ElementType::Predicate),
+          "quote" =>  Ok(ElementType::Quote),
+          "ref" =>  Ok(ElementType::Reference),
+          "relation" =>  Ok(ElementType::Relation),
+          "row" =>  Ok(ElementType::Row),
+          "semrole" =>  Ok(ElementType::SemanticRole),
+          "semroles" =>  Ok(ElementType::SemanticRolesLayer),
+          "sense" =>  Ok(ElementType::SenseAnnotation),
+          "s" =>  Ok(ElementType::Sentence),
+          "sentiment" =>  Ok(ElementType::Sentiment),
+          "sentiments" =>  Ok(ElementType::SentimentLayer),
+          "source" =>  Ok(ElementType::Source),
+          "spanrelation" =>  Ok(ElementType::SpanRelation),
+          "spanrelations" =>  Ok(ElementType::SpanRelationLayer),
+          "speech" =>  Ok(ElementType::Speech),
+          "statement" =>  Ok(ElementType::Statement),
+          "statements" =>  Ok(ElementType::StatementLayer),
+          "rel" =>  Ok(ElementType::StatementRelation),
+          "strength" =>  Ok(ElementType::StrengthFeature),
+          "str" =>  Ok(ElementType::String),
+          "style" =>  Ok(ElementType::StyleFeature),
+          "subjectivity" =>  Ok(ElementType::SubjectivityAnnotation),
+          "suggestion" =>  Ok(ElementType::Suggestion),
+          "synset" =>  Ok(ElementType::SynsetFeature),
+          "su" =>  Ok(ElementType::SyntacticUnit),
+          "syntax" =>  Ok(ElementType::SyntaxLayer),
+          "table" =>  Ok(ElementType::Table),
+          "tablehead" =>  Ok(ElementType::TableHead),
+          "target" =>  Ok(ElementType::Target),
+          "term" =>  Ok(ElementType::Term),
+          "text" =>  Ok(ElementType::Text),
+          "t" =>  Ok(ElementType::TextContent),
+          "t-correction" =>  Ok(ElementType::TextMarkupCorrection),
+          "t-error" =>  Ok(ElementType::TextMarkupError),
+          "t-gap" =>  Ok(ElementType::TextMarkupGap),
+          "t-ref" =>  Ok(ElementType::TextMarkupReference),
+          "t-str" =>  Ok(ElementType::TextMarkupString),
+          "t-style" =>  Ok(ElementType::TextMarkupStyle),
+          "time" =>  Ok(ElementType::TimeFeature),
+          "timesegment" =>  Ok(ElementType::TimeSegment),
+          "timing" =>  Ok(ElementType::TimingLayer),
+          "utt" =>  Ok(ElementType::Utterance),
+          "value" =>  Ok(ElementType::ValueFeature),
+          "whitespace" =>  Ok(ElementType::Whitespace),
+          "w" =>  Ok(ElementType::Word),
+          "wref" =>  Ok(ElementType::WordReference),
+            _ => Err(FoliaError::ParseError(format!("Unknown tag has no associated element type: {}",tag).to_string()))
+        }
+    }
 }
 
 pub fn annotationtype2elementtype(annotationtype: AnnotationType) -> ElementType {

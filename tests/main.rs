@@ -67,9 +67,17 @@ fn instantiate() {
 
 #[test]
 fn append() {
-    if let Ok(doc) = folia::Document::new("example", folia::BodyType::Text) {
-        let attribs = vec![ folia::Attribute::Id("s.1".to_string()) ];
-        doc.body.unwrap().append(folia::ElementType::Sentence, Some(attribs), None  );
+    if let Ok(mut doc) = folia::Document::new("example", folia::BodyType::Text) {
+        let root: folia::IntId = 0;
+        let sentence = doc.store.add_to(root,
+                                        folia::FoliaElement::new(folia::ElementType::Sentence)
+                                                            .with_attrib(folia::Attribute::Id("s.1".to_string())) );
+        doc.store.add_to(sentence,
+                         folia::FoliaElement::new(folia::ElementType::Word)
+                                             .with(folia::DataType::text("hello")));
+        doc.store.add_to(sentence,
+                         folia::FoliaElement::new(folia::ElementType::Word)
+                                             .with(folia::DataType::text("world")));
     } else {
         assert!(false);
     }

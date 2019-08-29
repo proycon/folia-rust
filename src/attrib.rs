@@ -38,6 +38,7 @@ pub enum Attribute {
 }
 
 impl Attribute {
+
     pub fn unwrap(&self) -> Cow<str> {
         match self {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |

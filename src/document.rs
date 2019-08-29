@@ -3,18 +3,22 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
 use std::str;
+use std::str::FromStr;
+use std::string::ToString;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
 
+use crate::common::*;
 use crate::error::*;
 use crate::element::*;
 use crate::attrib::*;
+use crate::elementstore::*;
 
 pub struct Document {
     pub id: String,
     pub filename: Option<String>,
-    pub body: Option<FoliaElement>,
+    pub store: ElementStore,
 }
 
 
@@ -22,11 +26,12 @@ pub struct Document {
 impl Document {
     ///Create a new FoLiA document from scratch
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
-        let body = match bodytype {
-            BodyType::Text => Some(FoliaElement::new(ElementType::Text, None, None).unwrap()),
-            BodyType::Speech => Some(FoliaElement::new(ElementType::Speech, None, None).unwrap()),
-        };
-        Ok(Self { id: id.to_string(), filename: None, body: body })
+        let mut store = ElementStore::default();
+        store.add(match bodytype {
+            BodyType::Text => FoliaElement::new(ElementType::Text),
+            BodyType::Speech => FoliaElement::new(ElementType::Speech),
+        });
+        Ok(Self { id: id.to_string(), filename: None, store: store })
     }
 
     ///Load a FoliA document from file
@@ -61,7 +66,7 @@ impl Document {
             match e {
                 (ref ns, Event::Start(ref e)) => {
                     match (*ns, e.local_name())  {
-                        (Some(NSFOLIA), b"FoLiA") => {
+                        (Some(ns), b"FoLiA") if ns == NSFOLIA => {
                             for attrib in e.attributes() {
                                 let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
                                 match attrib.key {
@@ -73,7 +78,7 @@ impl Document {
                             }
                             break;
                         },
-                        (Some(NSFOLIA), _) => {
+                        (Some(ns), _) if ns == NSFOLIA => {
                             return Err(FoliaError::ParseError("Encountered unknown root tag".to_string()));
                         },
                         (_ns,_tag) => {
@@ -97,19 +102,19 @@ impl Document {
             match e {
                 (ref ns, Event::Start(ref e)) => {
                     match (*ns, e.local_name())  {
-                        (Some(NSFOLIA), b"text") => {
+                        (Some(ns), b"text") if ns == NSFOLIA => {
                             if let Ok(attribs)  =  FoliaElement::parse_attributes(&reader, e.attributes()) {
-                                body = Some(FoliaElement { elementtype: ElementType::Text, data: Vec::new(), attribs: attribs });
+                                body = Some(FoliaElement::new(ElementType::Text).with_attribs(attribs));
                             }
                             break;
                         },
-                        (Some(NSFOLIA), b"speech") => {
+                        (Some(ns), b"speech") if ns == NSFOLIA => {
                             if let Ok(attribs)  =  FoliaElement::parse_attributes(&reader, e.attributes()) {
-                                body = Some(FoliaElement { elementtype: ElementType::Speech, data: Vec::new(), attribs: attribs });
+                                body = Some(FoliaElement::new(ElementType::Speech).with_attribs(attribs));
                             }
                             break;
                         },
-                        (Some(NSFOLIA), _) => {
+                        (Some(ns), _) if ns == NSFOLIA => {
                             //just ignore everything else for now
                         },
                         (Some(ns),tag) => {
@@ -128,73 +133,107 @@ impl Document {
         };
 
 
-        let mut doc = Self { id: id, body: body, filename: None };
-        if doc.body.is_some() {
-            doc.parse_body(reader, &mut buf, &mut nsbuf)?;
+        let mut doc = Self { id: id, filename: None, store: ElementStore::default() };
+        if let Some(body) = body {
+            let intid = doc.store.add(body);
+            doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
             Err(FoliaError::ParseError("No body found".to_string()))
         }
     }
 
-    ///Parses the body of the FoLiA document, this in turn invokes all parsers for the subelements
-    fn parse_body<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
-        let mut body: FoliaElement  = self.body.take().unwrap(); //we take ownership, we will put it back in self.body after we're done
-        let mut stack = vec![body];
-        loop {
-            let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
-            match e {
-                (Some(NSFOLIA), Event::Empty(ref e)) => {
-                    let elem = FoliaElement::parse(reader, e)?;
-                    // Since there is no Event::End after, directly append it to the current node
-                    stack.last_mut().unwrap().data.push(DataType::Element(elem));
-                },
-                (Some(NSFOLIA), Event::Start(ref e)) => {
-                    let elem = FoliaElement::parse(reader, e)?;
-                    stack.push(elem);
-                },
-                (Some(NSFOLIA), Event::End(ref e)) => {
-                    if stack.len() <= 1 {
+    ///Parses an element of the FoLiA document from XML, this in turn invokes all parsers for the subelements
+    fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
+        if !self.store.is_empty() {
+            let mut stack: Vec<IntId> = vec![0]; //0 is the root/body element, we always start with it
+            loop {
+                let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
+                match e {
+                    (Some(ns), Event::Empty(ref e)) if ns == NSFOLIA => {
+                        //EMPTY TAG FOUND (<tag/>)
+                        eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
+                        let elem = FoliaElement::parse(reader, e)?;
+                        let intid = self.store.add(elem);
+                        stack.push(intid);
+                        // Since there is no Event::End after, directly append it to the current node
+                        if let Some(parent_intid) = stack.last() {
+                            self.store.attach(*parent_intid, intid);
+                        }
+                    },
+                    (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
+                        //START TAG FOUND (<tag>)
+                        eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
+                        let elem = FoliaElement::parse(reader, e)?;
+                        stack.push(self.store.add(elem));
+                    },
+                    (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {
+                        //END TAG FOUND (</tag>)
+                        eprintln!("END TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
+                        if stack.len() <= 1 {
+                            break;
+                        }
+                        let intid = stack.pop().unwrap();
+                        if let Some(elem) = self.store.get(intid) {
+
+                            //verify we actually close the right thing (otherwise we have malformed XML)
+                            let elementname = str::from_utf8(e.local_name()).expect("Tag is not valid utf-8");
+                            let elementtype = ElementType::from_str(elementname)?;
+                            if elem.elementtype != elementtype {
+                                return Err(FoliaError::ParseError(format!("Malformed XML? Invalid element closed: {}, expected: {}", elementname, elem.elementtype.to_string() )));
+                            }
+                        } else {
+                            eprintln!("ID from stack does not exist! {}", intid ) ;
+                        }
+
+                        //add element to parent (the previous one in the stack)
+                        if let Some(parent_intid) = stack.last() {
+                            self.store.attach(*parent_intid, intid);
+                        }
+                    },
+                    (None, Event::Text(s)) => {
+                        let text = s.unescape_and_decode(reader)?;
+                        if text.trim() != "" {
+                            eprintln!("TEXT: {}", text);
+                            if let Some(parent_intid) = stack.last() {
+                                self.store.get_mut(*parent_intid).map( |mut parent| {
+                                    parent.push(DataType::Text(text));
+                                });
+                            }
+                        }
+                    },
+                    (None, Event::CData(s)) => {
+                        let text = reader.decode(&s).into_owned();
+                        if text.trim() != "" {
+                            eprintln!("CDATA: {}", text);
+                            if let Some(parent_intid) = stack.last() {
+                                self.store.get_mut(*parent_intid).map( |mut parent| {
+                                    parent.push(DataType::Text(text));
+                                });
+                            }
+                        }
+                    },
+                    (None, Event::Comment(s)) => {
+                        let comment = reader.decode(&s).into_owned();
+                        if comment.trim() != "" {
+                            eprintln!("COMMENT: {}", comment);
+                            if let Some(parent_intid) = stack.last() {
+                                self.store.get_mut(*parent_intid).map( |mut parent| {
+                                    parent.push(DataType::Comment(comment));
+                                });
+                            }
+                        }
+                    },
+                    (_, Event::Eof) => {
                         break;
                     }
-                    let elem = stack.pop().unwrap();
-                    if let Some(to) = stack.last_mut() {
-                        //verify we actually close the right thing (otherwise we have malformed XML)
-                        if elem.elementtype != getelementtype(str::from_utf8(e.local_name()).expect("Tag is not valid utf-8")).expect("Unknown tag") {
-                            return Err(FoliaError::ParseError("Malformed XML? Invalid element closed".to_string()));
-                        }
-                        to.data.push(DataType::Element(elem));
-                    }
-                },
-                (None, Event::Text(s)) => {
-                    let text = s.unescape_and_decode(reader)?;
-                    if text != "" {
-                        let current_elem = stack.last_mut().unwrap();
-                        current_elem.data.push(DataType::Text(text));
-                    }
-                },
-                (None, Event::CData(s)) => {
-                    let text = reader.decode(&s).into_owned();
-                    if text != "" {
-                        let current_elem = stack.last_mut().unwrap();
-                        current_elem.data.push(DataType::Text(text));
-                    }
-                },
-                (None, Event::Comment(s)) => {
-                    let comment = reader.decode(&s).into_owned();
-                    if comment != "" {
-                        let current_elem = stack.last_mut().unwrap();
-                        current_elem.data.push(DataType::Comment(comment));
-                    }
-                },
-                (_, Event::Eof) => {
-                    break;
+                    (_,_) => {}
                 }
-                (_,_) => {}
-            }
-        };
-        self.body = Some(stack.pop().unwrap());
-        Ok(())
+            };
+            Ok(())
+        } else {
+            Err(FoliaError::ParseError("No root element".to_string()))
+        }
     }
 
     pub fn id(&self) -> &str { &self.id }
