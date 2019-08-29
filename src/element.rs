@@ -6,6 +6,7 @@ use std::str::{FromStr,from_utf8};
 use std::string::ToString;
 use std::fmt;
 use std::collections::HashMap;
+use std::iter::ExactSizeIterator;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
@@ -86,44 +87,6 @@ pub struct FoliaElement {
 }
 
 
-#[derive(Debug,Clone)]
-pub struct Selector<'a> {
-    pub elementtype: TypeSelector,
-    pub set: SetSelector<'a>,
-    pub recursive: bool,
-}
-
-#[derive(Debug,Copy,Clone)]
-pub enum SetSelector<'a> {
-    SomeSet(&'a str),
-    AnySet,
-    NoSet
-}
-
-#[derive(Debug,Clone)]
-pub enum TypeSelector {
-    SomeType(ElementType),
-    MultiType(Vec<ElementType>),
-    AnyType,
-}
-
-pub struct SelectIterator<'a> {
-    selector: Selector<'a>,
-    element: &'a FoliaElement,
-}
-
-impl<'a> Iterator for SelectIterator<'a> {
-    type Item = DataType;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        unimplemented!(); //TODO
-        None
-    }
-}
-
-pub trait Select {
-    fn select(&self, selector: Selector) -> SelectIterator;
-}
 
 impl FoliaElement {
 
@@ -201,7 +164,7 @@ impl FoliaElement {
         self.data.push(datatype);
     }
 
-    ///Builder variant that adds data
+    ///Builder variant for push that adds data
     pub fn with(mut self, data: DataType) -> Self {
         self.data.push(data);
         self
@@ -231,6 +194,10 @@ impl FoliaElement {
     ///Low-level get function
     pub fn get(&self, index: usize) -> Option<&DataType> {
         self.data.get(index)
+    }
+
+    pub fn len(&self) -> usize {
+        self.data.len()
     }
 
     pub fn index(&self, refchild: &DataType) -> Option<usize> {

@@ -5,6 +5,7 @@ pub mod error;
 pub mod attrib;
 pub mod element;
 pub mod elementstore;
+pub mod select;
 pub mod document;
 
 
@@ -14,6 +15,7 @@ pub use document::*;
 pub use element::*;
 pub use elementstore::*;
 pub use attrib::*;
+pub use select::*;
 
 
 

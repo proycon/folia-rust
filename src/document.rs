@@ -1,12 +1,13 @@
 use std::path::{Path};
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Cursor;
 use std::fs::File;
 use std::str;
 use std::str::FromStr;
 use std::string::ToString;
 
-use quick_xml::Reader;
+use quick_xml::{Reader,Writer};
 use quick_xml::events::Event;
 
 use crate::common::*;
@@ -238,6 +239,10 @@ impl Document {
 
     pub fn id(&self) -> &str { &self.id }
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
+
+    pub fn xml(&self) {
+        let mut writer = Writer::new(Cursor::new(Vec::new()));
+    }
 
 
 }
