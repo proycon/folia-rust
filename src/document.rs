@@ -146,7 +146,7 @@ impl Document {
         }
     }
 
-    ///Parses an element of the FoLiA document from XML, this in turn invokes all parsers for the subelements
+    ///Parses all elementsm from XML, this in turn invokes all parsers for the subelements
     fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
         if !self.store.is_empty() {
             let mut stack: Vec<IntId> = vec![0]; //0 is the root/body element, we always start with it
@@ -155,7 +155,7 @@ impl Document {
                 match e {
                     (Some(ns), Event::Empty(ref e)) if ns == NSFOLIA => {
                         //EMPTY TAG FOUND (<tag/>)
-                        eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
+                        //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
                         let intid = self.store.add(elem);
                         stack.push(intid);
@@ -166,13 +166,13 @@ impl Document {
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
-                        eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
+                        //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
                         stack.push(self.store.add(elem));
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {
                         //END TAG FOUND (</tag>)
-                        eprintln!("END TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
+                        //eprintln!("END TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         if stack.len() <= 1 {
                             break;
                         }
@@ -242,6 +242,7 @@ impl Document {
     pub fn id(&self) -> &str { &self.id }
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
+    ///Serialises a document to XML (vector of bytes, utf-8)
     pub fn xml(&self, root_intid: IntId) -> Result<Vec<u8>, FoliaError> {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
 
@@ -260,7 +261,6 @@ impl Document {
         let mut stack = vec![];
         let mut previous_depth = 0;
         for item in self.store.select(root_intid,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
-            eprintln!("SELECT: {:?}", item);
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
@@ -274,7 +274,11 @@ impl Document {
                     if let Some(element) = self.store.get(*intid) {
                         let tagstring = element.elementtype.to_string();
                         let tag = tagstring.as_bytes();
-                        let start = BytesStart::owned(tag.to_vec(), tag.len());
+                        let mut start = BytesStart::owned(tag.to_vec(), tag.len());
+                        for attrib in element.attribs.iter() {
+                            let value: &str = &attrib.value();
+                            start.push_attribute((attrib.attribtype().into(), value ));
+                        }
                         writer.write_event(Event::Start(start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
                         let end = BytesEnd::owned(tag.to_vec());
                         stack.push(end);

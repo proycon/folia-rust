@@ -2,6 +2,9 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::borrow::Cow;
 use std::str::FromStr;
+use std::string::ToString;
+use std::convert::Into;
+use std::fmt;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
@@ -11,6 +14,39 @@ use crate::error::*;
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
     ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET
+}
+
+impl Into<&str> for AttribType {
+    fn into(self) -> &'static str {
+         match self {
+            AttribType::ID => "xml:id",
+            AttribType::SET => "set",
+            AttribType::CLASS => "class",
+            AttribType::ANNOTATOR => "annotator",
+            AttribType::ANNOTATORTYPE => "annotatortype",
+            AttribType::CONFIDENCE => "confidence",
+            AttribType::N => "n",
+            AttribType::DATETIME => "datetime",
+            AttribType::BEGINTIME => "begintime",
+            AttribType::ENDTIME => "endtime",
+            AttribType::SRC => "src",
+            AttribType::SPEAKER => "speaker",
+            AttribType::TEXTCLASS => "textclass",
+            AttribType::METADATA => "metadata",
+            AttribType::IDREF => "id",
+            AttribType::SPACE => "space",
+            AttribType::PROCESSOR => "processor",
+            AttribType::HREF => "href",
+            AttribType::FORMAT => "format",
+            AttribType::SUBSET => "subset"
+        }
+    }
+}
+
+impl fmt::Display for AttribType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 pub enum Attribute {
@@ -37,9 +73,15 @@ pub enum Attribute {
     Subset(String),
 }
 
+impl fmt::Display for Attribute {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}",  self.value() )
+    }
+}
+
 impl Attribute {
 
-    pub fn unwrap(&self) -> Cow<str> {
+    pub fn value(&self) -> Cow<str> {
         match self {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::AnnotatorType(s) | Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |

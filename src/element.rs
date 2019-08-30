@@ -7,6 +7,7 @@ use std::string::ToString;
 use std::fmt;
 use std::collections::HashMap;
 use std::iter::ExactSizeIterator;
+use std::convert::Into;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
@@ -25,6 +26,136 @@ pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, Begindateti
 //Defines all annotation types (as part of the AnnotationType enumeration)
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
+
+impl Into<&str> for AnnotationType {
+    fn into(self) -> &'static str {
+        //foliaspec:annotationtype_xml_map:self
+        //A mapping from annotation types to xml tags (strings)
+        match self {
+          AnnotationType::ALTERNATIVE => "alt",
+          AnnotationType::CHUNKING => "chunk",
+          AnnotationType::COMMENT => "comment",
+          AnnotationType::RAWCONTENT => "content",
+          AnnotationType::COREFERENCE => "coreferencechain",
+          AnnotationType::CORRECTION => "correction",
+          AnnotationType::DEFINITION => "def",
+          AnnotationType::DEPENDENCY => "dependency",
+          AnnotationType::DESCRIPTION => "desc",
+          AnnotationType::DIVISION => "div",
+          AnnotationType::DOMAIN => "domain",
+          AnnotationType::ENTITY => "entity",
+          AnnotationType::ENTRY => "entry",
+          AnnotationType::ERRORDETECTION => "errordetection",
+          AnnotationType::EVENT => "event",
+          AnnotationType::EXAMPLE => "ex",
+          AnnotationType::FIGURE => "figure",
+          AnnotationType::GAP => "gap",
+          AnnotationType::HEAD => "head",
+          AnnotationType::HIDDENTOKEN => "hiddenw",
+          AnnotationType::HYPHENATION => "t-hbr",
+          AnnotationType::LANG => "lang",
+          AnnotationType::LEMMA => "lemma",
+          AnnotationType::LINEBREAK => "br",
+          AnnotationType::LIST => "list",
+          AnnotationType::METRIC => "metric",
+          AnnotationType::MORPHOLOGICAL => "morpheme",
+          AnnotationType::NOTE => "note",
+          AnnotationType::OBSERVATION => "observation",
+          AnnotationType::PARAGRAPH => "p",
+          AnnotationType::PART => "part",
+          AnnotationType::PHON => "ph",
+          AnnotationType::PHONOLOGICAL => "phoneme",
+          AnnotationType::POS => "pos",
+          AnnotationType::PREDICATE => "predicate",
+          AnnotationType::QUOTE => "quote",
+          AnnotationType::REFERENCE => "ref",
+          AnnotationType::RELATION => "relation",
+          AnnotationType::SEMROLE => "semrole",
+          AnnotationType::SENSE => "sense",
+          AnnotationType::SENTENCE => "s",
+          AnnotationType::SENTIMENT => "sentiment",
+          AnnotationType::SPANRELATION => "spanrelation",
+          AnnotationType::STATEMENT => "statement",
+          AnnotationType::STRING => "str",
+          AnnotationType::SUBJECTIVITY => "subjectivity",
+          AnnotationType::SYNTAX => "su",
+          AnnotationType::TABLE => "table",
+          AnnotationType::TERM => "term",
+          AnnotationType::TEXT => "t",
+          AnnotationType::STYLE => "t-style",
+          AnnotationType::TIMESEGMENT => "timesegment",
+          AnnotationType::UTTERANCE => "utt",
+          AnnotationType::WHITESPACE => "whitespace",
+          AnnotationType::TOKEN => "w",
+        }
+    }
+}
+
+
+impl Into<ElementType> for AnnotationType {
+
+    fn into(self) -> ElementType {
+        //foliaspec:annotationtype_elementtype_map
+        //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
+        match self {
+            AnnotationType::ALTERNATIVE => ElementType::Alternative,
+            AnnotationType::CHUNKING => ElementType::Chunk,
+            AnnotationType::COMMENT => ElementType::Comment,
+            AnnotationType::RAWCONTENT => ElementType::Content,
+            AnnotationType::COREFERENCE => ElementType::CoreferenceChain,
+            AnnotationType::CORRECTION => ElementType::Correction,
+            AnnotationType::DEFINITION => ElementType::Definition,
+            AnnotationType::DEPENDENCY => ElementType::Dependency,
+            AnnotationType::DESCRIPTION => ElementType::Description,
+            AnnotationType::DIVISION => ElementType::Division,
+            AnnotationType::DOMAIN => ElementType::DomainAnnotation,
+            AnnotationType::ENTITY => ElementType::Entity,
+            AnnotationType::ENTRY => ElementType::Entry,
+            AnnotationType::ERRORDETECTION => ElementType::ErrorDetection,
+            AnnotationType::EVENT => ElementType::Event,
+            AnnotationType::EXAMPLE => ElementType::Example,
+            AnnotationType::FIGURE => ElementType::Figure,
+            AnnotationType::GAP => ElementType::Gap,
+            AnnotationType::HEAD => ElementType::Head,
+            AnnotationType::HIDDENTOKEN => ElementType::Hiddenword,
+            AnnotationType::HYPHENATION => ElementType::Hyphbreak,
+            AnnotationType::LANG => ElementType::LangAnnotation,
+            AnnotationType::LEMMA => ElementType::LemmaAnnotation,
+            AnnotationType::LINEBREAK => ElementType::Linebreak,
+            AnnotationType::LIST => ElementType::List,
+            AnnotationType::METRIC => ElementType::Metric,
+            AnnotationType::MORPHOLOGICAL => ElementType::Morpheme,
+            AnnotationType::NOTE => ElementType::Note,
+            AnnotationType::OBSERVATION => ElementType::Observation,
+            AnnotationType::PARAGRAPH => ElementType::Paragraph,
+            AnnotationType::PART => ElementType::Part,
+            AnnotationType::PHON => ElementType::PhonContent,
+            AnnotationType::PHONOLOGICAL => ElementType::Phoneme,
+            AnnotationType::POS => ElementType::PosAnnotation,
+            AnnotationType::PREDICATE => ElementType::Predicate,
+            AnnotationType::QUOTE => ElementType::Quote,
+            AnnotationType::REFERENCE => ElementType::Reference,
+            AnnotationType::RELATION => ElementType::Relation,
+            AnnotationType::SEMROLE => ElementType::SemanticRole,
+            AnnotationType::SENSE => ElementType::SenseAnnotation,
+            AnnotationType::SENTENCE => ElementType::Sentence,
+            AnnotationType::SENTIMENT => ElementType::Sentiment,
+            AnnotationType::SPANRELATION => ElementType::SpanRelation,
+            AnnotationType::STATEMENT => ElementType::Statement,
+            AnnotationType::STRING => ElementType::String,
+            AnnotationType::SUBJECTIVITY => ElementType::SubjectivityAnnotation,
+            AnnotationType::SYNTAX => ElementType::SyntacticUnit,
+            AnnotationType::TABLE => ElementType::Table,
+            AnnotationType::TERM => ElementType::Term,
+            AnnotationType::TEXT => ElementType::TextContent,
+            AnnotationType::STYLE => ElementType::TextMarkupStyle,
+            AnnotationType::TIMESEGMENT => ElementType::TimeSegment,
+            AnnotationType::UTTERANCE => ElementType::Utterance,
+            AnnotationType::WHITESPACE => ElementType::Whitespace,
+            AnnotationType::TOKEN => ElementType::Word,
+        }
+    }
+}
 
 #[derive(Debug,PartialEq,Clone)]
 pub enum DataType {
@@ -103,7 +234,7 @@ impl FoliaElement {
     ///Get attribute value as a string
     pub fn attrib_string(&self, atype: AttribType) -> Option<String> {
         if let Some(attrib) = self.attrib(atype) {
-            if let Cow::Borrowed(s) = attrib.unwrap() {
+            if let Cow::Borrowed(s) = attrib.value() {
                 Some(s.to_owned())
             }  else {
                 None
@@ -117,6 +248,7 @@ impl FoliaElement {
     pub fn has_attrib(&self, atype: AttribType) -> bool {
         self.attribs.iter().find(|&a| a.attribtype() == atype).is_some()
     }
+
 
     ///Deletes (and returns) the specified attribute
     pub fn del_attrib(&mut self, atype: AttribType) -> Option<Attribute> {
@@ -261,10 +393,8 @@ impl Select for FoliaElement {
 }
 */
 
-
-
 impl ElementType {
-    fn tagname(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         //foliaspec:elementtype_string_map
         match self {
           ElementType::ActorFeature => "actor",
@@ -382,15 +512,22 @@ impl ElementType {
 }
 
 
+impl Into<&str> for ElementType {
+    fn into(self) -> &'static str {
+        self.as_str()
+    }
+}
+
+
 impl fmt::Display for ElementType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.tagname())
+        write!(f, "{}", self.as_str())
     }
 }
 
 impl fmt::Debug for ElementType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.tagname())
+        write!(f, "{}", self.as_str())
     }
 }
 
@@ -513,130 +650,4 @@ impl std::str::FromStr for ElementType {
             _ => Err(FoliaError::ParseError(format!("Unknown tag has no associated element type: {}",tag).to_string()))
         }
     }
-}
-
-pub fn annotationtype2elementtype(annotationtype: AnnotationType) -> ElementType {
-    //foliaspec:annotationtype_elementtype_map
-    //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
-    match annotationtype {
-        AnnotationType::ALTERNATIVE => ElementType::Alternative,
-        AnnotationType::CHUNKING => ElementType::Chunk,
-        AnnotationType::COMMENT => ElementType::Comment,
-        AnnotationType::RAWCONTENT => ElementType::Content,
-        AnnotationType::COREFERENCE => ElementType::CoreferenceChain,
-        AnnotationType::CORRECTION => ElementType::Correction,
-        AnnotationType::DEFINITION => ElementType::Definition,
-        AnnotationType::DEPENDENCY => ElementType::Dependency,
-        AnnotationType::DESCRIPTION => ElementType::Description,
-        AnnotationType::DIVISION => ElementType::Division,
-        AnnotationType::DOMAIN => ElementType::DomainAnnotation,
-        AnnotationType::ENTITY => ElementType::Entity,
-        AnnotationType::ENTRY => ElementType::Entry,
-        AnnotationType::ERRORDETECTION => ElementType::ErrorDetection,
-        AnnotationType::EVENT => ElementType::Event,
-        AnnotationType::EXAMPLE => ElementType::Example,
-        AnnotationType::FIGURE => ElementType::Figure,
-        AnnotationType::GAP => ElementType::Gap,
-        AnnotationType::HEAD => ElementType::Head,
-        AnnotationType::HIDDENTOKEN => ElementType::Hiddenword,
-        AnnotationType::HYPHENATION => ElementType::Hyphbreak,
-        AnnotationType::LANG => ElementType::LangAnnotation,
-        AnnotationType::LEMMA => ElementType::LemmaAnnotation,
-        AnnotationType::LINEBREAK => ElementType::Linebreak,
-        AnnotationType::LIST => ElementType::List,
-        AnnotationType::METRIC => ElementType::Metric,
-        AnnotationType::MORPHOLOGICAL => ElementType::Morpheme,
-        AnnotationType::NOTE => ElementType::Note,
-        AnnotationType::OBSERVATION => ElementType::Observation,
-        AnnotationType::PARAGRAPH => ElementType::Paragraph,
-        AnnotationType::PART => ElementType::Part,
-        AnnotationType::PHON => ElementType::PhonContent,
-        AnnotationType::PHONOLOGICAL => ElementType::Phoneme,
-        AnnotationType::POS => ElementType::PosAnnotation,
-        AnnotationType::PREDICATE => ElementType::Predicate,
-        AnnotationType::QUOTE => ElementType::Quote,
-        AnnotationType::REFERENCE => ElementType::Reference,
-        AnnotationType::RELATION => ElementType::Relation,
-        AnnotationType::SEMROLE => ElementType::SemanticRole,
-        AnnotationType::SENSE => ElementType::SenseAnnotation,
-        AnnotationType::SENTENCE => ElementType::Sentence,
-        AnnotationType::SENTIMENT => ElementType::Sentiment,
-        AnnotationType::SPANRELATION => ElementType::SpanRelation,
-        AnnotationType::STATEMENT => ElementType::Statement,
-        AnnotationType::STRING => ElementType::String,
-        AnnotationType::SUBJECTIVITY => ElementType::SubjectivityAnnotation,
-        AnnotationType::SYNTAX => ElementType::SyntacticUnit,
-        AnnotationType::TABLE => ElementType::Table,
-        AnnotationType::TERM => ElementType::Term,
-        AnnotationType::TEXT => ElementType::TextContent,
-        AnnotationType::STYLE => ElementType::TextMarkupStyle,
-        AnnotationType::TIMESEGMENT => ElementType::TimeSegment,
-        AnnotationType::UTTERANCE => ElementType::Utterance,
-        AnnotationType::WHITESPACE => ElementType::Whitespace,
-        AnnotationType::TOKEN => ElementType::Word,
-    }
-
-}
-
-pub fn annotationtype2xml(annotationtype: AnnotationType) -> &'static str {
-    //foliaspec:annotationtype_xml_map
-    //A mapping from annotation types to xml tags (strings)
-    match annotationtype {
-      AnnotationType::ALTERNATIVE => "alt",
-      AnnotationType::CHUNKING => "chunk",
-      AnnotationType::COMMENT => "comment",
-      AnnotationType::RAWCONTENT => "content",
-      AnnotationType::COREFERENCE => "coreferencechain",
-      AnnotationType::CORRECTION => "correction",
-      AnnotationType::DEFINITION => "def",
-      AnnotationType::DEPENDENCY => "dependency",
-      AnnotationType::DESCRIPTION => "desc",
-      AnnotationType::DIVISION => "div",
-      AnnotationType::DOMAIN => "domain",
-      AnnotationType::ENTITY => "entity",
-      AnnotationType::ENTRY => "entry",
-      AnnotationType::ERRORDETECTION => "errordetection",
-      AnnotationType::EVENT => "event",
-      AnnotationType::EXAMPLE => "ex",
-      AnnotationType::FIGURE => "figure",
-      AnnotationType::GAP => "gap",
-      AnnotationType::HEAD => "head",
-      AnnotationType::HIDDENTOKEN => "hiddenw",
-      AnnotationType::HYPHENATION => "t-hbr",
-      AnnotationType::LANG => "lang",
-      AnnotationType::LEMMA => "lemma",
-      AnnotationType::LINEBREAK => "br",
-      AnnotationType::LIST => "list",
-      AnnotationType::METRIC => "metric",
-      AnnotationType::MORPHOLOGICAL => "morpheme",
-      AnnotationType::NOTE => "note",
-      AnnotationType::OBSERVATION => "observation",
-      AnnotationType::PARAGRAPH => "p",
-      AnnotationType::PART => "part",
-      AnnotationType::PHON => "ph",
-      AnnotationType::PHONOLOGICAL => "phoneme",
-      AnnotationType::POS => "pos",
-      AnnotationType::PREDICATE => "predicate",
-      AnnotationType::QUOTE => "quote",
-      AnnotationType::REFERENCE => "ref",
-      AnnotationType::RELATION => "relation",
-      AnnotationType::SEMROLE => "semrole",
-      AnnotationType::SENSE => "sense",
-      AnnotationType::SENTENCE => "s",
-      AnnotationType::SENTIMENT => "sentiment",
-      AnnotationType::SPANRELATION => "spanrelation",
-      AnnotationType::STATEMENT => "statement",
-      AnnotationType::STRING => "str",
-      AnnotationType::SUBJECTIVITY => "subjectivity",
-      AnnotationType::SYNTAX => "su",
-      AnnotationType::TABLE => "table",
-      AnnotationType::TERM => "term",
-      AnnotationType::TEXT => "t",
-      AnnotationType::STYLE => "t-style",
-      AnnotationType::TIMESEGMENT => "timesegment",
-      AnnotationType::UTTERANCE => "utt",
-      AnnotationType::WHITESPACE => "whitespace",
-      AnnotationType::TOKEN => "w",
-    }
-
 }
