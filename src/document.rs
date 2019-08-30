@@ -8,13 +8,14 @@ use std::str::FromStr;
 use std::string::ToString;
 
 use quick_xml::{Reader,Writer};
-use quick_xml::events::Event;
+use quick_xml::events::{Event,BytesStart,BytesEnd};
 
 use crate::common::*;
 use crate::error::*;
 use crate::element::*;
 use crate::attrib::*;
 use crate::elementstore::*;
+use crate::select::*;
 
 pub struct Document {
     pub id: String,
@@ -242,7 +243,22 @@ impl Document {
 
     pub fn xml(&self) {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
-        self.store.select(Selector::new(TypeSelector::AnyType, SetSelector::AnySet))
+        for datatype in self.store.select(0,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
+            match datatype {
+                DataType::Element(intid) => {
+                    if let Some(element) = self.store.get(*intid) {
+                        let tag = element.elementtype.to_string().as_bytes();
+                        let elem = BytesStart::owned(tag.to_vec(), tag.len());
+                        writer.write_event(Event::Start(elem));
+                    }
+                },
+                DataType::Text(text) => {
+                },
+                DataType::Comment(comment) => {
+                }
+
+            }
+        }
 
 
     }
