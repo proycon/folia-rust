@@ -11,7 +11,7 @@ pub struct ElementStore {
     index: HashMap<String,IntId>
 }
 
-impl Store<FoliaElement> for ElementStore {
+impl Store<FoliaElement,IntId> for ElementStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
         &mut self.items
     }

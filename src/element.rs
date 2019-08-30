@@ -17,6 +17,7 @@ use crate::error::*;
 use crate::attrib::*;
 use crate::elementstore::*;
 use crate::store::*;
+use crate::metadata::*;
 
 
 //foliaspec:elementtype
@@ -228,6 +229,8 @@ pub struct FoliaElement {
     pub attribs: Vec<Attribute>,
     data: Vec<DataType>,
     parent: Option<IntId>,
+    declaration: Option<DecIntId>,
+    processor: Option<ProcIntId>,
 }
 
 impl MaybeIdentifiable for FoliaElement {

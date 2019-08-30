@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::convert::TryFrom;
+use std::fmt::Debug;
 
 use crate::common::*;
 use crate::element::*;
@@ -12,22 +14,25 @@ pub trait MaybeIdentifiable {
 }
 
 
-pub trait Store<T> where T: MaybeIdentifiable {
+pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize> + Debug {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<T>>>;
-    fn index_mut(&mut self) -> &mut HashMap<String,IntId>;
+    fn index_mut(&mut self) -> &mut HashMap<String,I>;
 
     fn items(&self) -> &Vec<Option<Box<T>>>;
-    fn index(&self) -> &HashMap<String,IntId>;
+    fn index(&self) -> &HashMap<String,I>;
 
-    fn add(&mut self, item: T) -> IntId {
+    fn add(&mut self, item: T) -> I {
         let id = item.id();
         let boxed = Box::new(item);
         self.items_mut().push( Some(boxed) );
-        let intid = self.items().len() - 1;
-        if let Some(id) = id {
-            self.index_mut().insert(id,intid);
+        if let Ok(intid) = I::try_from(self.items().len() - 1) {
+            if let Some(id) = id {
+                self.index_mut().insert(id,intid);
+            }
+            intid
+        } else {
+            panic!("Store.add(). Index out of bounds");
         }
-        intid
     }
 
     fn is_empty(&self) -> bool {
@@ -39,8 +44,8 @@ pub trait Store<T> where T: MaybeIdentifiable {
     }
 
     ///Retrieves an element from the store
-    fn get(&self, intid: IntId) -> Option<&Box<T>> {
-        if let Some(intid) = self.items().get(intid) { //-> Option<&Option<Box<T>>>
+    fn get(&self, intid: I) -> Option<&Box<T>> {
+        if let Some(intid) = self.items().get(intid.into()) { //-> Option<&Option<Box<T>>>
             intid.as_ref()
         } else {
             None
@@ -48,8 +53,8 @@ pub trait Store<T> where T: MaybeIdentifiable {
     }
 
     ///Retrieves an element from the store
-    fn get_mut(&mut self, intid: IntId) -> Option<&mut Box<T>> {
-        if let Some(intid) = self.items_mut().get_mut(intid) { //-> Option<&Option<Box<T>>>
+    fn get_mut(&mut self, intid: I) -> Option<&mut Box<T>> {
+        if let Some(intid) = self.items_mut().get_mut(intid.into()) { //-> Option<&Option<Box<T>>>
             intid.as_mut()
         } else {
             None
@@ -57,7 +62,7 @@ pub trait Store<T> where T: MaybeIdentifiable {
     }
 
     ///Resolve an ID to an Internal ID using the index
-    fn id(&self, id: &str) -> Option<IntId> {
+    fn id(&self, id: &str) -> Option<I> {
         self.index().get(id).map( |&intid| intid )
     }
 
