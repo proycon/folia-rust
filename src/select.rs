@@ -105,6 +105,7 @@ impl<'a> SelectIterator<'a> {
 
 }
 
+#[derive(Debug)]
 pub struct SelectItem<'a> {
     pub data: &'a DataType,
     pub parent_intid: IntId,
@@ -117,35 +118,29 @@ impl<'a> Iterator for SelectIterator<'a> {
     type Item = SelectItem<'a>; //Returns the DataTyp, the Parent IntID, the
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((intid,cursor)) = self.stack.last().map(|(x,y)| (*x,*y)) {
+        if let Some((intid,cursor)) = self.stack.pop() {
             if let Some(parent) = self.store.get(intid) {
                 if let Some(item) = parent.get(cursor) {
-                    let current_cursor = cursor;
+                    eprintln!("{:?}", item);
+                    self.stack.push((intid, cursor+1));
                     let current_depth = self.stack.len();
                     //compute the next element
-                    match item {
-                        DataType::Element(intid) => {
+                    if let DataType::Element(intid) = item {
+                            //descend into the children of the current item
                             self.stack.push((*intid,0));
-                        },
-                        _ => {
-                            //temporarily pop the last element of the stack
-                            self.stack.pop();
-                            //increment the cursor
-                            let cursor = cursor + 1;
-                            //push it back if the cursor does not exceed the length
-                            if cursor < parent.len() {
-                                self.stack.push((intid, cursor));
-                            }
-                        }
                     };
                     //return the current one
                     if self.selector.matches(self.store, item) {
-                        Some(SelectItem { data: item, parent_intid: intid, cursor: current_cursor, depth: current_depth})
+                        Some(SelectItem { data: item, parent_intid: intid, cursor: cursor, depth: current_depth})
                     } else {
-                        self.next()
+                        self.next() //recurse
                     }
+                    //increment the cursor
                 } else {
-                    unreachable!("selector cursor index out of bounds")
+                    //child does not exist (cursor out of bounds), no panic, this means we are done
+                    //with this element and move back up the hierarchy (stack stays popped )
+
+                    self.next() //recurse
                 }
             } else {
                 unreachable!("selector tried to get an element which no longer exists")

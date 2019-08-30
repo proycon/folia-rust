@@ -95,3 +95,20 @@ fn parse() {
         }
     }
 }
+
+#[test]
+fn serialise() {
+    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
+        Ok(doc) => {
+            let xml = doc.xml(0);
+            assert!(xml.is_ok());
+            if let Ok(xml) = xml {
+                println!("{}",str::from_utf8(&xml).expect("invalid utf-8"));
+            }
+        }
+        Err(err) => {
+            println!("{}", err);
+            assert!(false);
+        }
+    }
+}
