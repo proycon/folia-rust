@@ -261,12 +261,13 @@ impl Document {
         let mut previous_depth = 0;
         for item in self.store.select(root_intid,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
             eprintln!("SELECT: {:?}", item);
-            if item.depth < previous_depth {
+            while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
                 } else {
                     return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
                 }
+                previous_depth -= 1;
             }
             match item.data {
                 DataType::Element(intid) => {
@@ -287,6 +288,11 @@ impl Document {
                 }
             }
             previous_depth = item.depth;
+        }
+
+        //don't forget the final closing elements
+        while let Some(end) = stack.pop() {
+            writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         }
 
         //Write root end tag
