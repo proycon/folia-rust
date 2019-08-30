@@ -87,6 +87,7 @@ pub enum TypeSelector {
     Comment,
 }
 
+///Implements a depth-first search
 pub struct SelectIterator<'a> {
     store: &'a ElementStore,
     selector: Selector,
@@ -121,23 +122,23 @@ impl<'a> Iterator for SelectIterator<'a> {
         if let Some((intid,cursor)) = self.stack.pop() {
             if let Some(parent) = self.store.get(intid) {
                 if let Some(item) = parent.get(cursor) {
-                    eprintln!("{:?}", item);
+                    //increment the cursor and push back to the stack
                     self.stack.push((intid, cursor+1));
                     let current_depth = self.stack.len();
-                    //compute the next element
+
+                    //we have an element, push to stack so we descend into its on next iteraton
                     if let DataType::Element(intid) = item {
-                            //descend into the children of the current item
-                            self.stack.push((*intid,0));
+                        self.stack.push((*intid,0));
                     };
+
                     //return the current one
                     if self.selector.matches(self.store, item) {
                         Some(SelectItem { data: item, parent_intid: intid, cursor: cursor, depth: current_depth})
                     } else {
                         self.next() //recurse
                     }
-                    //increment the cursor
                 } else {
-                    //child does not exist (cursor out of bounds), no panic, this means we are done
+                    //child does not exist (cursor out of bounds), no panic, this indicates we are done
                     //with this element and move back up the hierarchy (stack stays popped )
 
                     self.next() //recurse
