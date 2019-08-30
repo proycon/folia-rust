@@ -28,8 +28,8 @@ pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, Begindateti
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
 
-impl Into<&str> for AnnotationType {
-    fn into(self) -> &'static str {
+impl AnnotationType {
+    fn as_str(&self) -> &'static str {
         //foliaspec:annotationtype_xml_map:self
         //A mapping from annotation types to xml tags (strings)
         match self {
@@ -89,6 +89,18 @@ impl Into<&str> for AnnotationType {
           AnnotationType::WHITESPACE => "whitespace",
           AnnotationType::TOKEN => "w",
         }
+    }
+}
+
+impl Into<&str> for AnnotationType {
+    fn into(self) -> &'static str {
+        self.as_str()
+    }
+}
+
+impl fmt::Display for AnnotationType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
     }
 }
 

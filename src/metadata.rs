@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::common::*;
 use crate::element::*;
+use crate::store::*;
 
 pub type ProcessorIntId = usize;
 
@@ -11,8 +12,36 @@ pub struct Declaration {
     pub processors: Vec<ProcessorIntId>
 }
 
-pub struct DeclarationStore {
+impl MaybeIdentifiable for Declaration {
+    fn id(&self) -> Option<String> {
+        if let Some(set) = &self.set {
+            Some(format!("{}/{}", self.annotationtype, set))
+        } else {
+            Some(format!("{}", self.annotationtype))
+        }
+    }
+}
 
+#[derive(Default)]
+pub struct DeclarationStore {
+    items: Vec<Option<Box<Declaration>>>, //heap-allocated
+    index: HashMap<String,IntId>
+}
+
+impl Store<Declaration> for DeclarationStore {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
+        &mut self.items
+    }
+    fn index_mut(&mut self) -> &mut HashMap<String,IntId> {
+        &mut self.index
+    }
+
+    fn items(&self) -> &Vec<Option<Box<Declaration>>> {
+        &self.items
+    }
+    fn index(&self) -> &HashMap<String,IntId> {
+        &self.index
+    }
 }
 
 pub struct ProvenanceStore {

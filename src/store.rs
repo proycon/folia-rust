@@ -11,6 +11,7 @@ pub trait MaybeIdentifiable {
     }
 }
 
+
 pub trait Store<T> where T: MaybeIdentifiable {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<T>>>;
     fn index_mut(&mut self) -> &mut HashMap<String,IntId>;

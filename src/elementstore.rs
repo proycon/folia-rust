@@ -7,20 +7,20 @@ use crate::store::*;
 ///Holds and owns all elements, the index to them and their declarations. The store serves as an abstraction used by Documents
 #[derive(Default)]
 pub struct ElementStore {
-    elements: Vec<Option<Box<FoliaElement>>>, //heap-allocated
+    items: Vec<Option<Box<FoliaElement>>>, //heap-allocated
     index: HashMap<String,IntId>
 }
 
 impl Store<FoliaElement> for ElementStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
-        &mut self.elements
+        &mut self.items
     }
     fn index_mut(&mut self) -> &mut HashMap<String,IntId> {
         &mut self.index
     }
 
     fn items(&self) -> &Vec<Option<Box<FoliaElement>>> {
-        &self.elements
+        &self.items
     }
     fn index(&self) -> &HashMap<String,IntId> {
         &self.index
