@@ -5,10 +5,11 @@ use std::io::Cursor;
 use std::fs::File;
 use std::str;
 use std::str::FromStr;
+use std::borrow::ToOwned;
 use std::string::ToString;
 
 use quick_xml::{Reader,Writer};
-use quick_xml::events::{Event,BytesStart,BytesEnd};
+use quick_xml::events::{Event,BytesStart,BytesEnd,BytesText};
 
 use crate::common::*;
 use crate::error::*;
@@ -205,23 +206,23 @@ impl Document {
                         }
                     },
                     (None, Event::CData(s)) => {
-                        let text = reader.decode(&s).into_owned();
+                        let text = reader.decode(&s)?;
                         if text.trim() != "" {
                             eprintln!("CDATA: {}", text);
                             if let Some(parent_intid) = stack.last() {
                                 self.store.get_mut(*parent_intid).map( |mut parent| {
-                                    parent.push(DataType::Text(text));
+                                    parent.push(DataType::Text(text.to_string()));
                                 });
                             }
                         }
                     },
                     (None, Event::Comment(s)) => {
-                        let comment = reader.decode(&s).into_owned();
+                        let comment = reader.decode(&s)?;
                         if comment.trim() != "" {
                             eprintln!("COMMENT: {}", comment);
                             if let Some(parent_intid) = stack.last() {
                                 self.store.get_mut(*parent_intid).map( |mut parent| {
-                                    parent.push(DataType::Comment(comment));
+                                    parent.push(DataType::Comment(comment.to_string()));
                                 });
                             }
                         }
@@ -241,26 +242,56 @@ impl Document {
     pub fn id(&self) -> &str { &self.id }
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
-    pub fn xml(&self) {
+    pub fn xml(&self, root_intid: IntId) -> Result<Vec<u8>, FoliaError> {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
-        for datatype in self.store.select(0,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
-            match datatype {
+
+        //Start the root tag (and obtain data for its end)
+        let root_end = if let Some(element) = self.store.get(root_intid) {
+            let tagstring = element.elementtype.to_string();
+            let tag = tagstring.as_bytes();
+            let start = BytesStart::owned(tag.to_vec(), tag.len());
+            writer.write_event(Event::Start(start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+            BytesEnd::owned(tag.to_vec())
+        } else {
+            return Err(FoliaError::SerialisationError(format!("Specified root element not found: {}", root_intid)));
+        };
+
+        //Select children
+        let mut stack = vec![];
+        let mut previous_depth = 0;
+        for item in self.store.select(root_intid,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
+            if item.depth < previous_depth {
+                if let Some(end) = stack.pop() {
+                    writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                } else {
+                    return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
+                }
+            }
+            match item.data {
                 DataType::Element(intid) => {
                     if let Some(element) = self.store.get(*intid) {
-                        let tag = element.elementtype.to_string().as_bytes();
-                        let elem = BytesStart::owned(tag.to_vec(), tag.len());
-                        writer.write_event(Event::Start(elem));
+                        let tagstring = element.elementtype.to_string();
+                        let tag = tagstring.as_bytes();
+                        let start = BytesStart::owned(tag.to_vec(), tag.len());
+                        writer.write_event(Event::Start(start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                        let end = BytesEnd::owned(tag.to_vec());
+                        stack.push(end);
                     }
                 },
                 DataType::Text(text) => {
+                    let text = BytesText::from_plain_str(text.as_str());
+                    writer.write_event(Event::Text(text)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
                 },
                 DataType::Comment(comment) => {
                 }
-
             }
+            previous_depth = item.depth;
         }
 
-
+        //Write root end tag
+        writer.write_event(Event::End(root_end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        let result = writer.into_inner().into_inner();
+        Ok(result)
     }
 
 

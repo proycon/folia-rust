@@ -28,10 +28,10 @@ impl Selector {
                 if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
                     false
                 } else if let Some(element) = store.get(*intid) {
-                    match self.setselector {
+                    match &self.setselector {
                          SetSelector::SomeSet(set) => {
                              if let Some(set2) = element.set() {
-                                 set == set2
+                                 *set == set2
                              } else {
                                  false
                              }
@@ -61,7 +61,7 @@ impl Selector {
                 }
             }
         };
-        if let Some(next) = self.next {
+        if let Some(next) = &self.next {
             matches || next.matches(store, item)
         } else {
             matches
@@ -105,13 +105,23 @@ impl<'a> SelectIterator<'a> {
 
 }
 
+pub struct SelectItem<'a> {
+    pub data: &'a DataType,
+    pub parent_intid: IntId,
+    pub cursor: usize,
+    pub depth: usize,
+}
+
+
 impl<'a> Iterator for SelectIterator<'a> {
-    type Item = &'a DataType;
+    type Item = SelectItem<'a>; //Returns the DataTyp, the Parent IntID, the
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((intid,cursor)) = self.stack.last().map(|(x,y)| (*x,*y)) {
             if let Some(parent) = self.store.get(intid) {
                 if let Some(item) = parent.get(cursor) {
+                    let current_cursor = cursor;
+                    let current_depth = self.stack.len();
                     //compute the next element
                     match item {
                         DataType::Element(intid) => {
@@ -130,7 +140,7 @@ impl<'a> Iterator for SelectIterator<'a> {
                     };
                     //return the current one
                     if self.selector.matches(self.store, item) {
-                        Some(item)
+                        Some(SelectItem { data: item, parent_intid: intid, cursor: current_cursor, depth: current_depth})
                     } else {
                         self.next()
                     }

@@ -9,6 +9,7 @@ pub enum FoliaError {
     IoError(io::Error),
     XmlError(quick_xml::Error),
     ParseError(String),
+    SerialisationError(String),
     IndexError,
 }
 
@@ -30,6 +31,7 @@ impl Error for FoliaError {
             FoliaError::IoError(ref err) => err.description(),
             FoliaError::XmlError(ref _err) => "XML Error",
             FoliaError::ParseError(ref err) => err,
+            FoliaError::SerialisationError(ref err) => err,
             FoliaError::IndexError => "invalid index",
         }
     }
@@ -39,6 +41,7 @@ impl Error for FoliaError {
             FoliaError::IoError(ref err) => Some(err as &Error),
             FoliaError::XmlError(ref _err) => None,
             FoliaError::ParseError(ref _err) => None, //TODO
+            FoliaError::SerialisationError(ref _err) => None, //TODO
             FoliaError::IndexError => None,
         }
     }
@@ -50,6 +53,7 @@ impl fmt::Display for FoliaError {
             FoliaError::IoError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::XmlError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::ParseError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::SerialisationError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
         }
     }
