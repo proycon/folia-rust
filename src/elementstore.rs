@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::common::*;
 use crate::element::*;
+use crate::store::*;
 
 ///Holds and owns all elements, the index to them and their declarations. The store serves as an abstraction used by Documents
 #[derive(Default)]
@@ -10,7 +11,24 @@ pub struct ElementStore {
     index: HashMap<String,IntId>
 }
 
+impl Store<FoliaElement> for ElementStore {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
+        &mut self.elements
+    }
+    fn index_mut(&mut self) -> &mut HashMap<String,IntId> {
+        &mut self.index
+    }
+
+    fn items(&self) -> &Vec<Option<Box<FoliaElement>>> {
+        &self.elements
+    }
+    fn index(&self) -> &HashMap<String,IntId> {
+        &self.index
+    }
+}
+
 impl ElementStore {
+    /*
     pub fn add(&mut self, element: FoliaElement) -> IntId {
         let id = element.id();
         let boxed = Box::new(element);
@@ -64,6 +82,7 @@ impl ElementStore {
             self.get_mut(intid)
         }).map(|o| o.unwrap())
     }
+    */
 
     ///Adds an element as a child on another, this is a higher-level function that/
     ///takes care of adding and attaching for you.

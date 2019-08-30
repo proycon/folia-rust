@@ -2,6 +2,7 @@ use crate::common::*;
 use crate::error::*;
 use crate::element::*;
 use crate::attrib::*;
+use crate::store::*;
 use crate::elementstore::*;
 
 #[derive(Debug,Clone)]

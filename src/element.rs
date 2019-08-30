@@ -16,6 +16,7 @@ use crate::common::*;
 use crate::error::*;
 use crate::attrib::*;
 use crate::elementstore::*;
+use crate::store::*;
 
 
 //foliaspec:elementtype
@@ -217,6 +218,12 @@ pub struct FoliaElement {
     parent: Option<IntId>,
 }
 
+impl MaybeIdentifiable for FoliaElement {
+    fn id(&self) -> Option<String> {
+        self.attrib_string(AttribType::ID)
+    }
+}
+
 
 
 impl FoliaElement {
@@ -286,7 +293,6 @@ impl FoliaElement {
     }
 
     //attribute getters (shortcuts)
-    pub fn id(&self) -> Option<String> { self.attrib_string(AttribType::ID)  }
     pub fn class(&self) -> Option<String> { self.attrib_string(AttribType::CLASS)  }
     pub fn set(&self) -> Option<String> { self.attrib_string(AttribType::SET)  }
     pub fn processor(&self) -> Option<String> { self.attrib_string(AttribType::PROCESSOR)  }
