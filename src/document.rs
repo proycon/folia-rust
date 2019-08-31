@@ -114,7 +114,7 @@ impl Document {
                                 let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
                                 match attrib.key {
                                     b"xml:id" => {
-                                        id = attrib.unescape_and_decode_value(&reader).expect("Unable to parse ID")
+                                        id = attrib.unescape_and_decode_value(&reader).expect("Parsing ID")
                                     }
                                     _ => {}
                                 };
@@ -161,10 +161,10 @@ impl Document {
                             //just ignore everything else for now
                         },
                         (Some(ns),tag) => {
-                            return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got namespace {} with tag {}", str::from_utf8(ns).expect("invalid utf-8 in namespace"), str::from_utf8(tag).expect("invalid utf-8 in tag")).to_string()));
+                            return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got namespace {} with tag {}", str::from_utf8(ns).expect("decoding namespace from utf-8"), str::from_utf8(tag).expect("decoding XML tag from utf-8")).to_string()));
                         }
                         (None,tag) => {
-                            return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got no namespace with tag {}",  str::from_utf8(tag).expect("invalid utf-8 in tag")).to_string()));
+                            return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got no namespace with tag {}",  str::from_utf8(tag).expect("decoding tag from utf-8")).to_string()));
                         }
                     }
                 },
@@ -222,7 +222,7 @@ impl Document {
                         if let Some(elem) = self.elementstore.get(intid) {
 
                             //verify we actually close the right thing (otherwise we have malformed XML)
-                            let elementname = str::from_utf8(e.local_name()).expect("Tag is not valid utf-8");
+                            let elementname = str::from_utf8(e.local_name()).expect("Decoding XML tag from utf-8");
                             let elementtype = ElementType::from_str(elementname)?;
                             if elem.elementtype != elementtype {
                                 return Err(FoliaError::ParseError(format!("Malformed XML? Invalid element closed: {}, expected: {}", elementname, elem.elementtype.to_string() )));

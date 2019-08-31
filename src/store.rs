@@ -62,7 +62,7 @@ pub trait Store<T,I> where T: MaybeIdentifiable,
 
     ///Retrieves an element from the store
     fn get(&self, intid: I) -> Option<&Box<T>> {
-        if let Some(intid) = self.items().get(usize::try_from(intid).expect("conversion error")) { //-> Option<&Option<Box<T>>>
+        if let Some(intid) = self.items().get(usize::try_from(intid).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
             intid.as_ref()
         } else {
             None
@@ -71,7 +71,7 @@ pub trait Store<T,I> where T: MaybeIdentifiable,
 
     ///Retrieves an element from the store
     fn get_mut(&mut self, intid: I) -> Option<&mut Box<T>> {
-        if let Some(intid) = self.items_mut().get_mut(usize::try_from(intid).expect("conversion error")) { //-> Option<&Option<Box<T>>>
+        if let Some(intid) = self.items_mut().get_mut(usize::try_from(intid).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
             intid.as_mut()
         } else {
             None
