@@ -65,9 +65,6 @@ fn instantiate() {
     }
 }
 
-fn assert_error(err: folia::FoliaError) {
-    assert!(false, format!("{}",err))
-}
 
 #[test]
 fn append() {
@@ -75,13 +72,13 @@ fn append() {
         let root: folia::IntId = 0;
         let sentence = doc.add_to(root,
                                         folia::FoliaElement::new(folia::ElementType::Sentence)
-                                                            .with_attrib(folia::Attribute::Id("s.1".to_string())) ).unwrap_or_else(assert_error);
+                                                            .with_attrib(folia::Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
         doc.add_to(sentence,
                          folia::FoliaElement::new(folia::ElementType::Word)
-                                             .with(folia::DataType::text("hello"))).unwrap_or_else(assert_error);
+                                             .with(folia::DataType::text("hello"))).expect("Adding word 1");
         doc.add_to(sentence,
                          folia::FoliaElement::new(folia::ElementType::Word)
-                                             .with(folia::DataType::text("world"))).unwrap_or_else(assert_error);
+                                             .with(folia::DataType::text("world"))).expect("Adding word 2");
     } else {
         assert!(false);
     }
