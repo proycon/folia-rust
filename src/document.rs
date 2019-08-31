@@ -40,7 +40,14 @@ impl Document {
             BodyType::Text => FoliaElement::new(ElementType::Text),
             BodyType::Speech => FoliaElement::new(ElementType::Speech),
         });
-        Ok(Self { id: id.to_string(), filename: None, elementstore: elementstore, .. })
+        Ok(Self {
+            id: id.to_string(),
+            filename: None,
+            elementstore: elementstore,
+            provenancestore:  ProvenanceStore::default(),
+            declarationstore: DeclarationStore::default(),
+            metadata: Metadata::default(),
+        })
     }
 
     ///Load a FoliA document from file
@@ -64,8 +71,8 @@ impl Document {
 
 
     ///Add an element to the document, this will result in an orphaned element, use add_to() instead
-    pub fn add(&mut self, mut element: FoliaElement) -> Result<IntId, FoliaError> {
-        element.encode(&mut self);
+    pub fn add(&mut self, element: FoliaElement) -> Result<IntId, FoliaError> {
+        let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
         self.elementstore.add(element)
     }
 
@@ -77,7 +84,7 @@ impl Document {
     }
 
     pub fn add_to(&mut self, parent_intid: IntId, element: FoliaElement) -> Result<IntId, FoliaError> {
-        element.encode(&mut self);
+        let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
         self.elementstore.add_to(parent_intid, element)
     }
 
@@ -169,7 +176,7 @@ impl Document {
         };
 
 
-        let mut doc = Self { id: id, filename: None, store: ElementStore::default() };
+        let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: Metadata::default() };
         if let Some(body) = body {
             let intid = doc.elementstore.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
@@ -190,8 +197,9 @@ impl Document {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        let intid = self.elementstore.add(elem);
+                        let intid = self.elementstore.add(elem)?;
                         stack.push(intid);
+
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_intid) = stack.last() {
                             self.elementstore.attach(*parent_intid, intid);
@@ -201,7 +209,8 @@ impl Document {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        stack.push(self.elementstore.add(elem));
+                        let intid = self.elementstore.add(elem)?;
+                        stack.push(intid);
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {
                         //END TAG FOUND (</tag>)

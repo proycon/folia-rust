@@ -19,7 +19,10 @@ pub trait MaybeIdentifiable {
 
 
 
-pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize> + Debug {
+pub trait Store<T,I> where T: MaybeIdentifiable,
+                           I: TryFrom<usize> + Copy + Debug,
+                           usize: std::convert::TryFrom<I>,
+                           <usize as std::convert::TryFrom<I>>::Error : std::fmt::Debug {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<T>>>;
     fn index_mut(&mut self) -> &mut HashMap<String,I>;
 
@@ -27,11 +30,11 @@ pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize>
     fn index(&self) -> &HashMap<String,I>;
 
     fn add(&mut self, mut item: T) -> Result<I,FoliaError> {
-        let id = item.id();
+        let id = &item.id();
         if let Some(id) = id {
             //check if the ID already exists, if so, we re-use the existing entry and have nothing
             //else to do (the item stays unchanged)
-            if let Some(intid) = self.index().get(&id) {
+            if let Some(intid) = self.index().get(id) {
                 return Ok(*intid);
             }
         }
@@ -41,7 +44,7 @@ pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize>
         self.items_mut().push( Some(boxed) );
         if let Ok(intid) = I::try_from(self.items().len() - 1) {
             if let Some(id) = id {
-                self.index_mut().insert(id,intid);
+                self.index_mut().insert(id.to_string(),intid);
             }
             Ok(intid)
         } else {
@@ -59,7 +62,7 @@ pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize>
 
     ///Retrieves an element from the store
     fn get(&self, intid: I) -> Option<&Box<T>> {
-        if let Some(intid) = self.items().get(intid.into()) { //-> Option<&Option<Box<T>>>
+        if let Some(intid) = self.items().get(usize::try_from(intid).expect("conversion error")) { //-> Option<&Option<Box<T>>>
             intid.as_ref()
         } else {
             None
@@ -68,7 +71,7 @@ pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize>
 
     ///Retrieves an element from the store
     fn get_mut(&mut self, intid: I) -> Option<&mut Box<T>> {
-        if let Some(intid) = self.items_mut().get_mut(intid.into()) { //-> Option<&Option<Box<T>>>
+        if let Some(intid) = self.items_mut().get_mut(usize::try_from(intid).expect("conversion error")) { //-> Option<&Option<Box<T>>>
             intid.as_mut()
         } else {
             None

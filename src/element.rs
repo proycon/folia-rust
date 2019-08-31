@@ -77,26 +77,27 @@ impl FoliaElement {
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store (but this is instead invoked as part of adding an element
     ///to the store)
-    pub fn encode(mut self, doc: &mut Document) -> Result<Self, FoliaError> {
+    pub fn encode(mut self, declarationstore: &mut DeclarationStore, provenancestore: &mut ProvenanceStore) -> Result<Self, FoliaError> {
         //encode the element for storage
-        let set: Option<&Attribute> = self.attribs.iter().find(|&&a| {
+        let set: Option<&Attribute> = self.attribs.iter().find(|&a| {
             match a {
-                Attribute::Set(s) => true,
+                Attribute::Set(_) => true,
                 _ => false,
             }
         });
         let set: Option<Cow<str>> = set.map(|a| a.value() );
 
-        let annotationtype: AnnotationType = self.elementtype.annotationtype();
-        let decintid = doc.declare(Declaration::new(annotationtype, set.map(|x| x.to_owned() )))?;
-        self.declaration = Some(decintid);
+        if let Some(annotationtype) = self.elementtype.annotationtype() {
+            let decintid = declarationstore.add(Declaration::new(annotationtype, set.map(|x| x.into_owned() )))?;
+            self.declaration = Some(decintid);
+        }
         //TODO: handle processor and class
 
         //remove encoded attributes
         self.attribs.retain(|a| match a {
             Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => false,
             _ => true
-        }).collect();
+        });
 
         Ok(self)
     }
@@ -254,7 +255,7 @@ impl FoliaElement {
 
     ///Simple constructor for an empty element (optionally with attributes)
     pub fn new(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, declaration: None, processor: None }
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, declaration: None, processor: None, class: None }
     }
 
     pub fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {

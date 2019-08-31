@@ -166,65 +166,65 @@ impl AnnotationType {
 }
 
 impl ElementType {
-    pub fn annotationtype(&self) -> AnnotationType {
-        //foliaspec:annotationtype_elementtype_map
-        //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
+    pub fn annotationtype(&self) -> Option<AnnotationType> {
+        //foliaspec:elementtype_annotationtype_map
         match self {
-            ElementType::Alternative => AnnotationType::ALTERNATIVE,
-            ElementType::Chunk => AnnotationType::CHUNKING,
-            ElementType::Comment => AnnotationType::COMMENT,
-            ElementType::Content => AnnotationType::RAWCONTENT,
-            ElementType::CoreferenceChain => AnnotationType::COREFERENCE,
-            ElementType::Correction => AnnotationType::CORRECTION,
-            ElementType::Definition => AnnotationType::DEFINITION,
-            ElementType::Dependency => AnnotationType::DEPENDENCY,
-            ElementType::Description => AnnotationType::DESCRIPTION,
-            ElementType::Division => AnnotationType::DIVISION,
-            ElementType::DomainAnnotation => AnnotationType::DOMAIN,
-            ElementType::Entity => AnnotationType::ENTITY,
-            ElementType::Entry => AnnotationType::ENTRY,
-            ElementType::ErrorDetection => AnnotationType::ERRORDETECTION,
-            ElementType::Event => AnnotationType::EVENT,
-            ElementType::Example => AnnotationType::EXAMPLE,
-            ElementType::Figure => AnnotationType::FIGURE,
-            ElementType::Gap => AnnotationType::GAP,
-            ElementType::Head => AnnotationType::HEAD,
-            ElementType::Hiddenword => AnnotationType::HIDDENTOKEN,
-            ElementType::Hyphbreak => AnnotationType::HYPHENATION,
-            ElementType::LangAnnotation => AnnotationType::LANG,
-            ElementType::LemmaAnnotation => AnnotationType::LEMMA,
-            ElementType::Linebreak => AnnotationType::LINEBREAK,
-            ElementType::List => AnnotationType::LIST,
-            ElementType::Metric => AnnotationType::METRIC,
-            ElementType::Morpheme => AnnotationType::MORPHOLOGICAL,
-            ElementType::Note => AnnotationType::NOTE,
-            ElementType::Observation => AnnotationType::OBSERVATION,
-            ElementType::Paragraph => AnnotationType::PARAGRAPH,
-            ElementType::Part => AnnotationType::PART,
-            ElementType::PhonContent => AnnotationType::PHON,
-            ElementType::Phoneme => AnnotationType::PHONOLOGICAL,
-            ElementType::PosAnnotation => AnnotationType::POS,
-            ElementType::Predicate => AnnotationType::PREDICATE,
-            ElementType::Quote => AnnotationType::QUOTE,
-            ElementType::Reference => AnnotationType::REFERENCE,
-            ElementType::Relation => AnnotationType::RELATION,
-            ElementType::SemanticRole => AnnotationType::SEMROLE,
-            ElementType::SenseAnnotation => AnnotationType::SENSE,
-            ElementType::Sentence => AnnotationType::SENTENCE,
-            ElementType::Sentiment => AnnotationType::SENTIMENT,
-            ElementType::SpanRelation => AnnotationType::SPANRELATION,
-            ElementType::Statement => AnnotationType::STATEMENT,
-            ElementType::String => AnnotationType::STRING,
-            ElementType::SubjectivityAnnotation => AnnotationType::SUBJECTIVITY,
-            ElementType::SyntacticUnit => AnnotationType::SYNTAX,
-            ElementType::Table => AnnotationType::TABLE,
-            ElementType::Term => AnnotationType::TERM,
-            ElementType::TextContent => AnnotationType::TEXT,
-            ElementType::TextMarkupStyle => AnnotationType::STYLE,
-            ElementType::TimeSegment => AnnotationType::TIMESEGMENT,
-            ElementType::Utterance => AnnotationType::UTTERANCE,
-            ElementType::Whitespace => AnnotationType::WHITESPACE,
-            ElementType::Word => AnnotationType::TOKEN,
+            ElementType::Alternative => Some(AnnotationType::ALTERNATIVE),
+            ElementType::Chunk => Some(AnnotationType::CHUNKING),
+            ElementType::Comment => Some(AnnotationType::COMMENT),
+            ElementType::Content => Some(AnnotationType::RAWCONTENT),
+            ElementType::CoreferenceChain => Some(AnnotationType::COREFERENCE),
+            ElementType::Correction => Some(AnnotationType::CORRECTION),
+            ElementType::Definition => Some(AnnotationType::DEFINITION),
+            ElementType::Dependency => Some(AnnotationType::DEPENDENCY),
+            ElementType::Description => Some(AnnotationType::DESCRIPTION),
+            ElementType::Division => Some(AnnotationType::DIVISION),
+            ElementType::DomainAnnotation => Some(AnnotationType::DOMAIN),
+            ElementType::Entity => Some(AnnotationType::ENTITY),
+            ElementType::Entry => Some(AnnotationType::ENTRY),
+            ElementType::ErrorDetection => Some(AnnotationType::ERRORDETECTION),
+            ElementType::Event => Some(AnnotationType::EVENT),
+            ElementType::Example => Some(AnnotationType::EXAMPLE),
+            ElementType::Figure => Some(AnnotationType::FIGURE),
+            ElementType::Gap => Some(AnnotationType::GAP),
+            ElementType::Head => Some(AnnotationType::HEAD),
+            ElementType::Hiddenword => Some(AnnotationType::HIDDENTOKEN),
+            ElementType::Hyphbreak => Some(AnnotationType::HYPHENATION),
+            ElementType::LangAnnotation => Some(AnnotationType::LANG),
+            ElementType::LemmaAnnotation => Some(AnnotationType::LEMMA),
+            ElementType::Linebreak => Some(AnnotationType::LINEBREAK),
+            ElementType::List => Some(AnnotationType::LIST),
+            ElementType::Metric => Some(AnnotationType::METRIC),
+            ElementType::Morpheme => Some(AnnotationType::MORPHOLOGICAL),
+            ElementType::Note => Some(AnnotationType::NOTE),
+            ElementType::Observation => Some(AnnotationType::OBSERVATION),
+            ElementType::Paragraph => Some(AnnotationType::PARAGRAPH),
+            ElementType::Part => Some(AnnotationType::PART),
+            ElementType::PhonContent => Some(AnnotationType::PHON),
+            ElementType::Phoneme => Some(AnnotationType::PHONOLOGICAL),
+            ElementType::PosAnnotation => Some(AnnotationType::POS),
+            ElementType::Predicate => Some(AnnotationType::PREDICATE),
+            ElementType::Quote => Some(AnnotationType::QUOTE),
+            ElementType::Reference => Some(AnnotationType::REFERENCE),
+            ElementType::Relation => Some(AnnotationType::RELATION),
+            ElementType::SemanticRole => Some(AnnotationType::SEMROLE),
+            ElementType::SenseAnnotation => Some(AnnotationType::SENSE),
+            ElementType::Sentence => Some(AnnotationType::SENTENCE),
+            ElementType::Sentiment => Some(AnnotationType::SENTIMENT),
+            ElementType::SpanRelation => Some(AnnotationType::SPANRELATION),
+            ElementType::Statement => Some(AnnotationType::STATEMENT),
+            ElementType::String => Some(AnnotationType::STRING),
+            ElementType::SubjectivityAnnotation => Some(AnnotationType::SUBJECTIVITY),
+            ElementType::SyntacticUnit => Some(AnnotationType::SYNTAX),
+            ElementType::Table => Some(AnnotationType::TABLE),
+            ElementType::Term => Some(AnnotationType::TERM),
+            ElementType::TextContent => Some(AnnotationType::TEXT),
+            ElementType::TextMarkupStyle => Some(AnnotationType::STYLE),
+            ElementType::TimeSegment => Some(AnnotationType::TIMESEGMENT),
+            ElementType::Utterance => Some(AnnotationType::UTTERANCE),
+            ElementType::Whitespace => Some(AnnotationType::WHITESPACE),
+            ElementType::Word => Some(AnnotationType::TOKEN),
+            _ => None,
         }
     }
 }
@@ -354,11 +354,6 @@ impl Into<&str> for ElementType {
     }
 }
 
-impl Into<AnnotationType> for ElementType {
-    fn into(self) -> AnnotationType {
-        self.annotationtype()
-    }
-}
 
 impl Into<ElementType> for AnnotationType {
     fn into(self) -> ElementType {
@@ -500,12 +495,6 @@ impl std::str::FromStr for ElementType {
     }
 }
 
-impl Into<ElementType> for AnnotationType {
-
-    fn into(self) -> ElementType {
-        self.elementtype()
-    }
-}
 
 #[derive(Debug,PartialEq,Clone)]
 pub enum DataType {

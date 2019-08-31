@@ -1,4 +1,5 @@
 use crate::common::*;
+use crate::types::*;
 use crate::error::*;
 use crate::element::*;
 use crate::attrib::*;

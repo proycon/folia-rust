@@ -83,6 +83,7 @@ impl Store<Declaration,DecIntId> for DeclarationStore {
     }
 }
 
+#[derive(Default)]
 pub struct ProvenanceStore {
     items: Vec<Option<Box<Processor>>>, //heap-allocated
     index: HashMap<String,ProcIntId>,
