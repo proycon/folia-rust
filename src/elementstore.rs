@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::common::*;
+use crate::types::*;
 use crate::element::*;
 use crate::store::*;
 
@@ -30,18 +31,18 @@ impl Store<FoliaElement,IntId> for ElementStore {
 impl ElementStore {
     ///Adds an element as a child on another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_to(&mut self, parent_intid: IntId, child: FoliaElement) -> IntId {
-        let child_intid = self.add(child);
+    pub fn add_to(&mut self, parent_intid: IntId, child: FoliaElement) -> Result<IntId,FoliaError> {
+        let child_intid = self.add(child)?;
         self.attach(parent_intid, child_intid);
         child_intid
     }
 
     ///Adds the child element to the parent element, automatically takes care
     ///of removing the old parent (if any).
-    pub fn attach(&mut self, parent_intid: IntId, child_intid: IntId) -> bool {
+    pub fn attach(&mut self, parent_intid: IntId, child_intid: IntId) -> Result<(),FoliaError> {
         //ensure the parent exists
         if !self.get(parent_intid).is_some() {
-            return false;
+            return Err(FoliaError::InternalError(format!("Parent does not exist: {}", parent_intid)));
         };
 
         let oldparent_intid = if let Some(child) = self.get_mut(child_intid) {
@@ -51,7 +52,7 @@ impl ElementStore {
             tmp
         } else {
             //child does not exist
-            return false;
+            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_intid)));
         };
 
         if let Some(parent) = self.get_mut(parent_intid) {
@@ -66,11 +67,11 @@ impl ElementStore {
                 }
             }
         }
-        true
+        Ok(())
     }
 
     ///Removes the child from the parent, orphaning it, does NOT remove the element entirely
-    pub fn detach(&mut self, child_intid: IntId) -> bool {
+    pub fn detach(&mut self, child_intid: IntId) -> Result<(),FoliaError> {
         let oldparent_intid = if let Some(child) = self.get_mut(child_intid) {
             //add the new parent and return the old parent
             let tmp = child.get_parent();
@@ -78,7 +79,7 @@ impl ElementStore {
             tmp
         } else {
             //child does not exist
-            return false;
+            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_intid)));
         };
 
         if let Some(oldparent_intid) = oldparent_intid {
@@ -89,7 +90,7 @@ impl ElementStore {
                 }
             }
         }
-        true
+        Ok(())
     }
 }
 

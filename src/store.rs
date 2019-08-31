@@ -3,7 +3,10 @@ use std::convert::TryFrom;
 use std::fmt::Debug;
 
 use crate::common::*;
+use crate::types::*;
+use crate::error::*;
 use crate::element::*;
+use crate::document::*;
 
 ///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
 
@@ -14,6 +17,8 @@ pub trait MaybeIdentifiable {
 }
 
 
+
+
 pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize> + Debug {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<T>>>;
     fn index_mut(&mut self) -> &mut HashMap<String,I>;
@@ -21,17 +26,26 @@ pub trait Store<T,I> where T: MaybeIdentifiable, I: TryFrom<usize> + Into<usize>
     fn items(&self) -> &Vec<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,I>;
 
-    fn add(&mut self, item: T) -> I {
+    fn add(&mut self, mut item: T) -> Result<I,FoliaError> {
         let id = item.id();
+        if let Some(id) = id {
+            //check if the ID already exists, if so, we re-use the existing entry and have nothing
+            //else to do (the item stays unchanged)
+            if let Some(intid) = self.index().get(&id) {
+                return Ok(*intid);
+            }
+        }
+
+        //add the item anew
         let boxed = Box::new(item);
         self.items_mut().push( Some(boxed) );
         if let Ok(intid) = I::try_from(self.items().len() - 1) {
             if let Some(id) = id {
                 self.index_mut().insert(id,intid);
             }
-            intid
+            Ok(intid)
         } else {
-            panic!("Store.add(). Index out of bounds");
+            Err(FoliaError::InternalError(format!("Store.add(). Index out of bounds (e.g. integer overflow)")))
         }
     }
 

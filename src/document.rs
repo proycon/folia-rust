@@ -12,17 +12,22 @@ use quick_xml::{Reader,Writer};
 use quick_xml::events::{Event,BytesStart,BytesEnd,BytesText};
 
 use crate::common::*;
+use crate::types::*;
 use crate::error::*;
 use crate::element::*;
 use crate::attrib::*;
 use crate::store::*;
 use crate::elementstore::*;
+use crate::metadata::*;
 use crate::select::*;
 
 pub struct Document {
     pub id: String,
     pub filename: Option<String>,
-    pub store: ElementStore,
+    pub elementstore: ElementStore,
+    pub provenancestore: ProvenanceStore,
+    pub declarationstore: DeclarationStore,
+    pub metadata: Metadata,
 }
 
 
@@ -30,12 +35,12 @@ pub struct Document {
 impl Document {
     ///Create a new FoLiA document from scratch
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
-        let mut store = ElementStore::default();
-        store.add(match bodytype {
+        let mut elementstore = ElementStore::default();
+        elementstore.add(match bodytype {
             BodyType::Text => FoliaElement::new(ElementType::Text),
             BodyType::Speech => FoliaElement::new(ElementType::Speech),
         });
-        Ok(Self { id: id.to_string(), filename: None, store: store })
+        Ok(Self { id: id.to_string(), filename: None, elementstore: elementstore, .. })
     }
 
     ///Load a FoliA document from file
@@ -55,6 +60,33 @@ impl Document {
         let mut reader = Reader::from_str(data);
         reader.trim_text(true);
         Self::parse(&mut reader)
+    }
+
+
+    ///Add an element to the document, this will result in an orphaned element, use add_to() instead
+    pub fn add(&mut self, mut element: FoliaElement) -> Result<IntId, FoliaError> {
+        element.encode(&mut self);
+        self.elementstore.add(element)
+    }
+
+
+    ///Get an element from the document
+    pub fn remove(&mut self, intid: IntId) {
+        //self.elementstore.remove(intid)
+        unimplemented!()
+    }
+
+    pub fn add_to(&mut self, parent_intid: IntId, element: FoliaElement) -> Result<IntId, FoliaError> {
+        element.encode(&mut self);
+        self.elementstore.add_to(parent_intid, element)
+    }
+
+    pub fn add_processor(&mut self, processor: Processor) -> Result<ProcIntId, FoliaError> {
+        unimplemented!();
+    }
+
+    pub fn declare(&mut self, declaration: Declaration) -> Result<DecIntId, FoliaError> {
+        self.declarationstore.add(declaration)
     }
 
     ///Parse a FoLiA document
@@ -139,7 +171,7 @@ impl Document {
 
         let mut doc = Self { id: id, filename: None, store: ElementStore::default() };
         if let Some(body) = body {
-            let intid = doc.store.add(body);
+            let intid = doc.elementstore.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
@@ -149,7 +181,7 @@ impl Document {
 
     ///Parses all elementsm from XML, this in turn invokes all parsers for the subelements
     fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
-        if !self.store.is_empty() {
+        if !self.elementstore.is_empty() {
             let mut stack: Vec<IntId> = vec![0]; //0 is the root/body element, we always start with it
             loop {
                 let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
@@ -158,18 +190,18 @@ impl Document {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        let intid = self.store.add(elem);
+                        let intid = self.elementstore.add(elem);
                         stack.push(intid);
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_intid) = stack.last() {
-                            self.store.attach(*parent_intid, intid);
+                            self.elementstore.attach(*parent_intid, intid);
                         }
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        stack.push(self.store.add(elem));
+                        stack.push(self.elementstore.add(elem));
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {
                         //END TAG FOUND (</tag>)
@@ -178,7 +210,7 @@ impl Document {
                             break;
                         }
                         let intid = stack.pop().unwrap();
-                        if let Some(elem) = self.store.get(intid) {
+                        if let Some(elem) = self.elementstore.get(intid) {
 
                             //verify we actually close the right thing (otherwise we have malformed XML)
                             let elementname = str::from_utf8(e.local_name()).expect("Tag is not valid utf-8");
@@ -192,7 +224,7 @@ impl Document {
 
                         //add element to parent (the previous one in the stack)
                         if let Some(parent_intid) = stack.last() {
-                            self.store.attach(*parent_intid, intid);
+                            self.elementstore.attach(*parent_intid, intid);
                         }
                     },
                     (None, Event::Text(s)) => {
@@ -200,7 +232,7 @@ impl Document {
                         if text.trim() != "" {
                             eprintln!("TEXT: {}", text);
                             if let Some(parent_intid) = stack.last() {
-                                self.store.get_mut(*parent_intid).map( |mut parent| {
+                                self.elementstore.get_mut(*parent_intid).map( |mut parent| {
                                     parent.push(DataType::Text(text));
                                 });
                             }
@@ -211,7 +243,7 @@ impl Document {
                         if text.trim() != "" {
                             eprintln!("CDATA: {}", text);
                             if let Some(parent_intid) = stack.last() {
-                                self.store.get_mut(*parent_intid).map( |mut parent| {
+                                self.elementstore.get_mut(*parent_intid).map( |mut parent| {
                                     parent.push(DataType::Text(text.to_string()));
                                 });
                             }
@@ -222,7 +254,7 @@ impl Document {
                         if comment.trim() != "" {
                             eprintln!("COMMENT: {}", comment);
                             if let Some(parent_intid) = stack.last() {
-                                self.store.get_mut(*parent_intid).map( |mut parent| {
+                                self.elementstore.get_mut(*parent_intid).map( |mut parent| {
                                     parent.push(DataType::Comment(comment.to_string()));
                                 });
                             }
@@ -248,7 +280,7 @@ impl Document {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
 
         //Start the root tag (and obtain data for its end)
-        let root_end = if let Some(element) = self.store.get(root_intid) {
+        let root_end = if let Some(element) = self.elementstore.get(root_intid) {
             let tagstring = element.elementtype.to_string();
             let tag = tagstring.as_bytes();
             let start = BytesStart::owned(tag.to_vec(), tag.len());
@@ -261,7 +293,7 @@ impl Document {
         //Select children
         let mut stack = vec![];
         let mut previous_depth = 0;
-        for item in self.store.select(root_intid,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
+        for item in self.elementstore.select(root_intid,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
@@ -272,7 +304,7 @@ impl Document {
             }
             match item.data {
                 DataType::Element(intid) => {
-                    if let Some(element) = self.store.get(*intid) {
+                    if let Some(element) = self.elementstore.get(*intid) {
                         let tagstring = element.elementtype.to_string();
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());

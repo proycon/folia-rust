@@ -10,6 +10,9 @@ use quick_xml::Reader;
 use quick_xml::events::Event;
 
 use crate::error::*;
+use crate::common::*;
+use crate::types::*;
+use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
@@ -71,6 +74,7 @@ pub enum Attribute {
     Href(String),
     Format(String),
     Subset(String),
+
 }
 
 impl fmt::Display for Attribute {
@@ -78,6 +82,7 @@ impl fmt::Display for Attribute {
         write!(f, "{}",  self.value() )
     }
 }
+
 
 impl Attribute {
 

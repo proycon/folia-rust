@@ -6,10 +6,20 @@ use std::io;
 //
 #[derive(Debug)]
 pub enum FoliaError {
+    ///Indicates problems with the input/output (disk full? file not found?)
     IoError(io::Error),
+    ///Parse errors indicate invalid XML
     XmlError(quick_xml::Error),
+    ///Parse errors occur if there is a problem while parsing the input and is often indicative of
+    ///invalidly formatted input.
     ParseError(String),
+    ///Serialisation errors occur if there is a problem during serialisation
     SerialisationError(String),
+    ///Validation errors occur when the FoLiA is not consistent, they are a level beyond Parse
+    ///Errors
+    ValidationError(String),
+    ///Internal errors should never occur
+    InternalError(String),
     IndexError,
 }
 
@@ -32,6 +42,8 @@ impl Error for FoliaError {
             FoliaError::XmlError(ref _err) => "XML Error",
             FoliaError::ParseError(ref err) => err,
             FoliaError::SerialisationError(ref err) => err,
+            FoliaError::ValidationError(ref err) => err,
+            FoliaError::InternalError(ref err) => err,
             FoliaError::IndexError => "invalid index",
         }
     }
@@ -42,6 +54,8 @@ impl Error for FoliaError {
             FoliaError::XmlError(ref _err) => None,
             FoliaError::ParseError(ref _err) => None, //TODO
             FoliaError::SerialisationError(ref _err) => None, //TODO
+            FoliaError::ValidationError(ref _err) => None, //TODO
+            FoliaError::InternalError(ref _err) => None, //TODO
             FoliaError::IndexError => None,
         }
     }
@@ -54,6 +68,8 @@ impl fmt::Display for FoliaError {
             FoliaError::XmlError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::ParseError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::SerialisationError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::ValidationError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::InternalError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
         }
     }

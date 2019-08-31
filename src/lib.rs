@@ -1,6 +1,7 @@
 extern crate quick_xml;
 
 pub mod common;
+pub mod types;
 pub mod error;
 pub mod attrib;
 pub mod element;
@@ -12,6 +13,7 @@ pub mod document;
 
 
 pub use common::*;
+pub use types::*;
 pub use error::*;
 pub use document::*;
 pub use element::*;

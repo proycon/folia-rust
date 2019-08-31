@@ -1,17 +1,23 @@
 use std::collections::HashMap;
 
 use crate::common::*;
+use crate::types::*;
 use crate::element::*;
 use crate::store::*;
 
-pub type ProcIntId = u16;
-pub type DecIntId = u16;
 
 pub struct Declaration {
     pub annotationtype: AnnotationType,
     pub set: Option<String>,
     pub processors: Vec<ProcIntId>
 }
+
+impl Declaration {
+    pub fn new(annotationtype: AnnotationType, set: Option<String>) -> Declaration {
+        Declaration { annotationtype: annotationtype, set: set, processors: vec![] }
+    }
+}
+
 
 impl MaybeIdentifiable for Declaration {
     fn id(&self) -> Option<String> {
@@ -23,10 +29,42 @@ impl MaybeIdentifiable for Declaration {
     }
 }
 
+
+#[derive(Default)]
+pub struct ClassStore {
+    items: Vec<Option<Box<String>>>, //heap-allocated
+    index: HashMap<String,ClassIntId>
+}
+
+impl MaybeIdentifiable for String {
+    fn id(&self) -> Option<String> {
+        Some(self.to_string())
+    }
+}
+
+
+impl Store<String,ClassIntId> for ClassStore {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<String>>> {
+        &mut self.items
+    }
+    fn index_mut(&mut self) -> &mut HashMap<String,ClassIntId> {
+        &mut self.index
+    }
+
+    fn items(&self) -> &Vec<Option<Box<String>>> {
+        &self.items
+    }
+    fn index(&self) -> &HashMap<String,ClassIntId> {
+        &self.index
+    }
+}
+
+
 #[derive(Default)]
 pub struct DeclarationStore {
     items: Vec<Option<Box<Declaration>>>, //heap-allocated
-    index: HashMap<String,ProcIntId>
+    index: HashMap<String,DecIntId>,
+    classes: Option<ClassStore>
 }
 
 impl Store<Declaration,DecIntId> for DeclarationStore {
@@ -76,6 +114,11 @@ pub enum ProcessorType {
     DataSource,
 }
 
+impl Default for ProcessorType {
+    fn default() -> Self { ProcessorType::Auto }
+}
+
+#[derive(Default)]
 pub struct Processor {
     pub id: String,
     pub processortype: ProcessorType,
@@ -101,6 +144,7 @@ impl MaybeIdentifiable for Processor {
     }
 }
 
+#[derive(Default)]
 pub struct Metadata {
     pub data: HashMap<String,String>
 }
