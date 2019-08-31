@@ -76,7 +76,8 @@ impl FoliaElement {
     ///in other stores, which are inherent to the element.
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store (but this is instead invoked as part of adding an element
-    ///to the store)
+    ///to the store). This function takes and returns ownership.
+    ///
     pub fn encode(mut self, declarationstore: &mut DeclarationStore, provenancestore: &mut ProvenanceStore) -> Result<Self, FoliaError> {
         //encode the element for storage
         let set: Option<&Attribute> = self.attribs.iter().find(|&a| {

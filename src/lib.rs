@@ -10,6 +10,8 @@ pub mod elementstore;
 pub mod metadata;
 pub mod select;
 pub mod document;
+pub mod parser;
+pub mod serialiser;
 
 
 pub use common::*;
