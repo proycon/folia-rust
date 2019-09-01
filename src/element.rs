@@ -71,6 +71,7 @@ pub struct FoliaElement {
     enc_attribs: Option<EncodedAttributes>,
 }
 
+
 impl MaybeIdentifiable for FoliaElement {
     fn id(&self) -> Option<String> {
         self.attrib_string(AttribType::ID)
