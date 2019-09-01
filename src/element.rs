@@ -51,6 +51,14 @@ pub struct Properties {
     wrefable: bool //Indicates whether this element is referable as a token/word (applies only to a very select few elements, such as w, morpheme, and phoneme)
 }
 
+#[derive(Default)]
+pub struct EncodedAttributes {
+    //encoded (relation to other stores)
+    processor: Option<ProcIntId>,
+    declaration: Option<DecIntId>,
+    class: Option<ClassIntId>
+}
+
 pub struct FoliaElement {
     pub elementtype: ElementType,
     pub attribs: Vec<Attribute>,
@@ -59,10 +67,8 @@ pub struct FoliaElement {
     data: Vec<DataType>,
     parent: Option<IntId>,
 
-    //encoded (relation to other stores)
-    processor: Option<ProcIntId>,
-    declaration: Option<DecIntId>,
-    class: Option<ClassIntId>
+    //encoded attributes
+    enc_attribs: Option<EncodedAttributes>,
 }
 
 impl MaybeIdentifiable for FoliaElement {
@@ -79,18 +85,14 @@ impl FoliaElement {
     ///to the store). This function takes and returns ownership.
     ///
     pub fn encode(mut self, declarationstore: &mut DeclarationStore, provenancestore: &mut ProvenanceStore) -> Result<Self, FoliaError> {
+        let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
+
         //encode the element for storage
-        let set: Option<&Attribute> = self.attribs.iter().find(|&a| {
-            match a {
-                Attribute::Set(_) => true,
-                _ => false,
-            }
-        });
-        let set: Option<Cow<str>> = set.map(|a| a.value() );
+        let set = self.attrib(AttribType::SET);
 
         if let Some(annotationtype) = self.elementtype.annotationtype() {
-            let decintid = declarationstore.add(Declaration::new(annotationtype, set.map(|x| x.into_owned() )))?;
-            self.declaration = Some(decintid);
+            let decintid = declarationstore.add(Declaration::new(annotationtype, set.map(|x| x.value().into_owned() )))?;
+            enc_attribs.declaration = Some(decintid);
         }
         //TODO: handle processor and class
 
@@ -100,8 +102,11 @@ impl FoliaElement {
             _ => true
         });
 
+        self.set_enc_attribs(Some(enc_attribs));
+
         Ok(self)
     }
+
 }
 
 
@@ -116,6 +121,7 @@ impl FoliaElement {
         }
         None
     }
+
 
     ///Get attribute value as a string
     pub fn attrib_string(&self, atype: AttribType) -> Option<String> {
@@ -164,10 +170,20 @@ impl FoliaElement {
     pub fn set_attribs(&mut self, attribs: Vec<Attribute>) {
         self.attribs = attribs;
     }
+    ///Sets all encoded attributes at once (takes ownership)
+    pub fn set_enc_attribs(&mut self, enc_attribs: Option<EncodedAttributes>) {
+        self.enc_attribs = enc_attribs;
+    }
 
     ///Sets all attributes at once (takes ownership)
     pub fn with_attribs(mut self, attribs: Vec<Attribute>) -> Self {
         self.set_attribs(attribs);
+        self
+    }
+
+    ///Sets all encoded attributes at once (takes ownership)
+    pub fn with_enc_attribs(mut self, enc_attribs: Option<EncodedAttributes>) -> Self {
+        self.set_enc_attribs(enc_attribs);
         self
     }
 
@@ -200,11 +216,11 @@ impl FoliaElement {
     }
 
     pub fn get_processor(&self) -> Option<ProcIntId> {
-        self.processor
+        self.enc_attribs.map(|enc_attribs| enc_attribs.processor).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
     pub fn get_declaration(&self) -> Option<DecIntId> {
-        self.declaration
+        self.enc_attribs.map(|enc_attribs| enc_attribs.declaration).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
     pub fn set_parent(&mut self, parent: Option<IntId>) {
@@ -256,7 +272,7 @@ impl FoliaElement {
 
     ///Simple constructor for an empty element (optionally with attributes)
     pub fn new(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, declaration: None, processor: None, class: None }
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, enc_attribs: None }
     }
 
     pub fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {

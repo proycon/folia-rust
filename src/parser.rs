@@ -1,15 +1,13 @@
 use std::path::{Path};
 use std::io::BufRead;
 use std::io::BufReader;
-use std::io::Cursor;
-use std::fs::File;
 use std::str;
 use std::str::FromStr;
 use std::borrow::ToOwned;
 use std::string::ToString;
 
-use quick_xml::{Reader,Writer};
-use quick_xml::events::{Event,BytesStart,BytesEnd,BytesText};
+use quick_xml::Reader;
+use quick_xml::events::Event;
 
 use crate::common::*;
 use crate::types::*;
