@@ -104,7 +104,7 @@ impl Document {
 
         let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: Metadata::default() };
         if let Some(body) = body {
-            let intid = doc.elementstore.add(body);
+            let key = doc.elementstore.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
@@ -115,7 +115,7 @@ impl Document {
     ///Parses all elementsm from XML, this in turn invokes all parsers for the subelements
     pub fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
         if !self.elementstore.is_empty() {
-            let mut stack: Vec<IntId> = vec![0]; //0 is the root/body element, we always start with it
+            let mut stack: Vec<ElementKey> = vec![0]; //0 is the root/body element, we always start with it
             loop {
                 let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
                 match e {
@@ -123,20 +123,20 @@ impl Document {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        let intid = self.elementstore.add(elem)?;
-                        stack.push(intid);
+                        let key = self.elementstore.add(elem)?;
+                        stack.push(key);
 
                         // Since there is no Event::End after, directly append it to the current node
-                        if let Some(parent_intid) = stack.last() {
-                            self.elementstore.attach(*parent_intid, intid);
+                        if let Some(parent_key) = stack.last() {
+                            self.elementstore.attach(*parent_key, key);
                         }
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        let intid = self.elementstore.add(elem)?;
-                        stack.push(intid);
+                        let key = self.elementstore.add(elem)?;
+                        stack.push(key);
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {
                         //END TAG FOUND (</tag>)
@@ -144,8 +144,8 @@ impl Document {
                         if stack.len() <= 1 {
                             break;
                         }
-                        let intid = stack.pop().unwrap();
-                        if let Some(elem) = self.elementstore.get(intid) {
+                        let key = stack.pop().unwrap();
+                        if let Some(elem) = self.elementstore.get(key) {
 
                             //verify we actually close the right thing (otherwise we have malformed XML)
                             let elementname = str::from_utf8(e.local_name()).expect("Decoding XML tag from utf-8");
@@ -154,20 +154,20 @@ impl Document {
                                 return Err(FoliaError::ParseError(format!("Malformed XML? Invalid element closed: {}, expected: {}", elementname, elem.elementtype.to_string() )));
                             }
                         } else {
-                            eprintln!("ID from stack does not exist! {}", intid ) ;
+                            eprintln!("ID from stack does not exist! {}", key ) ;
                         }
 
                         //add element to parent (the previous one in the stack)
-                        if let Some(parent_intid) = stack.last() {
-                            self.elementstore.attach(*parent_intid, intid);
+                        if let Some(parent_key) = stack.last() {
+                            self.elementstore.attach(*parent_key, key);
                         }
                     },
                     (None, Event::Text(s)) => {
                         let text = s.unescape_and_decode(reader)?;
                         if text.trim() != "" {
                             eprintln!("TEXT: {}", text);
-                            if let Some(parent_intid) = stack.last() {
-                                self.elementstore.get_mut(*parent_intid).map( |mut parent| {
+                            if let Some(parent_key) = stack.last() {
+                                self.elementstore.get_mut(*parent_key).map( |mut parent| {
                                     parent.push(DataType::Text(text));
                                 });
                             }
@@ -177,8 +177,8 @@ impl Document {
                         let text = reader.decode(&s)?;
                         if text.trim() != "" {
                             eprintln!("CDATA: {}", text);
-                            if let Some(parent_intid) = stack.last() {
-                                self.elementstore.get_mut(*parent_intid).map( |mut parent| {
+                            if let Some(parent_key) = stack.last() {
+                                self.elementstore.get_mut(*parent_key).map( |mut parent| {
                                     parent.push(DataType::Text(text.to_string()));
                                 });
                             }
@@ -188,8 +188,8 @@ impl Document {
                         let comment = reader.decode(&s)?;
                         if comment.trim() != "" {
                             eprintln!("COMMENT: {}", comment);
-                            if let Some(parent_intid) = stack.last() {
-                                self.elementstore.get_mut(*parent_intid).map( |mut parent| {
+                            if let Some(parent_key) = stack.last() {
+                                self.elementstore.get_mut(*parent_key).map( |mut parent| {
                                     parent.push(DataType::Comment(comment.to_string()));
                                 });
                             }

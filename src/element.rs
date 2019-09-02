@@ -54,9 +54,9 @@ pub struct Properties {
 #[derive(Default)]
 pub struct EncodedAttributes {
     //encoded (relation to other stores)
-    processor: Option<ProcIntId>,
-    declaration: Option<DecIntId>,
-    class: Option<ClassIntId>
+    processor: Option<ProcKey>,
+    declaration: Option<DecKey>,
+    class: Option<ClassKey>
 }
 
 pub struct FoliaElement {
@@ -65,7 +65,7 @@ pub struct FoliaElement {
 
     //encoded (inter-element)
     data: Vec<DataType>,
-    parent: Option<IntId>,
+    parent: Option<ElementKey>,
 
     //encoded attributes
     enc_attribs: Option<EncodedAttributes>,
@@ -92,8 +92,8 @@ impl FoliaElement {
         let set = self.attrib(AttribType::SET);
 
         if let Some(annotationtype) = self.elementtype.annotationtype() {
-            let decintid = declarationstore.add(Declaration::new(annotationtype, set.map(|x| x.value().into_owned() )))?;
-            enc_attribs.declaration = Some(decintid);
+            let deckey = declarationstore.add(Declaration::new(annotationtype, set.map(|x| x.value().into_owned() )))?;
+            enc_attribs.declaration = Some(deckey);
         }
         //TODO: handle processor and class
 
@@ -212,23 +212,23 @@ impl FoliaElement {
         self
     }
 
-    pub fn get_parent(&self) -> Option<IntId> {
+    pub fn get_parent(&self) -> Option<ElementKey> {
         self.parent
     }
 
-    pub fn get_processor(&self) -> Option<ProcIntId> {
+    pub fn get_processor(&self) -> Option<ProcKey> {
         self.enc_attribs.map(|enc_attribs| enc_attribs.processor).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
-    pub fn get_declaration(&self) -> Option<DecIntId> {
+    pub fn get_declaration(&self) -> Option<DecKey> {
         self.enc_attribs.map(|enc_attribs| enc_attribs.declaration).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
-    pub fn set_parent(&mut self, parent: Option<IntId>) {
+    pub fn set_parent(&mut self, parent: Option<ElementKey>) {
         self.parent = parent;
     }
 
-    pub fn with_parent(mut self, parent: Option<IntId>) -> Self {
+    pub fn with_parent(mut self, parent: Option<ElementKey>) -> Self {
         self.set_parent(parent);
         self
     }

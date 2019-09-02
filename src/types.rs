@@ -4,16 +4,16 @@ use std::fmt;
 use crate::error::FoliaError;
 
 ///Internal ID Type, also an Integer ID Type, these are valid only as long as store is in memory
-pub type IntId = u32;
+pub type ElementKey = u32;
 
 ///Internal Processor ID Type
-pub type ProcIntId = u16;
+pub type ProcKey = u16;
 
 ///Internal Declaration ID Type (used for FoLiA sets)
-pub type DecIntId = u16;
+pub type DecKey = u16;
 
 ///Class ID Type (used for FoLiA sets)
-pub type ClassIntId = u32;
+pub type ClassKey = u32;
 
 //foliaspec:elementtype
 #[derive(Copy,Clone,PartialEq)]
@@ -500,7 +500,7 @@ impl std::str::FromStr for ElementType {
 pub enum DataType {
     Text(String),
     ///A reference to an element
-    Element(IntId),
+    Element(ElementKey),
     Comment(String),
 }
 

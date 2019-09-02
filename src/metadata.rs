@@ -9,7 +9,7 @@ use crate::store::*;
 pub struct Declaration {
     pub annotationtype: AnnotationType,
     pub set: Option<String>,
-    pub processors: Vec<ProcIntId>
+    pub processors: Vec<ProcKey>
 }
 
 impl Declaration {
@@ -33,7 +33,7 @@ impl MaybeIdentifiable for Declaration {
 #[derive(Default)]
 pub struct ClassStore {
     items: Vec<Option<Box<String>>>, //heap-allocated
-    index: HashMap<String,ClassIntId>
+    index: HashMap<String,ClassKey>
 }
 
 impl MaybeIdentifiable for String {
@@ -43,18 +43,18 @@ impl MaybeIdentifiable for String {
 }
 
 
-impl Store<String,ClassIntId> for ClassStore {
+impl Store<String,ClassKey> for ClassStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<String>>> {
         &mut self.items
     }
-    fn index_mut(&mut self) -> &mut HashMap<String,ClassIntId> {
+    fn index_mut(&mut self) -> &mut HashMap<String,ClassKey> {
         &mut self.index
     }
 
     fn items(&self) -> &Vec<Option<Box<String>>> {
         &self.items
     }
-    fn index(&self) -> &HashMap<String,ClassIntId> {
+    fn index(&self) -> &HashMap<String,ClassKey> {
         &self.index
     }
 }
@@ -63,22 +63,22 @@ impl Store<String,ClassIntId> for ClassStore {
 #[derive(Default)]
 pub struct DeclarationStore {
     items: Vec<Option<Box<Declaration>>>, //heap-allocated
-    index: HashMap<String,DecIntId>,
+    index: HashMap<String,DecKey>,
     classes: Option<ClassStore>
 }
 
-impl Store<Declaration,DecIntId> for DeclarationStore {
+impl Store<Declaration,DecKey> for DeclarationStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
         &mut self.items
     }
-    fn index_mut(&mut self) -> &mut HashMap<String,DecIntId> {
+    fn index_mut(&mut self) -> &mut HashMap<String,DecKey> {
         &mut self.index
     }
 
     fn items(&self) -> &Vec<Option<Box<Declaration>>> {
         &self.items
     }
-    fn index(&self) -> &HashMap<String,DecIntId> {
+    fn index(&self) -> &HashMap<String,DecKey> {
         &self.index
     }
 }
@@ -86,22 +86,22 @@ impl Store<Declaration,DecIntId> for DeclarationStore {
 #[derive(Default)]
 pub struct ProvenanceStore {
     items: Vec<Option<Box<Processor>>>, //heap-allocated
-    index: HashMap<String,ProcIntId>,
-    pub chain: Vec<ProcIntId>,
+    index: HashMap<String,ProcKey>,
+    pub chain: Vec<ProcKey>,
 }
 
-impl Store<Processor,ProcIntId> for ProvenanceStore {
+impl Store<Processor,ProcKey> for ProvenanceStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Processor>>> {
         &mut self.items
     }
-    fn index_mut(&mut self) -> &mut HashMap<String,ProcIntId> {
+    fn index_mut(&mut self) -> &mut HashMap<String,ProcKey> {
         &mut self.index
     }
 
     fn items(&self) -> &Vec<Option<Box<Processor>>> {
         &self.items
     }
-    fn index(&self) -> &HashMap<String,ProcIntId> {
+    fn index(&self) -> &HashMap<String,ProcKey> {
         &self.index
     }
 }
@@ -131,11 +131,11 @@ pub struct Processor {
     pub user: String,
     pub begindatetime: String,
     pub enddatetime: String,
-    pub processors: Vec<ProcIntId>,
+    pub processors: Vec<ProcKey>,
     pub src: String,
     pub format: String,
     pub resourcelink: String,
-    pub parent: Option<ProcIntId>,
+    pub parent: Option<ProcKey>,
     pub metadata: Metadata,
 }
 

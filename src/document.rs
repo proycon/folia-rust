@@ -73,28 +73,28 @@ impl Document {
 
 
     ///Add an element to the document, this will result in an orphaned element, use add_to() instead
-    pub fn add(&mut self, element: FoliaElement) -> Result<IntId, FoliaError> {
+    pub fn add(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
         let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
         self.elementstore.add(element)
     }
 
 
     ///Get an element from the document
-    pub fn remove(&mut self, intid: IntId) {
-        //self.elementstore.remove(intid)
+    pub fn remove(&mut self, key: ElementKey) {
+        //self.elementstore.remove(key)
         unimplemented!()
     }
 
-    pub fn add_to(&mut self, parent_intid: IntId, element: FoliaElement) -> Result<IntId, FoliaError> {
+    pub fn add_to(&mut self, parent_key: ElementKey, element: FoliaElement) -> Result<ElementKey, FoliaError> {
         let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
-        self.elementstore.add_to(parent_intid, element)
+        self.elementstore.add_to(parent_key, element)
     }
 
-    pub fn add_processor(&mut self, processor: Processor) -> Result<ProcIntId, FoliaError> {
+    pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
         unimplemented!();
     }
 
-    pub fn declare(&mut self, declaration: Declaration) -> Result<DecIntId, FoliaError> {
+    pub fn declare(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
         self.declarationstore.add(declaration)
     }
 

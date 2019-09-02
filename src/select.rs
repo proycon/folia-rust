@@ -26,10 +26,10 @@ impl Selector {
     pub fn matches(&self, store: &ElementStore, item: &DataType) -> bool {
         //we attempt to falsify the match
         let matches = match item {
-            DataType::Element(intid) => {
+            DataType::Element(key) => {
                 if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
                     false
-                } else if let Some(element) = store.get(*intid) {
+                } else if let Some(element) = store.get(*key) {
                     match &self.setselector {
                          SetSelector::SomeSet(set) => {
                              if let Some(set2) = element.set() {
@@ -94,15 +94,15 @@ pub struct SelectIterator<'a> {
     store: &'a ElementStore,
     selector: Selector,
     ///The current stack, containing the element and cursor within that element
-    stack: Vec<(IntId,usize)>,
+    stack: Vec<(ElementKey,usize)>,
 }
 
 impl<'a> SelectIterator<'a> {
-    pub fn new(store: &'a ElementStore, selector: Selector, intid: IntId) -> SelectIterator<'a> {
+    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey) -> SelectIterator<'a> {
         SelectIterator {
             store: store,
             selector: selector,
-            stack: vec![(intid,0)]
+            stack: vec![(key,0)]
         }
     }
 
@@ -111,7 +111,7 @@ impl<'a> SelectIterator<'a> {
 #[derive(Debug)]
 pub struct SelectItem<'a> {
     pub data: &'a DataType,
-    pub parent_intid: IntId,
+    pub parent_key: ElementKey,
     pub cursor: usize,
     pub depth: usize,
 }
@@ -121,21 +121,21 @@ impl<'a> Iterator for SelectIterator<'a> {
     type Item = SelectItem<'a>; //Returns the DataTyp, the Parent IntID, the
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((intid,cursor)) = self.stack.pop() {
-            if let Some(parent) = self.store.get(intid) {
+        if let Some((key,cursor)) = self.stack.pop() {
+            if let Some(parent) = self.store.get(key) {
                 if let Some(item) = parent.get(cursor) {
                     //increment the cursor and push back to the stack
-                    self.stack.push((intid, cursor+1));
+                    self.stack.push((key, cursor+1));
                     let current_depth = self.stack.len();
 
                     //we have an element, push to stack so we descend into its on next iteraton
-                    if let DataType::Element(intid) = item {
-                        self.stack.push((*intid,0));
+                    if let DataType::Element(key) = item {
+                        self.stack.push((*key,0));
                     };
 
                     //return the current one
                     if self.selector.matches(self.store, item) {
-                        Some(SelectItem { data: item, parent_intid: intid, cursor: cursor, depth: current_depth})
+                        Some(SelectItem { data: item, parent_key: key, cursor: cursor, depth: current_depth})
                     } else {
                         self.next() //recurse
                     }
@@ -157,11 +157,11 @@ impl<'a> Iterator for SelectIterator<'a> {
 }
 
 pub trait Select<'a> {
-    fn select(&'a self, intid: IntId, selector: Selector, recursive: bool) -> SelectIterator<'a>;
+    fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a>;
 }
 
 impl<'a> Select<'a> for ElementStore {
-    fn select(&'a self, intid: IntId, selector: Selector, recursive: bool) -> SelectIterator<'a> {
-        SelectIterator::new(self, selector, intid)
+    fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+        SelectIterator::new(self, selector, key)
     }
 }
