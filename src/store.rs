@@ -28,7 +28,8 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
     fn items(&self) -> &Vec<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,K>;
 
-    fn add(&mut self, mut item: T) -> Result<K,FoliaError> {
+    ///Add a new item to the store (takes ownership)
+    fn add(&mut self, item: T) -> Result<K,FoliaError> {
         let id = &item.id();
         if let Some(id) = id {
             //check if the ID already exists, if so, we re-use the existing entry and have nothing
@@ -55,14 +56,15 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
         self.items().is_empty()
     }
 
+    ///Returns the number of items in the store (including items that were removed)
     fn len(&self) -> usize {
         self.items().len()
     }
 
     ///Retrieves an element from the store
     fn get(&self, key: K) -> Option<&Box<T>> {
-        if let Some(key) = self.items().get(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
-            key.as_ref()
+        if let Some(item) = self.items().get(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
+            item.as_ref()
         } else {
             None
         }
@@ -70,26 +72,30 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
 
     ///Retrieves an element from the store
     fn get_mut(&mut self, key: K) -> Option<&mut Box<T>> {
-        if let Some(key) = self.items_mut().get_mut(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
-            key.as_mut()
+        if let Some(item) = self.items_mut().get_mut(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
+            item.as_mut()
         } else {
             None
         }
     }
 
-    ///Resolve an ID to an Key using the index
-    fn key(&self, key: &str) -> Option<K> {
-        self.index().get(key).map( |&key| key )
+    ///Resolve an ID to a Key using the index
+    fn id_to_key(&self, id: &str) -> Option<K> {
+        self.index().get(id).map( |&key| key )
     }
 
-    fn get_by_key(&self, key: &str) -> Option<&Box<T>> {
-        self.key(key).map( |key| {
+    ///Get by key, where key is still a string to be resolved. Shortcut function calling key() and
+    ///get()
+    fn get_by_key(&self, id: &str) -> Option<&Box<T>> {
+        self.id_to_key(id).map( |key| {
             self.get(key)
         }).map(|o| o.unwrap())
     }
 
-    fn get_mut_by_key(&mut self, key: &str) -> Option<&mut Box<T>> {
-        self.key(key).map( move |key| {
+    ///Get (mutably) by key, where key is still a string to be resolved. Shortcut function calling
+    ///key() and get_mut()
+    fn get_mut_by_key(&mut self, id: &str) -> Option<&mut Box<T>> {
+        self.id_to_key(id).map( move |key| {
             self.get_mut(key)
         }).map(|o| o.unwrap())
     }

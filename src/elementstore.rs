@@ -30,7 +30,7 @@ impl Store<FoliaElement,ElementKey> for ElementStore {
 }
 
 impl ElementStore {
-    ///Adds an element as a child on another, this is a higher-level function that/
+    ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
     pub fn add_to(&mut self, parent_key: ElementKey, child: FoliaElement) -> Result<ElementKey,FoliaError> {
         let child_key = self.add(child);

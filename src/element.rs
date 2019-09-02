@@ -84,7 +84,6 @@ impl FoliaElement {
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store (but this is instead invoked as part of adding an element
     ///to the store). This function takes and returns ownership.
-    ///
     pub fn encode(mut self, declarationstore: &mut DeclarationStore, provenancestore: &mut ProvenanceStore) -> Result<Self, FoliaError> {
         let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
 
@@ -108,10 +107,13 @@ impl FoliaElement {
         Ok(self)
     }
 
-}
-
-
-impl FoliaElement {
+    ///Decodes an element and returns a copy, therefore it should be used sparingly.
+    ///It does not decode relations between elements (data/children and parent)
+    pub fn decode(&self, declarationstore: &DeclarationStore, provenancestore: &ProvenanceStore) -> Self {
+        let mut element = Self::new(self.elementtype).with_attribs(self.attribs);
+        //TODO: decode attributes
+        element
+    }
 
     ///Get Attribute
     pub fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
@@ -189,9 +191,87 @@ impl FoliaElement {
     }
 
     //attribute getters (shortcuts)
-    pub fn class(&self) -> Option<String> { self.attrib_string(AttribType::CLASS)  }
-    pub fn set(&self) -> Option<String> { self.attrib_string(AttribType::SET)  }
-    pub fn processor(&self) -> Option<String> { self.attrib_string(AttribType::PROCESSOR)  }
+
+    ///Unencoded class. This only works on decoded elements (returns None otherwise) and does no
+    ///decoding itself, use decode_set() if you need to decode
+    pub fn class_as_str(&self) -> Option<&str> {
+        if let Some(attrib) = self.attrib(AttribType::CLASS) {
+            if let Cow::Borrowed(s) = attrib.value() { //assumes value is always a borrowed one
+                return Some(s);
+            }
+        }
+        None
+    }
+
+    ///Unencoded set. This only works on decoded elements (returns None otherwise) and does no
+    ///decoding itself
+    pub fn set_as_str(&self) -> Option<&str> {
+        if let Some(attrib) = self.attrib(AttribType::SET) {
+            if let Cow::Borrowed(s) = attrib.value() { //assumes value is always a borrowed one
+                return Some(s);
+            }
+        }
+        None
+    }
+
+    ///Unencoded processor. This only works on decoded elements (returns None otherwise) and does
+    ///no decoding itself
+    pub fn processor_as_str(&self) -> Option<&str> {
+        if let Some(attrib) = self.attrib(AttribType::PROCESSOR) {
+            if let Cow::Borrowed(s) = attrib.value() { //assumes value is always a borrowed one
+                return Some(s);
+            }
+        }
+        None
+    }
+
+    ///Get the declaration from the declaration store, given an encoded element
+    pub fn declaration<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a Declaration>) {
+        if let Some(declaration_key) = self.set() {
+            if let Some(declaration) = declarationstore.get(declaration_key) {
+                return declaration.set.as_ref();
+            }
+        }
+        None
+    }
+
+    ///Get the processor from the provenance store, given an encoded element
+    pub fn processor<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a Processor>) {
+        if let Some(processor_key) = self.set() {
+            if let Some(processor) = provenancestore.get(processor_key) {
+                return processor.set.as_ref();
+            }
+        }
+        None
+    }
+
+    ///Get set as a str on an encoded element.
+    pub fn decoded_set<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
+        if let Some(declaration) = self.declaration(declarationstore) {
+                return declaration.set.as_ref().map(|s| &**s);
+        }
+        None
+    }
+
+    pub fn decoded_class<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
+        if let Some(declaration) = self.declaration(declarationstore) {
+            //TODO: return class
+            return declaration.set.as_ref().map(|s| &**s);
+        }
+        None
+    }
+
+
+    ///Get the set (encoded) aka the declaration key
+    pub fn set(&self) -> Option<DecKey>
+        if let Some(enc_attribs) = &self.enc_attribs {
+            if let Some(declaration_key) = enc_attribs.declaration {
+                declaration_key
+            }
+        }
+    }
+
+
 
     ///Low-level add function
     pub fn push(&mut self, datatype: DataType) {

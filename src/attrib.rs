@@ -92,7 +92,7 @@ impl Attribute {
             Attribute::AnnotatorType(s) | Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
             Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s)
-                => Cow::Borrowed(s),
+                => Cow::Borrowed(&s),
             Attribute::Confidence(f) => Cow::Owned(f.to_string()),
             Attribute::Space(b) => { if *b { Cow::Borrowed("yes") } else { Cow::Borrowed("no") } }
         }
