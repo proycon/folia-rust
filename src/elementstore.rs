@@ -27,6 +27,7 @@ impl Store<FoliaElement,ElementKey> for ElementStore {
     fn index(&self) -> &HashMap<String,ElementKey> {
         &self.index
     }
+
 }
 
 impl ElementStore {

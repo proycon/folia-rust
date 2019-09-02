@@ -104,7 +104,7 @@ impl Document {
 
         let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: Metadata::default() };
         if let Some(body) = body {
-            let key = doc.elementstore.add(body);
+            let key = doc.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
@@ -123,7 +123,7 @@ impl Document {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        let key = self.elementstore.add(elem)?;
+                        let key = self.add(elem)?;
                         stack.push(key);
 
                         // Since there is no Event::End after, directly append it to the current node
@@ -135,7 +135,7 @@ impl Document {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = FoliaElement::parse(reader, e)?;
-                        let key = self.elementstore.add(elem)?;
+                        let key = self.add(elem)?;
                         stack.push(key);
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {

@@ -69,7 +69,7 @@ fn instantiate() {
 #[test]
 fn append() {
     if let Ok(mut doc) = folia::Document::new("example", folia::BodyType::Text) {
-        let root: folia::IntId = 0;
+        let root: folia::ElementKey = 0;
         let sentence = doc.add_to(root,
                                         folia::FoliaElement::new(folia::ElementType::Sentence)
                                                             .with_attrib(folia::Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");

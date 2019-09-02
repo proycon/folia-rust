@@ -79,6 +79,12 @@ impl MaybeIdentifiable for FoliaElement {
     }
 }
 
+impl CheckEncoded for FoliaElement {
+    fn encoded(&self) -> bool {
+        self.enc_attribs.is_some()
+    }
+}
+
 impl FoliaElement {
     ///Encode for storage, this only encodes attributes (set,class,processor) maintained
     ///in other stores, which are inherent to the element.
@@ -123,6 +129,7 @@ impl FoliaElement {
         }
         Self::new(self.elementtype).with_attribs(decoded_attribs)
     }
+
 
     ///Get Attribute
     pub fn attrib(&self, atype: AttribType) -> Option<&Attribute> {

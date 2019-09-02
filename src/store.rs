@@ -16,9 +16,15 @@ pub trait MaybeIdentifiable {
     }
 }
 
+pub trait CheckEncoded {
+    fn encoded(&self) -> bool {
+        true
+    }
+}
 
 
 pub trait Store<T,K> where T: MaybeIdentifiable,
+                           T: CheckEncoded,
                            K: TryFrom<usize> + Copy + Debug,
                            usize: std::convert::TryFrom<K>,
                            <usize as std::convert::TryFrom<K>>::Error : std::fmt::Debug {
@@ -30,6 +36,9 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
 
     ///Add a new item to the store (takes ownership)
     fn add(&mut self, item: T) -> Result<K,FoliaError> {
+        if !item.encoded() {
+            return Err(FoliaError::InternalError(format!("Store.add(). Item is not properly encoded")));
+        }
         let id = &item.id();
         if let Some(id) = id {
             //check if the ID already exists, if so, we re-use the existing entry and have nothing

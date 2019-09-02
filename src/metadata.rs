@@ -18,6 +18,9 @@ impl Declaration {
     }
 }
 
+impl CheckEncoded for Declaration { }
+
+impl CheckEncoded for String { }
 
 impl MaybeIdentifiable for Declaration {
     fn id(&self) -> Option<String> {
@@ -138,6 +141,8 @@ pub struct Processor {
     pub parent: Option<ProcKey>,
     pub metadata: Metadata,
 }
+
+impl CheckEncoded for Processor { }
 
 impl MaybeIdentifiable for Processor {
     fn id(&self) -> Option<String> {

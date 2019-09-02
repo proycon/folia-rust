@@ -24,6 +24,14 @@ impl Document {
     pub fn xml(&self, root_key: ElementKey) -> Result<Vec<u8>, FoliaError> {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
 
+        let mut doc_start = BytesStart::borrowed(b"FoLiA", 5);
+        doc_start.push_attribute(("xmlns", str::from_utf8(NSFOLIA).unwrap() ));
+        doc_start.push_attribute(("xmlns:xlink", str::from_utf8(NSXLINK).unwrap() ));
+        doc_start.push_attribute(("version",FOLIAVERSION ));
+        doc_start.push_attribute(("generator", GENERATOR ));
+        writer.write_event(Event::Start(doc_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+
+
         //Start the root tag (and obtain data for its end)
         let root_end = if let Some(element) = self.elementstore.get(root_key) {
             let tagstring = element.elementtype.to_string();
@@ -57,6 +65,16 @@ impl Document {
                             let value: &str = &attrib.value();
                             start.push_attribute((attrib.attribtype().into(), value ));
                         }
+                        //decode encoded attributes
+                        if let Some(set) = element.decoded_set(&self.declarationstore) {
+                            start.push_attribute(("set", set) );
+                        }
+                        if let Some(class) = element.decoded_class(&self.declarationstore) {
+                            start.push_attribute(("class", class) );
+                        }
+                        if let Some(processor) = element.decoded_processor(&self.provenancestore) {
+                            start.push_attribute(("processor", processor) );
+                        }
                         writer.write_event(Event::Start(start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
                         let end = BytesEnd::owned(tag.to_vec());
                         stack.push(end);
@@ -79,6 +97,7 @@ impl Document {
 
         //Write root end tag
         writer.write_event(Event::End(root_end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::End(BytesEnd::borrowed(b"FoLiA"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         let result = writer.into_inner().into_inner();
         Ok(result)
     }
