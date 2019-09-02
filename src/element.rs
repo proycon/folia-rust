@@ -7,6 +7,7 @@ use std::string::ToString;
 use std::fmt;
 use std::iter::ExactSizeIterator;
 use std::convert::Into;
+use std::clone::Clone;
 
 use quick_xml::Reader;
 
@@ -110,9 +111,17 @@ impl FoliaElement {
     ///Decodes an element and returns a copy, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent)
     pub fn decode(&self, declarationstore: &DeclarationStore, provenancestore: &ProvenanceStore) -> Self {
-        let mut element = Self::new(self.elementtype).with_attribs(self.attribs);
-        //TODO: decode attributes
-        element
+        let mut decoded_attribs: Vec<Attribute> = self.attribs.iter().map(|a| a.clone()).collect();
+        if let Some(set) = self.decoded_set(declarationstore) {
+            decoded_attribs.push(Attribute::Set(set.to_string()));
+        }
+        if let Some(class) = self.decoded_class(declarationstore) {
+            decoded_attribs.push(Attribute::Class(class.to_string()));
+        }
+        if let Some(processor) = self.decoded_processor(provenancestore) {
+            decoded_attribs.push(Attribute::Processor(processor.to_string()));
+        }
+        Self::new(self.elementtype).with_attribs(decoded_attribs)
     }
 
     ///Get Attribute
@@ -227,22 +236,20 @@ impl FoliaElement {
 
     ///Get the declaration from the declaration store, given an encoded element
     pub fn declaration<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a Declaration>) {
-        if let Some(declaration_key) = self.set() {
-            if let Some(declaration) = declarationstore.get(declaration_key) {
-                return declaration.set.as_ref();
-            }
+        if let Some(declaration_key) = self.set_key() {
+           declarationstore.get(declaration_key).map(|b| &**b)
+        } else {
+            None
         }
-        None
     }
 
     ///Get the processor from the provenance store, given an encoded element
     pub fn processor<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a Processor>) {
-        if let Some(processor_key) = self.set() {
-            if let Some(processor) = provenancestore.get(processor_key) {
-                return processor.set.as_ref();
-            }
+        if let Some(processor_key) = self.processor_key() {
+            provenancestore.get(processor_key).map(|b| &**b)
+        } else {
+            None
         }
-        None
     }
 
     ///Get set as a str on an encoded element.
@@ -261,16 +268,41 @@ impl FoliaElement {
         None
     }
 
-
-    ///Get the set (encoded) aka the declaration key
-    pub fn set(&self) -> Option<DecKey>
-        if let Some(enc_attribs) = &self.enc_attribs {
-            if let Some(declaration_key) = enc_attribs.declaration {
-                declaration_key
-            }
+    pub fn decoded_processor<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a str>) {
+        if let Some(processor) = self.processor(provenancestore) {
+            Some(processor.id.as_str())
+        } else {
+            None
         }
     }
 
+
+    ///Get the set (encoded) aka the declaration key
+    pub fn set_key(&self) -> Option<DecKey> {
+        if let Some(enc_attribs) = &self.enc_attribs {
+            enc_attribs.declaration
+        } else {
+            None
+        }
+    }
+
+    ///Get the class (encoded) aka the class keyy
+    pub fn class_key(&self) -> Option<ClassKey> {
+        if let Some(enc_attribs) = &self.enc_attribs {
+            enc_attribs.class
+        } else {
+            None
+        }
+    }
+
+    ///Get the processor (encoded) aka the processor keyy
+    pub fn processor_key(&self) -> Option<ProcKey> {
+        if let Some(enc_attribs) = &self.enc_attribs {
+            enc_attribs.processor
+        } else {
+            None
+        }
+    }
 
 
     ///Low-level add function
@@ -297,11 +329,11 @@ impl FoliaElement {
     }
 
     pub fn get_processor(&self) -> Option<ProcKey> {
-        self.enc_attribs.map(|enc_attribs| enc_attribs.processor).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
+        self.enc_attribs.as_ref().map(|enc_attribs| enc_attribs.processor).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
     pub fn get_declaration(&self) -> Option<DecKey> {
-        self.enc_attribs.map(|enc_attribs| enc_attribs.declaration).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
+        self.enc_attribs.as_ref().map(|enc_attribs| enc_attribs.declaration).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
     pub fn set_parent(&mut self, parent: Option<ElementKey>) {
@@ -326,7 +358,7 @@ impl FoliaElement {
         self.data.iter().position(|child| *child == *refchild)
     }
 
-    ///Remove (and return) the child at the specified index
+    ///Remove (and return) the child at the specified index, does not delete it from the underlying store
     pub fn remove(&mut self, index: usize) -> Option<DataType> {
         if index >= self.data.len() {
             None

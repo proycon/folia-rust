@@ -32,14 +32,14 @@ impl Selector {
                 } else if let Some(element) = store.get(*key) {
                     match &self.setselector {
                          SetSelector::SomeSet(set) => {
-                             if let Some(set2) = element.set() {
+                             if let Some(set2) = element.set_key() {
                                  *set == set2
                              } else {
                                  false
                              }
                          },
                          SetSelector::NoSet => {
-                             element.set().is_none()
+                             element.set_key().is_none()
                          },
                          SetSelector::AnySet => true,
                     }
@@ -75,7 +75,7 @@ impl Selector {
 
 #[derive(Debug,Clone)]
 pub enum SetSelector {
-    SomeSet(String),
+    SomeSet(DecKey),
     AnySet,
     NoSet
 }

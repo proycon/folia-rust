@@ -52,6 +52,7 @@ impl fmt::Display for AttribType {
     }
 }
 
+#[derive(Clone,PartialEq)]
 pub enum Attribute {
     Id(String),
     Set(String),
