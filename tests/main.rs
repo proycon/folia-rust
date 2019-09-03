@@ -1,5 +1,6 @@
 use std::str;
 use folia;
+use folia::store::Store;
 
 const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 <FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
@@ -66,6 +67,7 @@ fn instantiate() {
 }
 
 
+
 #[test]
 fn append() {
     if let Ok(mut doc) = folia::Document::new("example", folia::BodyType::Text) {
@@ -94,6 +96,33 @@ fn parse() {
             println!("{}", err);
             assert!(false);
         }
+    }
+}
+
+#[test]
+fn get_word_from_index() {
+    if let Ok(doc) = folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
+        if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
+            assert!(true);
+        } else {
+            assert!(false);
+        }
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn decode_set() {
+    if let Ok(doc) = folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
+        if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
+            let set = word.decoded_set(&doc.declarationstore);
+            assert_eq!(set.expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
+        } else {
+            assert!(false);
+        }
+    } else {
+        assert!(false);
     }
 }
 

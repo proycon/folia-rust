@@ -95,7 +95,7 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
 
     ///Get by key, where key is still a string to be resolved. Shortcut function calling key() and
     ///get()
-    fn get_by_key(&self, id: &str) -> Option<&Box<T>> {
+    fn get_by_id(&self, id: &str) -> Option<&Box<T>> {
         self.id_to_key(id).map( |key| {
             self.get(key)
         }).map(|o| o.unwrap())
@@ -103,7 +103,7 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
 
     ///Get (mutably) by key, where key is still a string to be resolved. Shortcut function calling
     ///key() and get_mut()
-    fn get_mut_by_key(&mut self, id: &str) -> Option<&mut Box<T>> {
+    fn get_mut_by_id(&mut self, id: &str) -> Option<&mut Box<T>> {
         self.id_to_key(id).map( move |key| {
             self.get_mut(key)
         }).map(|o| o.unwrap())

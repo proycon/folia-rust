@@ -128,7 +128,7 @@ impl Document {
 
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_key) = stack.last() {
-                            self.elementstore.attach(*parent_key, key);
+                            self.elementstore.attach(*parent_key, key)?;
                         }
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
@@ -154,18 +154,18 @@ impl Document {
                                 return Err(FoliaError::ParseError(format!("Malformed XML? Invalid element closed: {}, expected: {}", elementname, elem.elementtype.to_string() )));
                             }
                         } else {
-                            eprintln!("ID from stack does not exist! {}", key ) ;
+                            return Err(FoliaError::InternalError(format!("ID from stack does not exist! {}", key )));
                         }
 
                         //add element to parent (the previous one in the stack)
                         if let Some(parent_key) = stack.last() {
-                            self.elementstore.attach(*parent_key, key);
+                            self.elementstore.attach(*parent_key, key)?;
                         }
                     },
                     (None, Event::Text(s)) => {
                         let text = s.unescape_and_decode(reader)?;
                         if text.trim() != "" {
-                            eprintln!("TEXT: {}", text);
+                            //eprintln!("TEXT: {}", text);
                             if let Some(parent_key) = stack.last() {
                                 self.elementstore.get_mut(*parent_key).map( |mut parent| {
                                     parent.push(DataType::Text(text));
@@ -176,7 +176,6 @@ impl Document {
                     (None, Event::CData(s)) => {
                         let text = reader.decode(&s)?;
                         if text.trim() != "" {
-                            eprintln!("CDATA: {}", text);
                             if let Some(parent_key) = stack.last() {
                                 self.elementstore.get_mut(*parent_key).map( |mut parent| {
                                     parent.push(DataType::Text(text.to_string()));
@@ -187,7 +186,6 @@ impl Document {
                     (None, Event::Comment(s)) => {
                         let comment = reader.decode(&s)?;
                         if comment.trim() != "" {
-                            eprintln!("COMMENT: {}", comment);
                             if let Some(parent_key) = stack.last() {
                                 self.elementstore.get_mut(*parent_key).map( |mut parent| {
                                     parent.push(DataType::Comment(comment.to_string()));
@@ -203,7 +201,7 @@ impl Document {
             };
             Ok(())
         } else {
-            Err(FoliaError::ParseError("No root element".to_string()))
+            Err(FoliaError::InternalError("No root element".to_string()))
         }
     }
 }
