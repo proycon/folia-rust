@@ -30,6 +30,8 @@ impl Document {
         let mut nsbuf = Vec::new();
         let mut id: String = String::new();
         let mut metadata = Metadata::default();
+        let mut declarationstore = DeclarationStore::default();
+        let mut provenancestore = ProvenanceStore::default();
 
         //parse root
         loop {
@@ -89,8 +91,10 @@ impl Document {
                             }
                         },
                         (Some(ns), b"annotations") if ns == NSFOLIA => {
+                            declarationstore.parse(reader)?;
                         },
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
+                            provenancestore.parse(reader)?;
                         },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             let result = parse_meta(reader,e)?;
@@ -164,7 +168,7 @@ impl Document {
         };
 
 
-        let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: metadata };
+        let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: provenancestore, declarationstore: declarationstore, metadata: metadata };
         if let Some(body) = body {
             let key = doc.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
@@ -322,3 +326,18 @@ fn parse_until_end<R: BufRead>(reader: &mut Reader<R>, tag: &[u8]) -> Result<Opt
     Ok(text_option)
 }
 
+impl DeclarationStore {
+    ///Parses the <annotations> block
+    pub fn parse<R: BufRead>(&mut self, reader: &mut Reader<R>) -> Result<(), FoliaError> {
+        Ok(())
+    }
+
+}
+
+impl ProvenanceStore {
+    ///Parses the <provenance> block
+    pub fn parse<R: BufRead>(&mut self, reader: &mut Reader<R>) -> Result<(), FoliaError> {
+        Ok(())
+    }
+
+}
