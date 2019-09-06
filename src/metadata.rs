@@ -152,5 +152,8 @@ impl MaybeIdentifiable for Processor {
 
 #[derive(Default)]
 pub struct Metadata {
-    pub data: HashMap<String,String>
+    pub data: HashMap<String,String>,
+    pub src: Option<String>,
+    pub metadatatype: Option<String>,
 }
+

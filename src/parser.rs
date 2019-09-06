@@ -5,6 +5,7 @@ use std::str;
 use std::str::FromStr;
 use std::borrow::ToOwned;
 use std::string::ToString;
+use std::fmt::Display;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
@@ -28,6 +29,7 @@ impl Document {
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
         let mut id: String = String::new();
+        let mut metadata = Metadata::default();
 
         //parse root
         loop {
@@ -63,7 +65,67 @@ impl Document {
         };
 
         //parse metadata
-        //TODO
+        loop {
+            let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
+            match e {
+                (ref ns, Event::Start(ref e)) => {
+                    match (*ns, e.local_name())  {
+                        (Some(ns), b"metadata") if ns == NSFOLIA => {
+                            for attrib in e.attributes() {
+                                let attrib = attrib.expect("unwrapping metadata attribute");
+                                if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                                    match attrib.key {
+                                        b"src" => {
+                                            metadata.src = Some(value);
+                                        },
+                                        b"type" => {
+                                            metadata.metadatatype = Some(value);
+                                        },
+                                        otherwise => {
+                                            eprintln!("WARNING: Unhandled attribute metadata/@{:?}",otherwise);
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        (Some(ns), b"annotations") if ns == NSFOLIA => {
+                        },
+                        (Some(ns), b"provenance") if ns == NSFOLIA => {
+                        },
+                        (Some(ns), b"meta") if ns == NSFOLIA => {
+                            let result = parse_meta(reader,e)?;
+                            if let (key,value) = result {
+                                metadata.data.insert(key, value);
+                            }
+                        },
+                        (Some(ns), tag) if ns == NSFOLIA => {
+                            return Err(FoliaError::ParseError(format!("Unexpected FoLiA element: {}",  str::from_utf8(tag).expect("decoding tag from utf-8")).to_string()));
+                        },
+                        (Some(ns),tag) if ns != NSFOLIA => {
+                            return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got namespace {} with tag {}", str::from_utf8(ns).expect("decoding namespace from utf-8"), str::from_utf8(tag).expect("decoding XML tag from utf-8")).to_string()));
+                        }
+                        (None,tag) => {
+                            return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got no namespace with tag {}",  str::from_utf8(tag).expect("decoding tag from utf-8")).to_string()));
+                        }
+                        _ => {
+                            unreachable!()
+                        }
+                    }
+                },
+                (ref ns, Event::End(ref e)) => {
+                    match (*ns, e.local_name())  {
+                        (Some(ns), b"metadata") if ns == NSFOLIA => {
+                            break;
+                        },
+                        _ => { }
+                    }
+                },
+                (_, Event::Eof) => {
+                    return Err(FoliaError::ParseError("Premature end of document".to_string()));
+                }
+                (_,_) => {}
+            }
+        };
 
         //find body
         loop {
@@ -83,9 +145,9 @@ impl Document {
                             }
                             break;
                         },
-                        (Some(ns), _) if ns == NSFOLIA => {
+                        /*(Some(ns), _) if ns == NSFOLIA => {
                             //just ignore everything else for now
-                        },
+                        },*/
                         (Some(ns),tag) => {
                             return Err(FoliaError::ParseError(format!("Expected FoLiA namespace, got namespace {} with tag {}", str::from_utf8(ns).expect("decoding namespace from utf-8"), str::from_utf8(tag).expect("decoding XML tag from utf-8")).to_string()));
                         }
@@ -102,7 +164,7 @@ impl Document {
         };
 
 
-        let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: Metadata::default() };
+        let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: metadata };
         if let Some(body) = body {
             let key = doc.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
@@ -205,3 +267,58 @@ impl Document {
         }
     }
 }
+
+///Parses a meta element
+pub fn parse_meta<R: BufRead>(reader: &mut Reader<R>, event: &quick_xml::events::BytesStart) -> Result<(String,String), FoliaError> {
+    let mut meta_id: String = String::new();
+
+    for attrib in event.attributes() {
+        let attrib = attrib.expect("unwrapping metadata attribute");
+        if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+            match attrib.key {
+                b"id" | b"xml:id" => {
+                    meta_id = value;
+                },
+                otherwise => {
+                    eprintln!("WARNING: Unhandled attribute meta/@{:?}",otherwise);
+                }
+            }
+        }
+    }
+
+    if meta_id.is_empty() {
+        Err(FoliaError::ParseError("No ID found for <meta>".to_string()))
+    } else {
+        let text = parse_until_end(reader, b"meta")?;
+        Ok((meta_id, text.unwrap_or("".to_string())))
+    }
+}
+
+
+///Parses until the end of an element, returning any text if present
+fn parse_until_end<R: BufRead>(reader: &mut Reader<R>, tag: &[u8]) -> Result<Option<String>,FoliaError> {
+    let mut buf = Vec::new(); //not sure we can do this,
+    let mut nsbuf = Vec::new();
+    let mut text_option: Option<String> = None;
+
+    loop {
+        let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
+        match e {
+            (ref ns, Event::End(ref e)) => {
+                match (*ns, e.local_name())  {
+                    (Some(ns), foundtag) if ns == NSFOLIA && tag == foundtag  => {
+                        break;
+                    },
+                    _ => { }
+                }
+            },
+            (None, Event::Text(s)) => {
+                let text = s.unescape_and_decode(reader)?;
+                text_option = Some(text)
+            },
+            _ => {},
+        }
+    }
+    Ok(text_option)
+}
+
