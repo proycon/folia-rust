@@ -118,8 +118,9 @@ impl Document {
                             text = None;
                         },
                         (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
-                            declaration_type = get_declaration_type(tag);
-
+                            let result = get_declaration_type(str::from_utf8(tag).unwrap())?;
+                            declaration_type = Some(result);
+                            //TODO
                         },
                         (Some(ns), tag) if ns == NSFOLIA => {
                             return Err(FoliaError::ParseError(format!("Unexpected FoLiA element: {}",  str::from_utf8(tag).expect("decoding tag from utf-8")).to_string()));
