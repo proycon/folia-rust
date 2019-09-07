@@ -67,6 +67,11 @@ impl Document {
         };
 
         //parse metadata
+        let mut parsedeclarations = false;
+        let mut parseprovenance = false;
+        let mut text: Option<String> = None;
+        let mut meta_id: Option<String> = None;
+        let mut declaration_type: Option<AnnotationType> = None;
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
             match e {
@@ -91,16 +96,30 @@ impl Document {
                             }
                         },
                         (Some(ns), b"annotations") if ns == NSFOLIA => {
-                            declarationstore.parse(reader)?;
+                            parsedeclarations = true;
                         },
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
-                            provenancestore.parse(reader)?;
+                            parseprovenance = true;
                         },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
-                            let result = parse_meta(reader,e)?;
-                            if let (key,value) = result {
-                                metadata.data.insert(key, value);
+                            for attrib in e.attributes() {
+                                let attrib = attrib.expect("unwrapping meta attribute");
+                                if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                                    match attrib.key {
+                                        b"id" | b"xml:id" => {
+                                            meta_id = Some(value.clone());
+                                        },
+                                        otherwise => {
+                                            eprintln!("WARNING: Unhandled attribute meta/@{:?}",otherwise);
+                                        }
+                                    }
+                                }
                             }
+                            text = None;
+                        },
+                        (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
+                            declaration_type = get_declaration_type(tag);
+
                         },
                         (Some(ns), tag) if ns == NSFOLIA => {
                             return Err(FoliaError::ParseError(format!("Unexpected FoLiA element: {}",  str::from_utf8(tag).expect("decoding tag from utf-8")).to_string()));
@@ -116,10 +135,25 @@ impl Document {
                         }
                     }
                 },
+                (None, Event::Text(s)) => {
+                    let text_s = s.unescape_and_decode(reader)?;
+                    text = Some(text_s);
+                },
                 (ref ns, Event::End(ref e)) => {
                     match (*ns, e.local_name())  {
                         (Some(ns), b"metadata") if ns == NSFOLIA => {
                             break;
+                        },
+                        (Some(ns), b"annotations") if ns == NSFOLIA => {
+                            parsedeclarations = false;
+                        },
+                        (Some(ns), b"provenance") if ns == NSFOLIA => {
+                            parseprovenance = false;
+                        },
+                        (Some(ns), b"meta") if ns == NSFOLIA => {
+                            if let (Some(text), Some(meta_id)) = (&text, &meta_id) {
+                                metadata.data.insert(meta_id.clone(), text.clone());
+                            }
                         },
                         _ => { }
                     }
@@ -272,72 +306,20 @@ impl Document {
     }
 }
 
-///Parses a meta element
-pub fn parse_meta<R: BufRead>(reader: &mut Reader<R>, event: &quick_xml::events::BytesStart) -> Result<(String,String), FoliaError> {
-    let mut meta_id: String = String::new();
-
-    for attrib in event.attributes() {
-        let attrib = attrib.expect("unwrapping metadata attribute");
-        if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
-            match attrib.key {
-                b"id" | b"xml:id" => {
-                    meta_id = value;
-                },
-                otherwise => {
-                    eprintln!("WARNING: Unhandled attribute meta/@{:?}",otherwise);
-                }
+fn get_declaration_type(tag: &str) -> Result<AnnotationType, FoliaError> {
+    if let Some(index) = tag.find("-") {
+        let (declaration_type_string, suffix) = tag.split_at(index);
+        if suffix != "annotation" {
+            Err(FoliaError::ParseError(format!("Expected declaration element, got: {}", tag )))
+        } else {
+            if let Some(annotationtype) = AnnotationType::from_str(declaration_type_string) {
+                Ok(annotationtype)
+            } else {
+                Err(FoliaError::ParseError(format!("Unknown declaration: {}", tag )))
             }
         }
-    }
-
-    if meta_id.is_empty() {
-        Err(FoliaError::ParseError("No ID found for <meta>".to_string()))
     } else {
-        let text = parse_until_end(reader, b"meta")?;
-        Ok((meta_id, text.unwrap_or("".to_string())))
+        Err(FoliaError::ParseError(format!("Expected declaration element, got: {}", tag )))
     }
 }
 
-
-///Parses until the end of an element, returning any text if present
-fn parse_until_end<R: BufRead>(reader: &mut Reader<R>, tag: &[u8]) -> Result<Option<String>,FoliaError> {
-    let mut buf = Vec::new(); //not sure we can do this,
-    let mut nsbuf = Vec::new();
-    let mut text_option: Option<String> = None;
-
-    loop {
-        let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
-        match e {
-            (ref ns, Event::End(ref e)) => {
-                match (*ns, e.local_name())  {
-                    (Some(ns), foundtag) if ns == NSFOLIA && tag == foundtag  => {
-                        break;
-                    },
-                    _ => { }
-                }
-            },
-            (None, Event::Text(s)) => {
-                let text = s.unescape_and_decode(reader)?;
-                text_option = Some(text)
-            },
-            _ => {},
-        }
-    }
-    Ok(text_option)
-}
-
-impl DeclarationStore {
-    ///Parses the <annotations> block
-    pub fn parse<R: BufRead>(&mut self, reader: &mut Reader<R>) -> Result<(), FoliaError> {
-        Ok(())
-    }
-
-}
-
-impl ProvenanceStore {
-    ///Parses the <provenance> block
-    pub fn parse<R: BufRead>(&mut self, reader: &mut Reader<R>) -> Result<(), FoliaError> {
-        Ok(())
-    }
-
-}
