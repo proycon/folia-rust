@@ -119,7 +119,16 @@ impl Document {
                             text = None;
                         },
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
-                            //TODO: parse processor (use processor_stack)
+                            let processor = Processor::parse(&reader, &e)?;
+                            //TODO: add processor
+                            if processor_stack.is_empty() {
+                                let processor_key = provenancestore.add_to_chain(processor)?;
+                                processor_stack.push(processor_key);
+                            } else {
+                                let parent_key = processor_stack.last().expect("Polling processor stack");
+                                let processor_key = provenancestore.add_to(*parent_key, processor)?;
+                                processor_stack.push(processor_key);
+                            }
                         },
                         (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
                             //TODO: parse annotator (use declaration_key)

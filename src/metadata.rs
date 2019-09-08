@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::common::*;
+use crate::error::*;
 use crate::types::*;
 use crate::element::*;
 use crate::store::*;
@@ -106,6 +107,49 @@ impl Store<Processor,ProcKey> for ProvenanceStore {
     }
     fn index(&self) -> &HashMap<String,ProcKey> {
         &self.index
+    }
+}
+
+impl ProvenanceStore {
+    pub fn add_to_chain(&mut self, child: Processor) -> Result<ProcKey,FoliaError> {
+        let child_key = self.add(child);
+        if let Ok(child_key) = child_key {
+            self.chain.push(child_key);
+        }
+        child_key
+    }
+
+    ///Adds a processor as a child of another, this is a higher-level function that/
+    ///takes care of adding and attaching for you.
+    pub fn add_to(&mut self, parent_key: ProcKey, child: Processor) -> Result<ProcKey,FoliaError> {
+        let child_key = self.add(child);
+        if let Ok(child_key) = child_key {
+            self.attach(parent_key, child_key)?;
+        }
+        child_key
+    }
+
+    ///Adds the processor element to the parent element, automatically takes care
+    ///of removing the old parent (if any).
+    pub fn attach(&mut self, parent_key: ProcKey, child_key: ProcKey) -> Result<(),FoliaError> {
+        //ensure the parent exists
+        if !self.get(parent_key).is_some() {
+            return Err(FoliaError::InternalError(format!("Parent does not exist: {}", parent_key)));
+        };
+
+        if let Some(child) = self.get_mut(child_key) {
+            //add the new parent and return the old parent
+            child.parent = Some(parent_key);
+        } else {
+            //child does not exist
+            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_key)));
+        };
+
+        if let Some(parent) = self.get_mut(parent_key) {
+            parent.processors.push(child_key);
+        }
+
+        Ok(())
     }
 }
 
