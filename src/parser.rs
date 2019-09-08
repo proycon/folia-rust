@@ -364,3 +364,43 @@ fn get_declaration_type(tag: &str) -> Result<AnnotationType, FoliaError> {
     }
 }
 
+impl Processor {
+
+    ///Parse this element from XML, note that this does not handle the child elements, those are
+    ///appended by the main parser in Document::parse_body()
+    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<Processor, FoliaError> {
+        let mut processor = Processor::default();
+        for attrib in event.attributes()  {
+            if let Ok(attrib) = attrib {
+                let value = attrib.unescape_and_decode_value(&reader).expect("Parsing attribute value for processor");
+                match  attrib.key {
+                    b"xml:id" => { processor.id = value; },
+                    b"version" => { processor.version = value; },
+                    b"folia_version" => { processor.folia_version = value; },
+                    b"document_version" => { processor.document_version = value; },
+                    b"command" => { processor.command = value; },
+                    b"host" => { processor.host = value; },
+                    b"user" => { processor.user = value; },
+                    b"begindatetime" => { processor.begindatetime = value; },
+                    b"enddatetime" => { processor.enddatetime = value; },
+                    b"src" => { processor.src = value; },
+                    b"format" => { processor.format = value; },
+                    b"resourcelink" => { processor.resourcelink = value; },
+                    b"type" => { match value.as_str() {
+                        "manual" => processor.processortype = ProcessorType::Manual,
+                        "auto" => processor.processortype = ProcessorType::Auto,
+                        "generator" => processor.processortype = ProcessorType::Generator,
+                        "datasource" => processor.processortype = ProcessorType::DataSource,
+                        _ => {
+                            return Err(FoliaError::ParseError(format!("Invalid processor type: {:?}", value )));
+                        }
+                    }},
+                    tag => {
+                        return Err(FoliaError::ParseError(format!("Unknown attribute on processor, got: {:?}", tag )));
+                    }
+                }
+            }
+        }
+        Ok(processor)
+    }
+}
