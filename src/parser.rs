@@ -71,7 +71,8 @@ impl Document {
         let mut parseprovenance = false;
         let mut text: Option<String> = None;
         let mut meta_id: Option<String> = None;
-        let mut declaration_type: Option<AnnotationType> = None;
+        let mut declaration_key: Option<DecKey> = None;
+        let mut processor_stack: Vec<ProcKey> = vec![];
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
             match e {
@@ -117,10 +118,40 @@ impl Document {
                             }
                             text = None;
                         },
+                        (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
+                            //TODO: parse processor (use processor_stack)
+                        },
+                        (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
+                            //TODO: parse annotator (use declaration_key)
+                        },
                         (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
-                            let result = get_declaration_type(str::from_utf8(tag).unwrap())?;
-                            declaration_type = Some(result);
-                            //TODO
+                            let declaration_type = get_declaration_type(str::from_utf8(tag).unwrap())?;
+                            let mut set: Option<String> = None;
+                            for attrib in e.attributes() {
+                                let attrib = attrib.expect("unwrapping declaration attribute");
+                                if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                                    match attrib.key {
+                                        b"set" => {
+                                            set = Some(value.clone());
+                                        },
+                                        b"alias" => {
+                                            //TODO: parse alias
+                                        },
+                                        b"annotator" => {
+                                            //TODO: handle old-style default
+                                        },
+                                        b"annotatortype" => {
+                                            //TODO: handle old-style default
+                                        },
+                                        otherwise => {
+                                            eprintln!("WARNING: Unhandled attribute on declaration: @{:?}",otherwise);
+                                        }
+                                    }
+                                }
+                            }
+                            let declaration = Declaration::new(declaration_type, set);
+                            let result = declarationstore.add(declaration)?;
+                            declaration_key = Some(result);
                         },
                         (Some(ns), tag) if ns == NSFOLIA => {
                             return Err(FoliaError::ParseError(format!("Unexpected FoLiA element: {}",  str::from_utf8(tag).expect("decoding tag from utf-8")).to_string()));
@@ -151,11 +182,20 @@ impl Document {
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
                             parseprovenance = false;
                         },
+                        (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
+                            processor_stack.pop();
+                        },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             if let (Some(text), Some(meta_id)) = (&text, &meta_id) {
                                 metadata.data.insert(meta_id.clone(), text.clone());
                             }
                         },
+                        (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
+                            //nothing to do
+                        }
+                        (Some(ns), _tag) if ns == NSFOLIA && parsedeclarations => {
+                            declaration_key = None;
+                        }
                         _ => { }
                     }
                 },
