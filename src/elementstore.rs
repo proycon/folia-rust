@@ -34,11 +34,15 @@ impl ElementStore {
     ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
     pub fn add_to(&mut self, parent_key: ElementKey, child: FoliaElement) -> Result<ElementKey,FoliaError> {
-        let child_key = self.add(child);
-        if let Ok(child_key) = child_key {
-            self.attach(parent_key, child_key)?;
+        match self.add(child) {
+            Ok(child_key) => {
+                self.attach(parent_key, child_key)?;
+                Ok(child_key)
+            },
+            Err(err) => {
+                Err(FoliaError::InternalError(format!("Unable to add element to parent: {}", err)))
+            }
         }
-        child_key
     }
 
     ///Adds the child element to the parent element, automatically takes care
@@ -46,7 +50,7 @@ impl ElementStore {
     pub fn attach(&mut self, parent_key: ElementKey, child_key: ElementKey) -> Result<(),FoliaError> {
         //ensure the parent exists
         if !self.get(parent_key).is_some() {
-            return Err(FoliaError::InternalError(format!("Parent does not exist: {}", parent_key)));
+            return Err(FoliaError::InternalError(format!("Parent element does not exist: {}", parent_key)));
         };
 
         let oldparent_key = if let Some(child) = self.get_mut(child_key) {

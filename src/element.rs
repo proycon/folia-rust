@@ -396,6 +396,11 @@ impl FoliaElement {
         Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, enc_attribs: None }
     }
 
+    ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes
+    pub fn new_encoded(elementtype: ElementType) -> FoliaElement {
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, enc_attribs: Some(EncodedAttributes::default()) }
+    }
+
 }
 
 /*

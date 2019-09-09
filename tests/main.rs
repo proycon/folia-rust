@@ -58,7 +58,7 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 </FoLiA>"#;
 
 #[test]
-fn instantiate() {
+fn test001_instantiate() {
     match folia::Document::new("example", folia::BodyType::Text) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example");
@@ -72,7 +72,7 @@ fn instantiate() {
 
 
 #[test]
-fn append() {
+fn test002_append() {
     match folia::Document::new("example", folia::BodyType::Text) {
         Ok(mut doc) => {
             let root: folia::ElementKey = 0;
@@ -93,7 +93,7 @@ fn append() {
 }
 
 #[test]
-fn parse() {
+fn test003_parse() {
     match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example");
@@ -105,13 +105,13 @@ fn parse() {
 }
 
 #[test]
-fn get_word_from_index() {
+fn test004_get_word_from_index() {
     match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
                 assert!(true);
             } else {
-                assert!(false);
+                assert!(false, "unable to get word");
             }
         },
         Err(err) => {
@@ -121,7 +121,7 @@ fn get_word_from_index() {
 }
 
 #[test]
-fn decode_set() {
+fn test005_decode_set() {
     match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
@@ -138,7 +138,7 @@ fn decode_set() {
 }
 
 #[test]
-fn serialise() {
+fn test006_serialise() {
     match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             match doc.xml(0) {

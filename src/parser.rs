@@ -363,8 +363,8 @@ impl Document {
 fn get_declaration_type(tag: &str) -> Result<AnnotationType, FoliaError> {
     if let Some(index) = tag.find("-") {
         let (declaration_type_string, suffix) = tag.split_at(index);
-        if suffix != "annotation" {
-            Err(FoliaError::ParseError(format!("Expected declaration element, got: {}", tag )))
+        if suffix != "-annotation" {
+            Err(FoliaError::ParseError(format!("Expected declaration element, got: {}", tag)))
         } else {
             if let Some(annotationtype) = AnnotationType::from_str(declaration_type_string) {
                 Ok(annotationtype)

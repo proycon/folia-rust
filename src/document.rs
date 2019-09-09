@@ -41,8 +41,8 @@ impl Document {
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
         let mut elementstore = ElementStore::default();
         elementstore.add(match bodytype {
-            BodyType::Text => FoliaElement::new(ElementType::Text),
-            BodyType::Speech => FoliaElement::new(ElementType::Speech),
+            BodyType::Text => FoliaElement::new_encoded(ElementType::Text),
+            BodyType::Speech => FoliaElement::new_encoded(ElementType::Speech),
         })?;
         Ok(Self {
             id: id.to_string(),
