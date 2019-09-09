@@ -25,6 +25,8 @@ use crate::parser::*;
 
 pub struct Document {
     pub id: String,
+    ///The FoLiA version of the document
+    pub version: String,
     pub filename: Option<String>,
     pub elementstore: ElementStore,
     pub provenancestore: ProvenanceStore,
@@ -41,10 +43,11 @@ impl Document {
         elementstore.add(match bodytype {
             BodyType::Text => FoliaElement::new(ElementType::Text),
             BodyType::Speech => FoliaElement::new(ElementType::Speech),
-        });
+        })?;
         Ok(Self {
             id: id.to_string(),
             filename: None,
+            version: FOLIAVERSION.to_string(),
             elementstore: elementstore,
             provenancestore:  ProvenanceStore::default(),
             declarationstore: DeclarationStore::default(),
@@ -56,12 +59,10 @@ impl Document {
     pub fn from_file(filename: &str) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_file(Path::new(filename))?;
         reader.trim_text(true);
-        let mut result = Self::parse(&mut reader);
-        if let Ok(ref mut doc) = result {
-            //associate the filename with the document
-            doc.filename = Some(filename.to_string());
-        }
-        return result;
+        let mut doc = Self::parse(&mut reader)?;
+        //associate the filename with the document
+        doc.filename = Some(filename.to_string());
+        Ok(doc)
     }
 
     ///Load a FoliA document from XML string representation
@@ -79,7 +80,7 @@ impl Document {
     }
 
 
-    ///Get an element from the document
+    ///REmove an element from the document
     pub fn remove(&mut self, key: ElementKey) {
         //self.elementstore.remove(key)
         unimplemented!()
@@ -91,7 +92,7 @@ impl Document {
     }
 
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        unimplemented!();
+        self.provenancestore.add(processor)
     }
 
     pub fn declare(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {

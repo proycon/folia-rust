@@ -36,7 +36,7 @@ impl ElementStore {
     pub fn add_to(&mut self, parent_key: ElementKey, child: FoliaElement) -> Result<ElementKey,FoliaError> {
         let child_key = self.add(child);
         if let Ok(child_key) = child_key {
-            self.attach(parent_key, child_key);
+            self.attach(parent_key, child_key)?;
         }
         child_key
     }

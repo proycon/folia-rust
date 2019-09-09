@@ -29,6 +29,7 @@ impl Document {
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
         let mut id: String = String::new();
+        let mut version: String = FOLIAVERSION.to_string();
         let mut metadata = Metadata::default();
         let mut declarationstore = DeclarationStore::default();
         let mut provenancestore = ProvenanceStore::default();
@@ -45,6 +46,9 @@ impl Document {
                                 match attrib.key {
                                     b"xml:id" => {
                                         id = attrib.unescape_and_decode_value(&reader).expect("Parsing ID")
+                                    }
+                                    b"version" => {
+                                        version = attrib.unescape_and_decode_value(&reader).expect("Parsing version")
                                     }
                                     _ => {}
                                 };
@@ -252,7 +256,7 @@ impl Document {
         };
 
 
-        let mut doc = Self { id: id, filename: None, elementstore: ElementStore::default(), provenancestore: provenancestore, declarationstore: declarationstore, metadata: metadata };
+        let mut doc = Self { id: id, filename: None, version: version, elementstore: ElementStore::default(), provenancestore: provenancestore, declarationstore: declarationstore, metadata: metadata };
         if let Some(body) = body {
             let key = doc.add(body);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
@@ -411,5 +415,26 @@ impl Processor {
             }
         }
         Ok(processor)
+    }
+}
+
+impl FoliaElement {
+    fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
+        let mut attributes: Vec<Attribute> = Vec::new();
+        for attrib in attribiter {
+            match Attribute::parse(&reader, &attrib.unwrap()) {
+                Ok(attrib) => { attributes.push(attrib); },
+                Err(e) => { return Err(e); }
+            }
+        }
+        Ok(attributes)
+    }
+
+    ///Parse this element from XML, note that this does not handle the child elements, those are
+    ///appended by the main parser in Document::parse_body()
+    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+        let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
+        let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
+        Ok(FoliaElement::new(elementtype).with_attribs(attributes))
     }
 }

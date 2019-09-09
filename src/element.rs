@@ -18,6 +18,7 @@ use crate::attrib::*;
 use crate::elementstore::*;
 use crate::store::*;
 use crate::metadata::*;
+use crate::parser::*;
 use crate::document::{Document};
 
 
@@ -395,24 +396,6 @@ impl FoliaElement {
         Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, enc_attribs: None }
     }
 
-    pub fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
-        let mut attributes: Vec<Attribute> = Vec::new();
-        for attrib in attribiter {
-            match Attribute::parse(&reader, &attrib.unwrap()) {
-                Ok(attrib) => { attributes.push(attrib); },
-                Err(e) => { return Err(e); }
-            }
-        }
-        Ok(attributes)
-    }
-
-    ///Parse this element from XML, note that this does not handle the child elements, those are
-    ///appended by the main parser in Document::parse_body()
-    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
-        let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
-        let elementtype = ElementType::from_str(from_utf8(event.local_name()).unwrap())?;
-        Ok(FoliaElement::new(elementtype).with_attribs(attributes))
-    }
 }
 
 /*
