@@ -5,6 +5,8 @@ use std::str::FromStr;
 use std::borrow::ToOwned;
 use std::string::ToString;
 
+use std::io::Write;
+use std::io::BufWriter;
 use quick_xml::{Reader,Writer};
 use quick_xml::events::{Event,BytesStart,BytesEnd,BytesText};
 
@@ -31,7 +33,30 @@ impl Document {
         doc_start.push_attribute(("generator", GENERATOR ));
         writer.write_event(Event::Start(doc_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
 
+        self.xml_metadata(&mut writer, root_key)?;
 
+        self.xml_elements(&mut writer, root_key)?;
+
+        writer.write_event(Event::End(BytesEnd::borrowed(b"FoLiA"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        let result = writer.into_inner().into_inner();
+        Ok(result)
+    }
+
+    fn xml_metadata(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
+        self.xml_declaration(writer, root_key)?;
+        self.xml_provenance(writer, root_key)?;
+        Ok(())
+    }
+
+    fn xml_declaration(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
+        Ok(())
+    }
+
+    fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
+        Ok(())
+    }
+
+    fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
         //Start the root tag (and obtain data for its end)
         let root_end = if let Some(element) = self.elementstore.get(root_key) {
             let tagstring = element.elementtype.to_string();
@@ -97,8 +122,6 @@ impl Document {
 
         //Write root end tag
         writer.write_event(Event::End(root_end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
-        writer.write_event(Event::End(BytesEnd::borrowed(b"FoLiA"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
-        let result = writer.into_inner().into_inner();
-        Ok(result)
+        Ok(())
     }
 }
