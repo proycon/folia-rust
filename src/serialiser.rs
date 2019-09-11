@@ -50,6 +50,7 @@ impl Document {
         if let Some(src) = &self.metadata.src {
             metadata_start.push_attribute(("src", src.as_str() ));
         }
+        writer.write_event(Event::Start(metadata_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         self.xml_declarations(writer)?;
         self.xml_provenance(writer)?;
         writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
@@ -57,18 +58,22 @@ impl Document {
     }
 
     fn xml_declarations(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        BytesStart::borrowed(b"annotations", 11);
-        writer.write_event(Event::End(BytesEnd::borrowed(b"annotations"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::Start( BytesStart::borrowed(b"annotations", 11))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         for declaration in self.declarationstore.iter() {
             if let Some(declaration) = declaration {
-                let tagname = declaration.annotationtype.as_str();
+                let tagname = format!("{}-annotation", declaration.annotationtype.as_str());
+                let mut dec_start = BytesStart::owned_name(tagname.as_bytes());
+                let dec_end = BytesEnd::owned(tagname.as_bytes().to_vec());
+                writer.write_event(Event::Start(dec_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                writer.write_event(Event::End(dec_end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
             }
         }
+        writer.write_event(Event::End(BytesEnd::borrowed(b"annotations"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         Ok(())
     }
 
     fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        BytesStart::borrowed(b"provenance", 10);
+        writer.write_event(Event::Start( BytesStart::borrowed(b"provenance", 11))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         writer.write_event(Event::End(BytesEnd::borrowed(b"provenance"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         Ok(())
     }
