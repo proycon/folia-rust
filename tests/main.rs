@@ -7,16 +7,16 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
   <metadata>
       <annotations>
           <token-annotation set="https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl">
-			 <annotator processor="p1" />
-		  </token-annotation>
+             <annotator processor="p1" />
+          </token-annotation>
           <text-annotation>
-			 <annotator processor="p1" />
+             <annotator processor="p1" />
           </text-annotation>
           <sentence-annotation>
-			 <annotator processor="p1" />
+             <annotator processor="p1" />
           </sentence-annotation>
           <paragraph-annotation>
-			 <annotator processor="p1" />
+             <annotator processor="p1" />
           </paragraph-annotation>
       </annotations>
       <provenance>
@@ -96,13 +96,15 @@ fn test002_append() {
 fn test003_parse() {
     match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
         Ok(doc) => {
-            assert_eq!(doc.id(), "example");
+            assert_eq!(doc.id(), "example", "ID check");
+            assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain");
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
         }
     }
 }
+
 
 #[test]
 fn test004_get_word_from_index() {

@@ -16,8 +16,8 @@ pub struct Declaration {
 }
 
 impl Declaration {
-    pub fn new(annotationtype: AnnotationType, set: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, alias: None, processors: vec![] }
+    pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
+        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] }
     }
 }
 
@@ -198,6 +198,7 @@ impl fmt::Display for ProcessorType {
 #[derive(Default)]
 pub struct Processor {
     pub id: String,
+    pub name: String,
     pub processortype: ProcessorType,
     pub version: String,
     pub folia_version: String,

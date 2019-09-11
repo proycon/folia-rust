@@ -98,6 +98,7 @@ impl Document {
         if let Some(processor) = self.provenancestore.get(processor_key) {
             let mut processor_start = BytesStart::borrowed_name(b"processor");
             processor_start.push_attribute(("xml:id", processor.id.as_str() ));
+            processor_start.push_attribute(("name", processor.name.as_str() ));
             processor_start.push_attribute(("type", processor.processortype.as_str() ));
             if !processor.version.is_empty() {
                 processor_start.push_attribute(("version", processor.version.as_str() ));

@@ -80,6 +80,22 @@ impl Document {
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
             match e {
+                (ref ns, Event::Empty(ref e)) => {
+                    match (*ns, e.local_name())  {
+                        (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
+                            eprintln!("Parsing processor");
+                            let processor = Processor::parse(&reader, &e)?;
+                            if processor_stack.is_empty() {
+                                let processor_key = provenancestore.add_to_chain(processor)?;
+                            } else {
+                                let parent_key = processor_stack.last().expect("Polling processor stack");
+                                provenancestore.add_to(*parent_key, processor)?;
+                            }
+                        },
+                        _ => {
+                        }
+                    }
+                },
                 (ref ns, Event::Start(ref e)) => {
                     match (*ns, e.local_name())  {
                         (Some(ns), b"metadata") if ns == NSFOLIA => {
@@ -105,6 +121,7 @@ impl Document {
                         },
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
                             parseprovenance = true;
+                            eprintln!("Parsing provenance");
                         },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             for attrib in e.attributes() {
@@ -123,8 +140,8 @@ impl Document {
                             text = None;
                         },
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
+                            eprintln!("Parsing processor");
                             let processor = Processor::parse(&reader, &e)?;
-                            //TODO: add processor
                             if processor_stack.is_empty() {
                                 let processor_key = provenancestore.add_to_chain(processor)?;
                                 processor_stack.push(processor_key);
@@ -138,31 +155,7 @@ impl Document {
                             //TODO: parse annotator (use declaration_key)
                         },
                         (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
-                            let declaration_type = get_declaration_type(str::from_utf8(tag).unwrap())?;
-                            let mut set: Option<String> = None;
-                            for attrib in e.attributes() {
-                                let attrib = attrib.expect("unwrapping declaration attribute");
-                                if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
-                                    match attrib.key {
-                                        b"set" => {
-                                            set = Some(value.clone());
-                                        },
-                                        b"alias" => {
-                                            //TODO: parse alias
-                                        },
-                                        b"annotator" => {
-                                            //TODO: handle old-style default
-                                        },
-                                        b"annotatortype" => {
-                                            //TODO: handle old-style default
-                                        },
-                                        otherwise => {
-                                            eprintln!("WARNING: Unhandled attribute on declaration: @{:?}",otherwise);
-                                        }
-                                    }
-                                }
-                            }
-                            let declaration = Declaration::new(declaration_type, set);
+                            let declaration = Declaration::parse(&reader, e, tag)?;
                             let result = declarationstore.add(declaration)?;
                             declaration_key = Some(result);
                         },
@@ -388,6 +381,7 @@ impl Processor {
                 let value = attrib.unescape_and_decode_value(&reader).expect("Parsing attribute value for processor");
                 match  attrib.key {
                     b"xml:id" => { processor.id = value; },
+                    b"name" => { processor.name = value; },
                     b"version" => { processor.version = value; },
                     b"folia_version" => { processor.folia_version = value; },
                     b"document_version" => { processor.document_version = value; },
@@ -409,7 +403,7 @@ impl Processor {
                         }
                     }},
                     tag => {
-                        return Err(FoliaError::ParseError(format!("Unknown attribute on processor, got: {:?}", tag )));
+                        return Err(FoliaError::ParseError(format!("Unknown attribute on processor, got: {:?}", str::from_utf8(tag).unwrap() )));
                     }
                 }
             }
@@ -436,5 +430,36 @@ impl FoliaElement {
         let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
         let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement::new(elementtype).with_attribs(attributes))
+    }
+}
+
+impl Declaration {
+    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart, tag: &[u8]) -> Result<Declaration, FoliaError> {
+        let declaration_type = get_declaration_type(str::from_utf8(tag).unwrap())?;
+        let mut set: Option<String> = None;
+        let mut alias: Option<String> = None;
+        for attrib in event.attributes() {
+            let attrib = attrib.expect("unwrapping declaration attribute");
+            if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                match attrib.key {
+                    b"set" => {
+                        set = Some(value.clone());
+                    },
+                    b"alias" => {
+                        alias = Some(value.clone());
+                    },
+                    b"annotator" => {
+                        //TODO: handle old-style default
+                    },
+                    b"annotatortype" => {
+                        //TODO: handle old-style default
+                    },
+                    otherwise => {
+                        eprintln!("WARNING: Unhandled attribute on declaration: @{:?}",otherwise);
+                    }
+                }
+            }
+        }
+        Ok(Declaration::new(declaration_type, set, alias))
     }
 }
