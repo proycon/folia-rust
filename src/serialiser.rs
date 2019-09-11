@@ -32,24 +32,26 @@ impl Document {
     pub fn xml(&self, root_key: ElementKey) -> Result<Vec<u8>, FoliaError> {
         let mut writer = Writer::new(Cursor::new(Vec::new()));
 
-        let mut doc_start = BytesStart::borrowed(b"FoLiA", 5);
+        let mut doc_start = BytesStart::borrowed_name(b"FoLiA");
         doc_start.push_attribute(("xmlns", str::from_utf8(NSFOLIA).unwrap() ));
         doc_start.push_attribute(("xmlns:xlink", str::from_utf8(NSXLINK).unwrap() ));
         doc_start.push_attribute(("version",FOLIAVERSION ));
         doc_start.push_attribute(("generator", GENERATOR ));
         writer.write_event(Event::Start(doc_start)).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
 
         self.xml_metadata(&mut writer)?;
 
         self.xml_elements(&mut writer, root_key)?;
 
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         writer.write_event(Event::End(BytesEnd::borrowed(b"FoLiA"))).map_err(to_serialisation_error)?;
         let result = writer.into_inner().into_inner();
         Ok(result)
     }
 
     fn xml_metadata(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        let mut metadata_start = BytesStart::borrowed(b"metadata", 8);
+        let mut metadata_start = BytesStart::borrowed_name(b"metadata");
         if let Some(metadatatype) = &self.metadata.metadatatype {
             metadata_start.push_attribute(("type", metadatatype.as_str() ));
         }
@@ -57,6 +59,7 @@ impl Document {
             metadata_start.push_attribute(("src", src.as_str() ));
         }
         writer.write_event(Event::Start(metadata_start)).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         self.xml_declarations(writer)?;
         self.xml_provenance(writer)?;
         writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(to_serialisation_error)?;
@@ -66,6 +69,7 @@ impl Document {
 
     fn xml_declarations(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
         writer.write_event(Event::Start( BytesStart::borrowed_name(b"annotations"))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         for declaration in self.declarationstore.iter() {
             if let Some(declaration) = declaration {
                 let tagname = format!("{}-annotation", declaration.annotationtype.as_str());
@@ -79,18 +83,22 @@ impl Document {
                 let dec_end = BytesEnd::owned(tagname.as_bytes().to_vec());
                 writer.write_event(Event::Start(dec_start)).map_err(to_serialisation_error)?;
                 writer.write_event(Event::End(dec_end)).map_err(to_serialisation_error)?;
+                writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
             }
         }
         writer.write_event(Event::End(BytesEnd::borrowed(b"annotations"))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         Ok(())
     }
 
     fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
         writer.write_event(Event::Start( BytesStart::borrowed_name(b"provenance"))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         for processor_key in self.provenancestore.chain.iter() {
             self.xml_processor(writer, *processor_key)?;
         }
         writer.write_event(Event::End(BytesEnd::borrowed(b"provenance"))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         Ok(())
     }
 
@@ -154,6 +162,7 @@ impl Document {
         } else {
             return Err(FoliaError::SerialisationError(format!("Specified root element not found: {}", root_key)));
         };
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
 
         //Select children
         let mut stack = vec![];
@@ -208,6 +217,7 @@ impl Document {
         }
 
         //Write root end tag
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         writer.write_event(Event::End(root_end)).map_err(to_serialisation_error)?;
         Ok(())
     }
