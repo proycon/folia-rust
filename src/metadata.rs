@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 
 use crate::common::*;
 use crate::error::*;
@@ -172,8 +173,26 @@ pub enum ProcessorType {
     DataSource,
 }
 
+impl ProcessorType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ProcessorType::Auto => "auto",
+            ProcessorType::Manual => "manual",
+            ProcessorType::Generator => "generator",
+            ProcessorType::DataSource => "datasource",
+        }
+    }
+}
+
 impl Default for ProcessorType {
     fn default() -> Self { ProcessorType::Auto }
+
+}
+
+impl fmt::Display for ProcessorType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
 }
 
 #[derive(Default)]

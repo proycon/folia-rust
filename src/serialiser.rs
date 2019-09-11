@@ -65,7 +65,7 @@ impl Document {
     }
 
     fn xml_declarations(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        writer.write_event(Event::Start( BytesStart::borrowed(b"annotations", 11))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Start( BytesStart::borrowed_name(b"annotations"))).map_err(to_serialisation_error)?;
         for declaration in self.declarationstore.iter() {
             if let Some(declaration) = declaration {
                 let tagname = format!("{}-annotation", declaration.annotationtype.as_str());
@@ -86,8 +86,58 @@ impl Document {
     }
 
     fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        writer.write_event(Event::Start( BytesStart::borrowed(b"provenance", 11))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Start( BytesStart::borrowed_name(b"provenance"))).map_err(to_serialisation_error)?;
+        for processor_key in self.provenancestore.chain.iter() {
+            self.xml_processor(writer, *processor_key)?;
+        }
         writer.write_event(Event::End(BytesEnd::borrowed(b"provenance"))).map_err(to_serialisation_error)?;
+        Ok(())
+    }
+
+    fn xml_processor(&self, writer: &mut Writer<Cursor<Vec<u8>>>, processor_key: ProcKey) -> Result<(),FoliaError> {
+        if let Some(processor) = self.provenancestore.get(processor_key) {
+            let mut processor_start = BytesStart::borrowed_name(b"processor");
+            processor_start.push_attribute(("xml:id", processor.id.as_str() ));
+            processor_start.push_attribute(("type", processor.processortype.as_str() ));
+            if !processor.version.is_empty() {
+                processor_start.push_attribute(("version", processor.version.as_str() ));
+            }
+            if !processor.folia_version.is_empty() {
+                processor_start.push_attribute(("folia_version", processor.folia_version.as_str() ));
+            }
+            if !processor.document_version.is_empty() {
+                processor_start.push_attribute(("document_version", processor.document_version.as_str() ));
+            }
+            if !processor.command.is_empty() {
+                processor_start.push_attribute(("command", processor.command.as_str() ));
+            }
+            if !processor.host.is_empty() {
+                processor_start.push_attribute(("host", processor.host.as_str() ));
+            }
+            if !processor.user.is_empty() {
+                processor_start.push_attribute(("user", processor.user.as_str() ));
+            }
+            if !processor.begindatetime.is_empty() {
+                processor_start.push_attribute(("begindatetime", processor.begindatetime.as_str() ));
+            }
+            if !processor.enddatetime.is_empty() {
+                processor_start.push_attribute(("enddatetime", processor.enddatetime.as_str() ));
+            }
+            if !processor.src.is_empty() {
+                processor_start.push_attribute(("src", processor.src.as_str() ));
+            }
+            if !processor.format.is_empty() {
+                processor_start.push_attribute(("format", processor.format.as_str() ));
+            }
+            if !processor.resourcelink.is_empty() {
+                processor_start.push_attribute(("resourcelink", processor.resourcelink.as_str() ));
+            }
+            writer.write_event(Event::Start(processor_start)).map_err(to_serialisation_error)?;
+            for subprocessor_key in processor.processors.iter() {
+                self.xml_processor(writer, *subprocessor_key)?;
+            }
+            writer.write_event(Event::End(BytesEnd::borrowed(b"processor"))).map_err(to_serialisation_error)?;
+        }
         Ok(())
     }
 
