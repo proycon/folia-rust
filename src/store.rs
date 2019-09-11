@@ -32,6 +32,7 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
     fn index_mut(&mut self) -> &mut HashMap<String,K>;
 
     fn items(&self) -> &Vec<Option<Box<T>>>;
+    fn iter(&self) -> std::slice::Iter<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,K>;
 
     ///Add a new item to the store (takes ownership)

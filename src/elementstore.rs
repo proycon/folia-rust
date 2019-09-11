@@ -28,6 +28,10 @@ impl Store<FoliaElement,ElementKey> for ElementStore {
         &self.index
     }
 
+    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement>>> {
+        self.items.iter()
+    }
+
 }
 
 impl ElementStore {
@@ -44,6 +48,7 @@ impl ElementStore {
             }
         }
     }
+
 
     ///Adds the child element to the parent element, automatically takes care
     ///of removing the old parent (if any).

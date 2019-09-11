@@ -33,7 +33,7 @@ impl Document {
         doc_start.push_attribute(("generator", GENERATOR ));
         writer.write_event(Event::Start(doc_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
 
-        self.xml_metadata(&mut writer, root_key)?;
+        self.xml_metadata(&mut writer)?;
 
         self.xml_elements(&mut writer, root_key)?;
 
@@ -42,17 +42,34 @@ impl Document {
         Ok(result)
     }
 
-    fn xml_metadata(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
-        self.xml_declaration(writer, root_key)?;
-        self.xml_provenance(writer, root_key)?;
+    fn xml_metadata(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
+        let mut metadata_start = BytesStart::borrowed(b"metadata", 8);
+        if let Some(metadatatype) = &self.metadata.metadatatype {
+            metadata_start.push_attribute(("type", metadatatype.as_str() ));
+        }
+        if let Some(src) = &self.metadata.src {
+            metadata_start.push_attribute(("src", src.as_str() ));
+        }
+        self.xml_declarations(writer)?;
+        self.xml_provenance(writer)?;
+        writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         Ok(())
     }
 
-    fn xml_declaration(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
+    fn xml_declarations(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
+        BytesStart::borrowed(b"annotations", 11);
+        writer.write_event(Event::End(BytesEnd::borrowed(b"annotations"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        for declaration in self.declarationstore.iter() {
+            if let Some(declaration) = declaration {
+                let tagname = declaration.annotationtype.as_str();
+            }
+        }
         Ok(())
     }
 
-    fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
+    fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
+        BytesStart::borrowed(b"provenance", 10);
+        writer.write_event(Event::End(BytesEnd::borrowed(b"provenance"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
         Ok(())
     }
 

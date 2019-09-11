@@ -61,6 +61,9 @@ impl Store<String,ClassKey> for ClassStore {
     fn index(&self) -> &HashMap<String,ClassKey> {
         &self.index
     }
+    fn iter(&self) -> std::slice::Iter<Option<Box<String>>> {
+        self.items.iter()
+    }
 }
 
 
@@ -85,6 +88,9 @@ impl Store<Declaration,DecKey> for DeclarationStore {
     fn index(&self) -> &HashMap<String,DecKey> {
         &self.index
     }
+    fn iter(&self) -> std::slice::Iter<Option<Box<Declaration>>> {
+        self.items.iter()
+    }
 }
 
 #[derive(Default)]
@@ -107,6 +113,9 @@ impl Store<Processor,ProcKey> for ProvenanceStore {
     }
     fn index(&self) -> &HashMap<String,ProcKey> {
         &self.index
+    }
+    fn iter(&self) -> std::slice::Iter<Option<Box<Processor>>> {
+        self.items.iter()
     }
 }
 
