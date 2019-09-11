@@ -138,6 +138,7 @@ impl Document {
                 self.xml_processor(writer, *subprocessor_key)?;
             }
             writer.write_event(Event::End(BytesEnd::borrowed(b"processor"))).map_err(to_serialisation_error)?;
+            writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         }
         Ok(())
     }
