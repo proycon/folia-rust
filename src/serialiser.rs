@@ -21,6 +21,12 @@ use crate::metadata::*;
 use crate::select::*;
 use crate::document::Document;
 
+const NL: &[u8] = b"\n";
+
+fn to_serialisation_error(err: quick_xml::Error) -> FoliaError {
+    FoliaError::SerialisationError(format!("{}",err))
+}
+
 impl Document {
     ///Serialises a document to XML (vector of bytes, utf-8)
     pub fn xml(&self, root_key: ElementKey) -> Result<Vec<u8>, FoliaError> {
@@ -31,13 +37,13 @@ impl Document {
         doc_start.push_attribute(("xmlns:xlink", str::from_utf8(NSXLINK).unwrap() ));
         doc_start.push_attribute(("version",FOLIAVERSION ));
         doc_start.push_attribute(("generator", GENERATOR ));
-        writer.write_event(Event::Start(doc_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::Start(doc_start)).map_err(to_serialisation_error)?;
 
         self.xml_metadata(&mut writer)?;
 
         self.xml_elements(&mut writer, root_key)?;
 
-        writer.write_event(Event::End(BytesEnd::borrowed(b"FoLiA"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::End(BytesEnd::borrowed(b"FoLiA"))).map_err(to_serialisation_error)?;
         let result = writer.into_inner().into_inner();
         Ok(result)
     }
@@ -50,31 +56,38 @@ impl Document {
         if let Some(src) = &self.metadata.src {
             metadata_start.push_attribute(("src", src.as_str() ));
         }
-        writer.write_event(Event::Start(metadata_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::Start(metadata_start)).map_err(to_serialisation_error)?;
         self.xml_declarations(writer)?;
         self.xml_provenance(writer)?;
-        writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         Ok(())
     }
 
     fn xml_declarations(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        writer.write_event(Event::Start( BytesStart::borrowed(b"annotations", 11))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::Start( BytesStart::borrowed(b"annotations", 11))).map_err(to_serialisation_error)?;
         for declaration in self.declarationstore.iter() {
             if let Some(declaration) = declaration {
                 let tagname = format!("{}-annotation", declaration.annotationtype.as_str());
                 let mut dec_start = BytesStart::owned_name(tagname.as_bytes());
+                if let Some(set) = &declaration.set {
+                    dec_start.push_attribute(("set", set.as_str() ));
+                }
+                if let Some(alias) = &declaration.alias {
+                    dec_start.push_attribute(("alias", alias.as_str() ));
+                }
                 let dec_end = BytesEnd::owned(tagname.as_bytes().to_vec());
-                writer.write_event(Event::Start(dec_start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
-                writer.write_event(Event::End(dec_end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                writer.write_event(Event::Start(dec_start)).map_err(to_serialisation_error)?;
+                writer.write_event(Event::End(dec_end)).map_err(to_serialisation_error)?;
             }
         }
-        writer.write_event(Event::End(BytesEnd::borrowed(b"annotations"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::End(BytesEnd::borrowed(b"annotations"))).map_err(to_serialisation_error)?;
         Ok(())
     }
 
     fn xml_provenance(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
-        writer.write_event(Event::Start( BytesStart::borrowed(b"provenance", 11))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
-        writer.write_event(Event::End(BytesEnd::borrowed(b"provenance"))).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::Start( BytesStart::borrowed(b"provenance", 11))).map_err(to_serialisation_error)?;
+        writer.write_event(Event::End(BytesEnd::borrowed(b"provenance"))).map_err(to_serialisation_error)?;
         Ok(())
     }
 
@@ -84,7 +97,7 @@ impl Document {
             let tagstring = element.elementtype.to_string();
             let tag = tagstring.as_bytes();
             let start = BytesStart::owned(tag.to_vec(), tag.len());
-            writer.write_event(Event::Start(start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+            writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
             BytesEnd::owned(tag.to_vec())
         } else {
             return Err(FoliaError::SerialisationError(format!("Specified root element not found: {}", root_key)));
@@ -96,7 +109,7 @@ impl Document {
         for item in self.elementstore.select(root_key,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
-                    writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                    writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
                 } else {
                     return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
                 }
@@ -122,14 +135,14 @@ impl Document {
                         if let Some(processor) = element.decoded_processor(&self.provenancestore) {
                             start.push_attribute(("processor", processor) );
                         }
-                        writer.write_event(Event::Start(start)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                        writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
                         let end = BytesEnd::owned(tag.to_vec());
                         stack.push(end);
                     }
                 },
                 DataType::Text(text) => {
                     let text = BytesText::from_plain_str(text.as_str());
-                    writer.write_event(Event::Text(text)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+                    writer.write_event(Event::Text(text)).map_err(to_serialisation_error)?;
                 },
                 DataType::Comment(comment) => {
                 }
@@ -139,11 +152,11 @@ impl Document {
 
         //don't forget the final closing elements
         while let Some(end) = stack.pop() {
-            writer.write_event(Event::End(end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+            writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
         }
 
         //Write root end tag
-        writer.write_event(Event::End(root_end)).map_err(|err| FoliaError::SerialisationError(format!("{}",err)))?;
+        writer.write_event(Event::End(root_end)).map_err(to_serialisation_error)?;
         Ok(())
     }
 }

@@ -10,12 +10,13 @@ use crate::store::*;
 pub struct Declaration {
     pub annotationtype: AnnotationType,
     pub set: Option<String>,
-    pub processors: Vec<ProcKey>
+    pub alias: Option<String>,
+    pub processors: Vec<ProcKey>,
 }
 
 impl Declaration {
     pub fn new(annotationtype: AnnotationType, set: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, processors: vec![] }
+        Declaration { annotationtype: annotationtype, set: set, alias: None, processors: vec![] }
     }
 }
 
