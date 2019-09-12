@@ -95,8 +95,12 @@ impl Document {
         self.provenancestore.add(processor)
     }
 
-    pub fn declare(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
+    pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
         self.declarationstore.add(declaration)
+    }
+
+    pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
+        self.declarationstore.declare(annotationtype, set, alias)
     }
 
     pub fn id(&self) -> &str { &self.id }

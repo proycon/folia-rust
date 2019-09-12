@@ -99,8 +99,9 @@ impl FoliaElement {
         let set = self.attrib(AttribType::SET);
 
         if let Some(annotationtype) = self.elementtype.annotationtype() {
-            //TOO: declare only if not already declared!
-            let deckey = declarationstore.add(Declaration::new(annotationtype, set.map(|x| x.value().into_owned() ), None))?;
+            //Declare the element (either declares anew or just resolves the to the right
+            //declaration.
+            let deckey = declarationstore.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
             enc_attribs.declaration = Some(deckey);
         }
         //TODO: handle processor and class

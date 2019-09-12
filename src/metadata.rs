@@ -27,11 +27,7 @@ impl CheckEncoded for String { }
 
 impl MaybeIdentifiable for Declaration {
     fn id(&self) -> Option<String> {
-        if let Some(set) = &self.set {
-            Some(format!("{}/{}", self.annotationtype, set))
-        } else {
-            Some(format!("{}", self.annotationtype))
-        }
+        Some(DeclarationStore::index_id(self.annotationtype,&self.set))
     }
 }
 
@@ -74,6 +70,69 @@ pub struct DeclarationStore {
     items: Vec<Option<Box<Declaration>>>, //heap-allocated
     index: HashMap<String,DecKey>,
     classes: Option<ClassStore>
+}
+
+impl DeclarationStore {
+    ///Create a id to use with the index
+    fn index_id(annotationtype: AnnotationType, set: &Option<String>) -> String {
+        if let Some(set) = set {
+            format!("{}/{}", annotationtype, set)
+        } else {
+            format!("{}", annotationtype)
+        }
+    }
+
+    ///Declares a new annotation type and set or returns the key of an existing one
+    pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
+        //first we simply check the index
+        if let Some(found_key) = self.id_to_key(Self::index_id(annotationtype, set).as_str()) {
+            return Ok(found_key);
+        }
+
+        //If not found, we search for a default
+        if let Some(default_key) = self.get_default_key(annotationtype) {
+            if let Some(declaration) = self.get(default_key) {
+                if set.is_some() {
+                    //there is an explicit set defined, only return the default if the sets are not
+                    //in conflict
+                    if let Some(declared_set) = &declaration.set {
+                        if *declared_set == *set.as_ref().unwrap() {
+                            return Ok(default_key);
+                        }
+                    }
+                } else {
+                    //no set defined, that means we inherit the default set
+                    return Ok(default_key);
+                }
+            }
+        }
+
+        //if we reach this point we have no defaults and add a new declaration
+        let added_key = self.add(Declaration::new(annotationtype, set.clone(), alias.clone()))?;
+        Ok(added_key)
+    }
+
+    ///Retrieves the key for the default annotation for the given annotationtype (if there is a
+    ///default)
+    pub fn get_default_key(&self, annotationtype: AnnotationType) -> Option<DecKey> {
+        let matches: Vec<usize> = self.items.iter().enumerate().filter_map(|(index, declaration)|  {
+            if let Some(declaration) = declaration {
+                if declaration.annotationtype  == annotationtype {
+                    Some(index)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }).collect();
+        if matches.len() == 1 {
+            Some(matches[0] as DecKey)
+        } else {
+            None
+        }
+    }
+
 }
 
 impl Store<Declaration,DecKey> for DeclarationStore {
