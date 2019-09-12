@@ -35,6 +35,7 @@ impl Document {
         let mut doc_start = BytesStart::borrowed_name(b"FoLiA");
         doc_start.push_attribute(("xmlns", str::from_utf8(NSFOLIA).unwrap() ));
         doc_start.push_attribute(("xmlns:xlink", str::from_utf8(NSXLINK).unwrap() ));
+        doc_start.push_attribute(("xml:id",self.id.as_str()));
         doc_start.push_attribute(("version",FOLIAVERSION ));
         doc_start.push_attribute(("generator", GENERATOR ));
         writer.write_event(Event::Start(doc_start)).map_err(to_serialisation_error)?;
