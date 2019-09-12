@@ -5,7 +5,7 @@ use std::io::Cursor;
 use std::fs::File;
 use std::str;
 use std::str::FromStr;
-use std::borrow::ToOwned;
+use std::borrow::Cow;
 use std::string::ToString;
 
 use quick_xml::{Reader,Writer};
@@ -106,6 +106,16 @@ impl Document {
     pub fn id(&self) -> &str { &self.id }
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
+
+
+    pub fn text(&self, element_key: ElementKey, textclass: Option<&str>) -> Cow<str> {
+        let textclass: &str = if let Some(textclass) = textclass {
+            textclass
+        } else {
+            "current"
+        }
+        unimplemented!(); //TODO
+    }
 
 
 
