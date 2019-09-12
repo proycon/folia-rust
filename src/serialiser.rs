@@ -203,7 +203,21 @@ impl Document {
                                 start.push_attribute(("class", class) );
                             }
                             if let Some(processor) = element.decoded_processor(&self.provenancestore) {
-                                start.push_attribute(("processor", processor) );
+                                //check if this processor is the default one, if so we don't need
+                                //to serialise it
+                                let is_default: bool = if let Some(declaration) = self.declarationstore.get(declaration_key) {
+                                    if declaration.processors.len() == 1 {
+                                        declaration.processors.get(0) == element.processor_key().as_ref()
+                                    } else {
+                                        false
+                                    }
+                                } else {
+                                    false
+                                };
+
+                                if !is_default {
+                                    start.push_attribute(("processor", processor) );
+                                }
                             }
                         }
                         writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;

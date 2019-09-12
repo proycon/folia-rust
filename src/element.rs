@@ -286,7 +286,7 @@ impl FoliaElement {
         }
     }
 
-    ///Get set as a str on an encoded element.
+    ///Get set as a str from an encoded element.
     pub fn decoded_set<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
         if let Some(declaration) = self.declaration(declarationstore) {
                 return declaration.set.as_ref().map(|s| &**s);
@@ -294,6 +294,7 @@ impl FoliaElement {
         None
     }
 
+    ///Get a class as a str from an encoded element
     pub fn decoded_class<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
         if let Some(class_key) = self.class_key() {
             if let Some(declaration) = self.declaration(declarationstore) {
