@@ -81,8 +81,21 @@ impl Document {
                     dec_start.push_attribute(("alias", alias.as_str() ));
                 }
                 let dec_end = BytesEnd::owned(tagname.as_bytes().to_vec());
-                writer.write_event(Event::Start(dec_start)).map_err(to_serialisation_error)?;
-                writer.write_event(Event::End(dec_end)).map_err(to_serialisation_error)?;
+                if declaration.processors.is_empty() {
+                    writer.write_event(Event::Empty(dec_start)).map_err(to_serialisation_error)?;
+                } else {
+                    writer.write_event(Event::Start(dec_start)).map_err(to_serialisation_error)?;
+                    for proc_key in declaration.processors.iter() {
+                        if let Some(processor) = self.provenancestore.get(*proc_key) {
+                            let mut ann_start = BytesStart::borrowed_name(b"annotator");
+                            ann_start.push_attribute(("processor", processor.id.as_str() ));
+                            writer.write_event(Event::Empty(ann_start)).map_err(to_serialisation_error)?;
+                        } else {
+                            return Err(FoliaError::InternalError(format!("Unable to resolve referenced processor during serialisation")));
+                        }
+                    }
+                    writer.write_event(Event::End(dec_end)).map_err(to_serialisation_error)?;
+                }
                 writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
             }
         }
