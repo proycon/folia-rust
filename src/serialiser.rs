@@ -4,7 +4,6 @@ use std::str;
 use std::str::FromStr;
 use std::borrow::ToOwned;
 use std::string::ToString;
-use std::collections::HashSet;
 
 use std::io::Write;
 use std::io::BufWriter;

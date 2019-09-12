@@ -94,7 +94,7 @@ fn test002_append() {
 
 #[test]
 fn test003_parse() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
+    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example", "ID check");
             assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain");
@@ -108,7 +108,7 @@ fn test003_parse() {
 
 #[test]
 fn test004_get_word_from_index() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
+    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
                 assert!(true);
@@ -123,12 +123,16 @@ fn test004_get_word_from_index() {
 }
 
 #[test]
-fn test005_decode_set() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("invalid utf-8 in example")) {
+fn test005_decode() {
+    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
                 let set = word.decoded_set(&doc.declarationstore);
                 assert_eq!(set.expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
+                let class = word.decoded_class(&doc.declarationstore);
+                assert_eq!(class.expect("Unwrapping class"), "WORD");
+                let processor = word.decoded_processor(&doc.provenancestore);
+                assert_eq!(processor.expect("Unwrapping class"), "p1");
             } else {
                 assert!(false, "Word not found");
             }
