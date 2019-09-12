@@ -163,11 +163,15 @@ impl Document {
             if !processor.resourcelink.is_empty() {
                 processor_start.push_attribute(("resourcelink", processor.resourcelink.as_str() ));
             }
-            writer.write_event(Event::Start(processor_start)).map_err(to_serialisation_error)?;
-            for subprocessor_key in processor.processors.iter() {
-                self.xml_processor(writer, *subprocessor_key)?;
+            if processor.processors.is_empty() {
+                writer.write_event(Event::Empty(processor_start)).map_err(to_serialisation_error)?;
+            } else {
+                writer.write_event(Event::Start(processor_start)).map_err(to_serialisation_error)?;
+                for subprocessor_key in processor.processors.iter() {
+                    self.xml_processor(writer, *subprocessor_key)?;
+                }
+                writer.write_event(Event::End(BytesEnd::borrowed(b"processor"))).map_err(to_serialisation_error)?;
             }
-            writer.write_event(Event::End(BytesEnd::borrowed(b"processor"))).map_err(to_serialisation_error)?;
             writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         }
         Ok(())
