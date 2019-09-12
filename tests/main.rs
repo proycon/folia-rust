@@ -4,7 +4,7 @@ use folia::store::Store;
 
 const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 <FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
-  <metadata>
+  <metadata type="native">
       <annotations>
           <token-annotation set="https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl">
              <annotator processor="p1" />
@@ -22,6 +22,7 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
       <provenance>
          <processor xml:id="p1" name="proycon" type="manual" />
       </provenance>
+      <meta id="language">eng</meta>
   </metadata>
   <text xml:id="example.text">
     <p xml:id="example.p.1">

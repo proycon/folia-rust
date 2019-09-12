@@ -63,6 +63,14 @@ impl Document {
         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         self.xml_declarations(writer)?;
         self.xml_provenance(writer)?;
+        for (meta_id, value) in self.metadata.data.iter() {
+            let mut meta_start = BytesStart::borrowed_name(b"meta");
+            meta_start.push_attribute(("id", meta_id.as_str() ));
+            writer.write_event(Event::Start(meta_start)).map_err(to_serialisation_error)?;
+            writer.write_event(Event::Text(BytesText::from_plain_str(value))).map_err(to_serialisation_error)?;
+            writer.write_event(Event::End(BytesEnd::borrowed(b"meta"))).map_err(to_serialisation_error)?;
+            writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
+        }
         writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(to_serialisation_error)?;
         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         Ok(())

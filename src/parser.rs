@@ -95,7 +95,6 @@ impl Document {
                             }
                         },
                         (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
-                            //TODO: parse annotator (use declaration_key)
                             let mut processor_id: Option<String> = None;
                             for attrib in e.attributes() {
                                 let attrib = attrib.expect("unwrapping annotator attribute");
