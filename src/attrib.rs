@@ -94,8 +94,8 @@ impl Attribute {
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
             Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s)
                 => Cow::Borrowed(&s),
-            Attribute::Confidence(f) => Cow::Owned(f.to_string()),
-            Attribute::Space(b) => { if *b { Cow::Borrowed("yes") } else { Cow::Borrowed("no") } }
+            Attribute::Confidence(f) => Cow::from(f.to_string()),
+            Attribute::Space(b) => { if *b { Cow::from("yes") } else { Cow::from("no") } }
         }
     }
 

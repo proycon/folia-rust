@@ -53,7 +53,7 @@ pub struct Properties {
     wrefable: bool //Indicates whether this element is referable as a token/word (applies only to a very select few elements, such as w, morpheme, and phoneme)
 }
 
-#[derive(Default)]
+#[derive(Default,Clone)]
 pub struct EncodedAttributes {
     //encoded (relation to other stores)
     processor: Option<ProcKey>,
@@ -61,6 +61,7 @@ pub struct EncodedAttributes {
     class: Option<ClassKey>
 }
 
+#[derive(Clone)]
 pub struct FoliaElement {
     pub elementtype: ElementType,
     pub attribs: Vec<Attribute>,
@@ -75,8 +76,12 @@ pub struct FoliaElement {
 
 
 impl MaybeIdentifiable for FoliaElement {
-    fn id(&self) -> Option<String> {
-        self.attrib_string(AttribType::ID)
+    fn maybe_id(&self) -> Option<Cow<str>> {
+        if let Some(attrib) = self.attrib(AttribType::ID) {
+            Some(attrib.value())
+        } else {
+            None
+        }
     }
 }
 
@@ -103,8 +108,17 @@ impl FoliaElement {
             //declaration.
             let deckey = declarationstore.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
             enc_attribs.declaration = Some(deckey);
+
+            if let Some(class) = self.attrib(AttribType::CLASS) {
+                if let Attribute::Class(class) = class {
+                    if let Ok(class_key) = declarationstore.encode_class(deckey, class) {
+                        enc_attribs.class = Some(class_key);
+                    }
+                }
+            }
+
         }
-        //TODO: handle processor and class
+        //TODO: handle processor
 
         //remove encoded attributes
         self.attribs.retain(|a| match a {

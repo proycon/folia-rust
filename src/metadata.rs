@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt;
+use std::borrow::Cow;
 
 use crate::common::*;
 use crate::error::*;
@@ -8,16 +9,18 @@ use crate::element::*;
 use crate::store::*;
 
 
+#[derive(Clone)]
 pub struct Declaration {
     pub annotationtype: AnnotationType,
     pub set: Option<String>,
     pub alias: Option<String>,
     pub processors: Vec<ProcKey>,
+    pub classes: Option<ClassStore>
 }
 
 impl Declaration {
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] }
+        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None }
     }
 }
 
@@ -26,40 +29,42 @@ impl CheckEncoded for Declaration { }
 impl CheckEncoded for String { }
 
 impl MaybeIdentifiable for Declaration {
-    fn id(&self) -> Option<String> {
-        Some(DeclarationStore::index_id(self.annotationtype,&self.set))
+    fn maybe_id(&self) -> Option<Cow<str>> {
+        Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set)))
     }
 }
 
 
-#[derive(Default)]
+#[derive(Default,Clone)]
 pub struct ClassStore {
-    items: Vec<Option<Box<String>>>, //heap-allocated
-    index: HashMap<String,ClassKey>
+    items: Vec<Option<Box<Class>>>, //heap-allocated
+    index: HashMap<Class,ClassKey>
 }
 
-impl MaybeIdentifiable for String {
-    fn id(&self) -> Option<String> {
-        Some(self.to_string())
+
+impl MaybeIdentifiable for String { //for classes
+    fn maybe_id(&self) -> Option<Cow<str>> {
+        Some(Cow::from(self))
     }
 }
 
 
-impl Store<String,ClassKey> for ClassStore {
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<String>>> {
+impl Store<Class,ClassKey> for ClassStore {
+
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<Class>>> {
         &mut self.items
     }
-    fn index_mut(&mut self) -> &mut HashMap<String,ClassKey> {
+    fn index_mut(&mut self) -> &mut HashMap<Class,ClassKey> {
         &mut self.index
     }
 
-    fn items(&self) -> &Vec<Option<Box<String>>> {
+    fn items(&self) -> &Vec<Option<Box<Class>>> {
         &self.items
     }
-    fn index(&self) -> &HashMap<String,ClassKey> {
+    fn index(&self) -> &HashMap<Class,ClassKey> {
         &self.index
     }
-    fn iter(&self) -> std::slice::Iter<Option<Box<String>>> {
+    fn iter(&self) -> std::slice::Iter<Option<Box<Class>>> {
         self.items.iter()
     }
 }
@@ -69,7 +74,6 @@ impl Store<String,ClassKey> for ClassStore {
 pub struct DeclarationStore {
     items: Vec<Option<Box<Declaration>>>, //heap-allocated
     index: HashMap<String,DecKey>,
-    classes: Option<ClassStore>
 }
 
 impl DeclarationStore {
@@ -158,6 +162,32 @@ impl DeclarationStore {
         }
     }
 
+    ///Returns the class store for the given declaration (mutably)
+    pub fn get_class_store_mut(&mut self, dec_key: DecKey) -> &mut ClassStore {
+        if let Some(mut declaration) = self.get_mut(dec_key) {
+            if declaration.classes.is_none() {
+                declaration.classes = Some(ClassStore::default());
+            }
+            declaration.classes.as_mut().unwrap()
+        } else {
+            panic!("get_class_store_mut: No such declaration");
+        }
+    }
+
+    ///Encode a class, adding it to the class store if needed
+    pub fn encode_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
+        let mut class_store = self.get_class_store_mut(dec_key);
+        if let Some(class_key) = class_store.id_to_key(class) {
+            Ok(class_key)
+        } else {
+            let class_key = class_store.get_key(class);
+            if let Some(class_key) = class_key {
+                Ok(class_key)
+            } else {
+                class_store.add(class.to_owned())
+            }
+        }
+    }
 }
 
 impl Store<Declaration,DecKey> for DeclarationStore {
@@ -279,7 +309,7 @@ impl fmt::Display for ProcessorType {
     }
 }
 
-#[derive(Default)]
+#[derive(Default,Clone)]
 pub struct Processor {
     pub id: String,
     pub name: String,
@@ -303,12 +333,12 @@ pub struct Processor {
 impl CheckEncoded for Processor { }
 
 impl MaybeIdentifiable for Processor {
-    fn id(&self) -> Option<String> {
-        Some(self.id.clone())
+    fn maybe_id(&self) -> Option<Cow<str>> {
+        Some(Cow::from(&self.id))
     }
 }
 
-#[derive(Default)]
+#[derive(Default,Clone)]
 pub struct Metadata {
     pub data: HashMap<String,String>,
     pub src: Option<String>,
