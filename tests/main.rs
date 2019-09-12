@@ -162,3 +162,18 @@ fn test006_serialise() {
         }
     }
 }
+
+#[test]
+fn test007_metadata() {
+    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+        Ok(doc) => {
+            assert_eq!(doc.metadata.metadatatype.unwrap(), "native");
+            assert_eq!(doc.metadata.src, None);
+            let language = doc.metadata.data.get("language");
+            assert_eq!(language.expect("unwrapping meta"), "eng");
+        }
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
