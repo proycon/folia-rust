@@ -6,6 +6,7 @@ use std::str::FromStr;
 use std::borrow::ToOwned;
 use std::string::ToString;
 use std::fmt::Display;
+use std::collections::HashMap;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
@@ -76,6 +77,7 @@ impl Document {
         let mut text: Option<String> = None;
         let mut meta_id: Option<String> = None;
         let mut declaration_key: Option<DecKey> = None;
+        let mut annotators: Vec<(DecKey,String)> = Vec::new(); //mapping of declaration keys to processor ids; temporary structure
         let mut processor_stack: Vec<ProcKey> = vec![];
         loop {
             let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
@@ -90,6 +92,31 @@ impl Document {
                             } else {
                                 let parent_key = processor_stack.last().expect("Polling processor stack");
                                 provenancestore.add_to(*parent_key, processor)?;
+                            }
+                        },
+                        (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
+                            //TODO: parse annotator (use declaration_key)
+                            let mut processor_id: Option<String> = None;
+                            for attrib in e.attributes() {
+                                let attrib = attrib.expect("unwrapping annotator attribute");
+                                if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                                    match attrib.key {
+                                        b"processor" => {
+                                            processor_id = Some(value.clone());
+                                        },
+                                        otherwise => {
+                                            eprintln!("WARNING: Unhandled attribute annotator/@{:?}",otherwise);
+                                        }
+                                    }
+                                }
+                            }
+                            if let Some(processor_id) = processor_id {
+                                if let Some(declaration_key) = declaration_key {
+                                    //add to a temporary structure because we don't know about the
+                                    //processors yet at this stage, provenance still has to be
+                                    //parsed, after that we resolve everything from this structure.
+                                    annotators.push((declaration_key, processor_id));
+                                }
                             }
                         },
                         _ => {
@@ -151,9 +178,6 @@ impl Document {
                                 processor_stack.push(processor_key);
                             }
                         },
-                        (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
-                            //TODO: parse annotator (use declaration_key)
-                        },
                         (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
                             let declaration = Declaration::parse(&reader, e, tag)?;
                             let result = declarationstore.add(declaration)?;
@@ -187,6 +211,16 @@ impl Document {
                         },
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
                             parseprovenance = false;
+
+                            //we are done with provenance, we can now assign processors to
+                            //declarations using our temporary structure
+                            for (dec_key, processor_id) in annotators.iter() {
+                                if let Some(processor_key) = provenancestore.id_to_key(processor_id) {
+                                    if let Some(declaration) = declarationstore.get_mut(*dec_key) {
+                                        declaration.processors.push(processor_key);
+                                    }
+                                }
+                            }
                         },
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
                             processor_stack.pop();

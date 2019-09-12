@@ -117,8 +117,18 @@ impl FoliaElement {
                 }
             }
 
+            if let Some(declaration) = declarationstore.get(deckey) {
+                enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
+            }
         }
-        //TODO: handle processor
+
+        if let Some(processor) = self.attrib(AttribType::PROCESSOR) {
+            let processor_id: &str  = &processor.value();
+
+            if let Some(processor_key) = provenancestore.id_to_key(processor_id) {
+                enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
+            }
+        }
 
         //remove encoded attributes
         self.attribs.retain(|a| match a {
@@ -285,9 +295,14 @@ impl FoliaElement {
     }
 
     pub fn decoded_class<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
-        if let Some(declaration) = self.declaration(declarationstore) {
-            //TODO: return class
-            return declaration.set.as_ref().map(|s| &**s);
+        if let Some(class_key) = self.class_key() {
+            if let Some(declaration) = self.declaration(declarationstore) {
+                if let Some(classes) = &declaration.classes {
+                    if let Some(class) = classes.get(class_key) {
+                        return Some(class.as_str());
+                    }
+                }
+            }
         }
         None
     }

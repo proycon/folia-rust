@@ -22,6 +22,15 @@ impl Declaration {
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
         Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None }
     }
+
+    ///Returns the key of default processor, if any
+    pub fn default_processor(&self) -> Option<ProcKey> {
+        if self.processors.len() == 1 {
+            self.processors.get(0).map(|x| x.to_owned())
+        } else {
+            None
+        }
+    }
 }
 
 impl CheckEncoded for Declaration { }
