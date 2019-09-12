@@ -73,13 +73,38 @@ pub struct DeclarationStore {
 }
 
 impl DeclarationStore {
+
     ///Create a id to use with the index
-    fn index_id(annotationtype: AnnotationType, set: &Option<String>) -> String {
+    pub fn index_id(annotationtype: AnnotationType, set: &Option<String>) -> String {
         if let Some(set) = set {
             format!("{}/{}", annotationtype, set)
         } else {
             format!("{}", annotationtype)
         }
+    }
+
+    ///Returns a vector of boolean, indicating if the declaration is a default or not. Can be
+    ///indexed with DecKey
+    pub fn default_mask(&self) -> Vec<bool> {
+        let mut typecount: HashMap<AnnotationType,usize> = HashMap::new();
+        for declaration in self.items.iter() {
+            if let Some(declaration) = declaration {
+                if let Some(count) = typecount.get_mut(&declaration.annotationtype) {
+                    *count += 1;
+                } else {
+                    typecount.insert(declaration.annotationtype, 1);
+                }
+            }
+        }
+        let mut mask: Vec<bool> = Vec::with_capacity(self.items.len());
+        for declaration in self.items.iter() {
+            if let Some(declaration) = declaration {
+                mask.push( typecount.get(&declaration.annotationtype) == Some(&1) );
+            } else {
+                mask.push(false);
+            }
+        }
+        mask
     }
 
     ///Declares a new annotation type and set or returns the key of an existing one

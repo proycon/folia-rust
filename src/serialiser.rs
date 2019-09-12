@@ -4,6 +4,7 @@ use std::str;
 use std::str::FromStr;
 use std::borrow::ToOwned;
 use std::string::ToString;
+use std::collections::HashSet;
 
 use std::io::Write;
 use std::io::BufWriter;
@@ -164,6 +165,10 @@ impl Document {
         };
         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
 
+
+        //caches declarations that are defaults
+        let dec_is_default: Vec<bool> = self.declarationstore.default_mask();
+
         //Select children
         let mut stack = vec![];
         let mut previous_depth = 0;
@@ -186,15 +191,20 @@ impl Document {
                             let value: &str = &attrib.value();
                             start.push_attribute((attrib.attribtype().into(), value ));
                         }
-                        //decode encoded attributes
-                        if let Some(set) = element.decoded_set(&self.declarationstore) {
-                            start.push_attribute(("set", set) );
-                        }
-                        if let Some(class) = element.decoded_class(&self.declarationstore) {
-                            start.push_attribute(("class", class) );
-                        }
-                        if let Some(processor) = element.decoded_processor(&self.provenancestore) {
-                            start.push_attribute(("processor", processor) );
+                        if let Some(declaration_key) = element.declaration_key() {
+                            //check if the declaration is the default, no need to serialise set then
+                            if !dec_is_default.get(declaration_key as usize).expect("checking default") {
+                                //decode encoded attributes
+                                if let Some(set) = element.decoded_set(&self.declarationstore) {
+                                    start.push_attribute(("set", set) );
+                                }
+                            }
+                            if let Some(class) = element.decoded_class(&self.declarationstore) {
+                                start.push_attribute(("class", class) );
+                            }
+                            if let Some(processor) = element.decoded_processor(&self.provenancestore) {
+                                start.push_attribute(("processor", processor) );
+                            }
                         }
                         writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
                         let end = BytesEnd::owned(tag.to_vec());

@@ -288,12 +288,17 @@ impl FoliaElement {
 
 
     ///Get the set (encoded) aka the declaration key
-    pub fn set_key(&self) -> Option<DecKey> {
+    pub fn declaration_key(&self) -> Option<DecKey> {
         if let Some(enc_attribs) = &self.enc_attribs {
             enc_attribs.declaration
         } else {
             None
         }
+    }
+
+    ///Alias for declaration_key
+    pub fn set_key(&self) -> Option<DecKey> {
+        self.declaration_key()
     }
 
     ///Get the class (encoded) aka the class keyy
