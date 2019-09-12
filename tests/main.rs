@@ -47,10 +47,19 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
          <w xml:id="example.p.1.s.2.w.3" class="WORD">
             <t>an</t>
          </w>
-         <w xml:id="example.p.1.s.2.w.4" class="WORD" space="no">
+         <w xml:id="example.p.1.s.2.w.4" class="WORD">
             <t>example</t>
          </w>
-         <w xml:id="example.p.1.s.2.w.5" class="PUNCTUATION">
+         <w xml:id="example.p.1.s.2.w.5" class="WORD">
+            <t>&amp;</t>
+         </w>
+         <w xml:id="example.p.1.s.2.w.6" class="WORD">
+            <t>a</t>
+         </w>
+         <w xml:id="example.p.1.s.2.w.7" class="WORD" space="no">
+            <t>test</t>
+         </w>
+         <w xml:id="example.p.1.s.2.w.8" class="PUNCTUATION">
             <t>.</t>
          </w>
       </s>
@@ -98,7 +107,7 @@ fn test003_parse() {
     match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example", "ID check");
-            assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain");
+            assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain (count only)");
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
