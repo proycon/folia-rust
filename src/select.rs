@@ -6,16 +6,22 @@ use crate::attrib::*;
 use crate::store::*;
 use crate::elementstore::*;
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,Default)]
 pub struct Selector {
     pub typeselector: TypeSelector,
     pub setselector: SetSelector,
+    pub classselector: ClassSelector,
+    pub procselector: ProcSelector,
     pub next: Option<Box<Selector>>
 }
 
 impl Selector {
-    pub fn new(typeselector: TypeSelector, setselector: SetSelector) -> Selector {
-        Selector { typeselector: typeselector, setselector: setselector, next: None }
+    pub fn new() {
+        Selector::default()
+    }
+
+    pub fn with_type(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector, procselector: ProcSelector) -> Selector {
+        Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, procselector: procselector, next: None }
     }
 
     pub fn and(mut self, selector: Selector) -> Self {
@@ -78,6 +84,38 @@ pub enum SetSelector {
     SomeSet(DecKey),
     AnySet,
     NoSet
+}
+
+impl Default for SetSelector {
+    fn default() -> Self { SetSelector::AnySet }
+}
+
+#[derive(Debug,Clone)]
+pub enum ClassSelector {
+    SomeClass(ClassKey),
+    AnyClass,
+    NoClass
+}
+
+impl Default for ClassSelector {
+    fn encoded(class: &str, declarationstore: &DeclarationStore) -> Option<Self> {
+
+
+
+    }
+
+    fn default() -> Self { ClassSelector::AnyClass }
+}
+
+#[derive(Debug,Clone)]
+pub enum ProcSelector {
+    SomeClass(ProcKey),
+    AnyProc,
+    NoProc,
+}
+
+impl Default for ProcSelector {
+    fn default() -> Self { ProcSelector::AnyProc }
 }
 
 #[derive(Debug,Clone)]
