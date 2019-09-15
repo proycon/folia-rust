@@ -2,31 +2,77 @@ use crate::common::*;
 use crate::types::*;
 use crate::error::*;
 use crate::element::*;
+use crate::document::*;
 use crate::attrib::*;
+use crate::metadata::*;
 use crate::store::*;
 use crate::elementstore::*;
+
+
 
 #[derive(Debug,Clone,Default)]
 pub struct Selector {
     pub typeselector: TypeSelector,
     pub setselector: SetSelector,
     pub classselector: ClassSelector,
-    pub procselector: ProcSelector,
     pub next: Option<Box<Selector>>
 }
 
 impl Selector {
-    pub fn new() {
-        Selector::default()
+
+    pub fn new(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector) -> Self {
+        Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, next: None }
     }
 
-    pub fn with_type(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector, procselector: ProcSelector) -> Selector {
-        Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, procselector: procselector, next: None }
+    ///Sets the selector
+    pub fn with(mut self, document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
+        self.typeselector = TypeSelector::SomeElement(elementtype);
+        if let Some(annotationtype) = elementtype.annotationtype() {
+            self.setselector = match set {
+                SelectorValue::Some(set) => {
+                    let id = DeclarationStore::index_id(annotationtype, &Some(set));
+                    //add a set filter,
+                    if let Some(dec_key) = document.declarationstore.id_to_key(id.as_str()) {
+                        SetSelector::SomeSet(dec_key)
+                    } else {
+                        SetSelector::Unmatchable
+                    }
+                },
+                SelectorValue::Any => SetSelector::AnySet,
+                SelectorValue::None => SetSelector::NoSet,
+            };
+            self.classselector = match class {
+                SelectorValue::Some(class) => {
+                    //add a class filter
+                    let mut result = ClassSelector::Unmatchable;
+                    if let SetSelector::SomeSet(dec_key) = self.setselector {
+                        if let Some(declaration) = document.declarationstore.get(dec_key) {
+                            if let Some(classes) = declaration.classes {
+                                if let Some(class_key) = classes.id_to_key(class) {
+                                      result = ClassSelector::SomeClass(class_key);
+                                }
+                            }
+                        }
+                    }
+                    result
+                },
+                SelectorValue::Any =>  ClassSelector::AnyClass,
+                SelectorValue::None => ClassSelector::NoClass,
+            }
+        }
+        self
     }
+
 
     pub fn and(mut self, selector: Selector) -> Self {
         self.next = Some(Box::new(selector));
         self
+    }
+
+    pub fn matchable(&self) -> bool {
+        self.typeselector != TypeSelector::Unmatchable &&
+        self.setselector != SetSelector::Unmatchable &&
+        self.classselector != ClassSelector::Unmatchable
     }
 
     pub fn matches(&self, store: &ElementStore, item: &DataType) -> bool {
@@ -78,53 +124,59 @@ impl Selector {
 }
 
 
-
 #[derive(Debug,Clone)]
+pub enum SelectorValue<'a> {
+    Some(&'a str),
+    Any,
+    None,
+}
+
+impl<'a> Default for SelectorValue<'a> {
+    fn default() -> Self {
+        SelectorValue::Any
+    }
+}
+
+#[derive(Debug,Clone,PartialEq)]
 pub enum SetSelector {
     SomeSet(DecKey),
     AnySet,
-    NoSet
+    NoSet,
+    Unmatchable,
 }
 
 impl Default for SetSelector {
     fn default() -> Self { SetSelector::AnySet }
 }
 
-#[derive(Debug,Clone)]
+
+
+#[derive(Debug,Clone,PartialEq)]
 pub enum ClassSelector {
     SomeClass(ClassKey),
     AnyClass,
-    NoClass
+    NoClass,
+    Unmatchable,
 }
 
 impl Default for ClassSelector {
-    fn encoded(class: &str, declarationstore: &DeclarationStore) -> Option<Self> {
-
-
-
-    }
-
     fn default() -> Self { ClassSelector::AnyClass }
 }
 
-#[derive(Debug,Clone)]
-pub enum ProcSelector {
-    SomeClass(ProcKey),
-    AnyProc,
-    NoProc,
-}
 
-impl Default for ProcSelector {
-    fn default() -> Self { ProcSelector::AnyProc }
-}
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum TypeSelector {
     SomeElement(ElementType),
     AnyElement,
     AnyType,
     Text,
     Comment,
+    Unmatchable,
+}
+
+impl Default for TypeSelector {
+    fn default() -> Self { TypeSelector::AnyType }
 }
 
 ///Implements a depth-first search
@@ -133,6 +185,7 @@ pub struct SelectIterator<'a> {
     selector: Selector,
     ///The current stack, containing the element and cursor within that element
     stack: Vec<(ElementKey,usize)>,
+    iteration: usize,
 }
 
 impl<'a> SelectIterator<'a> {
@@ -140,7 +193,8 @@ impl<'a> SelectIterator<'a> {
         SelectIterator {
             store: store,
             selector: selector,
-            stack: vec![(key,0)]
+            stack: vec![(key,0)],
+            iteration: 0,
         }
     }
 
@@ -159,6 +213,13 @@ impl<'a> Iterator for SelectIterator<'a> {
     type Item = SelectItem<'a>; //Returns the DataTyp, the Parent IntID, the
 
     fn next(&mut self) -> Option<Self::Item> {
+        self.iteration += 1;
+        if self.iteration == 1 {
+            if !self.selector.matchable() {
+                //no need to iterate, selector already knows it is not matchable
+                return None;
+            }
+        }
         if let Some((key,cursor)) = self.stack.pop() {
             if let Some(parent) = self.store.get(key) {
                 if let Some(item) = parent.get(cursor) {
