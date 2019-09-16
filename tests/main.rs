@@ -1,6 +1,5 @@
 use std::str;
-use folia;
-use folia::store::Store;
+use folia::*;
 
 const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 <FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
@@ -69,7 +68,7 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 
 #[test]
 fn test001_instantiate() {
-    match folia::Document::new("example", folia::BodyType::Text) {
+    match Document::new("example", BodyType::Text) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example");
         },
@@ -83,18 +82,18 @@ fn test001_instantiate() {
 
 #[test]
 fn test002_append() {
-    match folia::Document::new("example", folia::BodyType::Text) {
+    match Document::new("example", BodyType::Text) {
         Ok(mut doc) => {
-            let root: folia::ElementKey = 0;
+            let root: ElementKey = 0;
             let sentence = doc.add_to(root,
-                                            folia::FoliaElement::new(folia::ElementType::Sentence)
-                                                                .with_attrib(folia::Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
+                                            FoliaElement::new(ElementType::Sentence)
+                                                                .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
             doc.add_to(sentence,
-                             folia::FoliaElement::new(folia::ElementType::Word)
-                                                 .with(folia::DataType::text("hello"))).expect("Adding word 1");
+                             FoliaElement::new(ElementType::Word)
+                                                 .with(DataType::text("hello"))).expect("Adding word 1");
             doc.add_to(sentence,
-                             folia::FoliaElement::new(folia::ElementType::Word)
-                                                 .with(folia::DataType::text("world"))).expect("Adding word 2");
+                             FoliaElement::new(ElementType::Word)
+                                                 .with(DataType::text("world"))).expect("Adding word 2");
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
@@ -104,7 +103,7 @@ fn test002_append() {
 
 #[test]
 fn test003_parse() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example", "ID check");
             assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain (count only)");
@@ -118,7 +117,7 @@ fn test003_parse() {
 
 #[test]
 fn test004_get_word_from_index() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
                 assert!(true);
@@ -134,7 +133,7 @@ fn test004_get_word_from_index() {
 
 #[test]
 fn test005_decode() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
                 let set = word.decoded_set(&doc.declarationstore);
@@ -155,7 +154,7 @@ fn test005_decode() {
 
 #[test]
 fn test006_serialise() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             match doc.xml(0) {
                 Ok(xml) => {
@@ -174,12 +173,38 @@ fn test006_serialise() {
 
 #[test]
 fn test007_metadata() {
-    match folia::Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             assert_eq!(doc.metadata.metadatatype.unwrap(), "native");
             assert_eq!(doc.metadata.src, None);
             let language = doc.metadata.data.get("language");
             assert_eq!(language.expect("unwrapping meta"), "eng");
+        }
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test008_selector() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+        Ok(doc) => {
+            let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
+            let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            for (i, item) in selector.enumerate() {
+                match i {
+                    1 = {
+                        assert_eq!(DataType::Element(), item)
+
+                    },
+                    2 = {
+
+                    }
+
+                }
+            }
+
         }
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));

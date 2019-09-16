@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::common::*;
 use crate::types::*;
 use crate::error::*;
@@ -20,11 +22,12 @@ pub struct Selector {
 
 impl Selector {
 
+    ///Creates a new selector
     pub fn new(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector) -> Self {
         Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, next: None }
     }
 
-    ///Sets the selector
+    ///Encodes a selector
     pub fn with(mut self, document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
         self.typeselector = TypeSelector::SomeElement(elementtype);
         if let Some(annotationtype) = elementtype.annotationtype() {
@@ -69,6 +72,10 @@ impl Selector {
         self
     }
 
+
+    ///The selector determines whether it is matchable in the encoding stage, when references are
+    ///made to sets or classes that don't exist in the document, then it is unmatchable and there
+    ///is no sense in actually performing any matching.
     pub fn matchable(&self) -> bool {
         self.typeselector != TypeSelector::Unmatchable &&
         self.setselector != SetSelector::Unmatchable &&
@@ -182,11 +189,11 @@ impl Default for TypeSelector {
 
 ///Implements a depth-first search
 pub struct SelectIterator<'a> {
-    store: &'a ElementStore,
-    selector: Selector,
+    pub(crate) store: &'a ElementStore,
+    pub(crate) selector: Selector,
     ///The current stack, containing the element and cursor within that element
-    stack: Vec<(ElementKey,usize)>,
-    iteration: usize,
+    pub(crate) stack: Vec<(ElementKey,usize)>,
+    pub(crate) iteration: usize,
 }
 
 impl<'a> SelectIterator<'a> {
@@ -209,9 +216,17 @@ pub struct SelectItem<'a> {
     pub depth: usize,
 }
 
+impl<'a> Deref for SelectItem<'a> {
+    type Target = DataType;
+
+    fn deref(&self) -> &Self::Target {
+        self.data
+    }
+}
+
 
 impl<'a> Iterator for SelectIterator<'a> {
-    type Item = SelectItem<'a>; //Returns the DataTyp, the Parent IntID, the
+    type Item = SelectItem<'a>; //Returns the DataType, the Parent IntID, the cursor and the depth
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iteration += 1;
@@ -260,8 +275,59 @@ pub trait Select<'a> {
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a>;
 }
 
+
 impl<'a> Select<'a> for ElementStore {
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
         SelectIterator::new(self, selector, key)
     }
+}
+
+impl<'a> Select<'a> for Document {
+    fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+        SelectIterator::new(&self.elementstore, selector, key)
+    }
+}
+
+///Implements a depth-first search
+pub struct SelectElementsIterator<'a> {
+    iterator: SelectIterator<'a>
+}
+
+pub struct SelectElementsItem<'a> {
+    pub data: &'a FoliaElement,
+}
+
+impl<'a> Deref for SelectElementsItem<'a> {
+    type Target = FoliaElement;
+
+    fn deref(&self) -> &Self::Target {
+        self.data
+    }
+}
+
+
+impl<'a> Iterator for SelectElementsIterator<'a> {
+    type Item = SelectElementsItem<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let selectitem = self.iterator.next();
+        if let Some(selectitem) = selectitem {
+            match *selectitem {
+                DataType::Element(key) => {
+                    let element = self.iterator.store.get(key).expect("Getting key from elementstore for SelectElementsIterator");
+                    Some(Self::Item { data: &**element })
+                },
+                _ => {
+                    //recurse
+                    self.next()
+                }
+            }
+        } else {
+            None
+        }
+    }
+
+}
+pub trait SelectElements<'a> {
+    fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
 }
