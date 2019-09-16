@@ -210,6 +210,7 @@ impl Default for ClassSelector {
 
 #[derive(Debug,Clone,PartialEq)]
 pub enum TypeSelector {
+    SomeElementGroup(ElementGroup),
     SomeElement(ElementType),
     AnyElement,
     AnyType,
