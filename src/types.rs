@@ -300,6 +300,13 @@ impl AnnotationType {
 }
 
 impl ElementType {
+    pub fn is_in_group(&self, group: ElementGroup) -> bool {
+        match (self, group) {
+            (ElementType::Alternative, ElementGroup::HigherOrder) => true,
+            //tODO
+        }
+    }
+
     pub fn annotationtype(&self) -> Option<AnnotationType> {
         //foliaspec:elementtype_annotationtype_map
         match self {
