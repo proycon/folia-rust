@@ -89,34 +89,48 @@ impl Selector {
                 if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
                     false
                 } else if let Some(element) = store.get(*key) {
-                    let setmatch: bool = match &self.setselector {
-                         SetSelector::SomeSet(refset) => {
-                             if let Some(set) = element.set_key() {
-                                 set == *refset
-                             } else {
-                                 false
-                             }
-                         },
-                         SetSelector::NoSet => element.set_key().is_none(),
-                         SetSelector::AnySet => true,
-                         SetSelector::Unmatchable => false,
+                    let typematch: bool = match &self.typeselector {
+                        TypeSelector::SomeElement(refelementtype) => {
+                            element.elementtype == *refelementtype
+                        },
+                        TypeSelector::AnyElement => true,
+                        TypeSelector::AnyType => true,
+                        TypeSelector::Unmatchable => false,
+                        TypeSelector::Comment => false,
+                        TypeSelector::Text => false,
                     };
-                    if setmatch {
-                        let classmatch: bool = match &self.classselector {
-                            ClassSelector::SomeClass(refclass) => {
-                                if let Some(class) = element.class_key() {
-                                    class == *refclass
-                                } else {
-                                    false
-                                }
-                            },
-                            ClassSelector::NoClass => element.class_key().is_none(),
-                            ClassSelector::AnyClass => true,
-                            ClassSelector::Unmatchable => false,
+                    if typematch {
+                        let setmatch: bool = match &self.setselector {
+                             SetSelector::SomeSet(refset) => {
+                                 if let Some(set) = element.set_key() {
+                                     set == *refset
+                                 } else {
+                                     false
+                                 }
+                             },
+                             SetSelector::NoSet => element.set_key().is_none(),
+                             SetSelector::AnySet => true,
+                             SetSelector::Unmatchable => false,
                         };
-                        classmatch
+                        if setmatch {
+                            let classmatch: bool = match &self.classselector {
+                                ClassSelector::SomeClass(refclass) => {
+                                    if let Some(class) = element.class_key() {
+                                        class == *refclass
+                                    } else {
+                                        false
+                                    }
+                                },
+                                ClassSelector::NoClass => element.class_key().is_none(),
+                                ClassSelector::AnyClass => true,
+                                ClassSelector::Unmatchable => false,
+                            };
+                            classmatch
+                        } else {
+                            false
+                        }
                     } else {
-                        setmatch
+                        false
                     }
                 } else {
                     //element does not exist, can never match

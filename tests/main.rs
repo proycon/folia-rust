@@ -190,7 +190,28 @@ fn test007_metadata() {
 }
 
 #[test]
-fn test008_selector() {
+fn test008a_selector_any() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+        Ok(doc) => {
+            let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
+            assert_matches!(selector.selector.setselector, SetSelector::AnySet);
+            assert_matches!(selector.selector.classselector, ClassSelector::AnyClass);
+            assert!(selector.selector.matchable());
+            let mut count = 0;
+            for item in selector {
+                count += 1;
+                assert_matches!(*item, DataType::Element(_));
+            }
+            assert_eq!(count, 11, "Checking whether we have the right amount of matches");
+        }
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test008b_selector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
@@ -199,7 +220,7 @@ fn test008_selector() {
             assert_matches!(selector.selector.classselector, ClassSelector::SomeClass(_));
             assert!(selector.selector.matchable());
             let mut count = 0;
-            for (i, item) in selector.enumerate() {
+            for item in selector {
                 count += 1;
                 assert_matches!(*item, DataType::Element(_));
             }
