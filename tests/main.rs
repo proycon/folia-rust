@@ -216,13 +216,35 @@ fn test008b_selector_set_class() {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
             let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
-            assert_matches!(selector.selector.setselector, SetSelector::SomeSet(_));
-            assert_matches!(selector.selector.classselector, ClassSelector::SomeClass(_));
+            assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
+            assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
             assert!(selector.selector.matchable());
             let mut count = 0;
             for item in selector {
                 count += 1;
                 assert_matches!(*item, DataType::Element(_));
+            }
+            assert_eq!(count, 2, "Checking whether we have the right amount of matches");
+        }
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test008c_elementselector_set_class() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+        Ok(doc) => {
+            let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
+            let selector = doc.select_elements(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
+            assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
+            assert!(selector.selector().matchable());
+            let mut count = 0;
+            for item in selector {
+                count += 1;
+                assert_matches!(item.decoded_class(&doc.declarationstore), Some("PUNCTUATION"));
             }
             assert_eq!(count, 2, "Checking whether we have the right amount of matches");
         }

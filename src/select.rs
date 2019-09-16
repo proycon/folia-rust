@@ -235,6 +235,10 @@ impl<'a> SelectIterator<'a> {
         }
     }
 
+    pub fn selector(&self) -> &Selector {
+        &self.selector
+    }
+
 }
 
 #[derive(Debug)]
@@ -322,6 +326,19 @@ pub struct SelectElementsIterator<'a> {
     iterator: SelectIterator<'a>
 }
 
+impl<'a> SelectElementsIterator<'a> {
+    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey) -> SelectElementsIterator<'a> {
+        SelectElementsIterator {
+            iterator: SelectIterator::new(&store, selector, key)
+        }
+    }
+
+    pub fn selector(&self) -> &Selector {
+        &self.iterator.selector
+    }
+
+}
+
 pub struct SelectElementsItem<'a> {
     pub data: &'a FoliaElement,
 }
@@ -359,4 +376,16 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
 }
 pub trait SelectElements<'a> {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
+}
+
+impl<'a> SelectElements<'a> for ElementStore {
+    fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
+        SelectElementsIterator::new(self, selector, key)
+    }
+}
+
+impl<'a> SelectElements<'a> for Document {
+    fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
+        SelectElementsIterator::new(&self.elementstore, selector, key)
+    }
 }

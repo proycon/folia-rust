@@ -107,13 +107,28 @@ impl Document {
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
 
+    pub fn textcontent(&self, element_key: ElementKey, textclass: Option<&str>) -> Option<&FoliaElement> {
+        let textclass: &str = if let Some(textclass) = textclass {
+            textclass
+        } else {
+            "current"
+        };
+        //TODO: implement
+        /*for element in self.select_elements(element_key, Selector::new(TypeSelector::Element(ElementType::TextContent), ) {
+        }*/
+        unimplemented!()
+    }
 
+    ///Get the text for the given element key
     pub fn text(&self, element_key: ElementKey, textclass: Option<&str>) -> Cow<str> {
         let textclass: &str = if let Some(textclass) = textclass {
             textclass
         } else {
             "current"
         };
+        if let Some(element) = self.elementstore.get(element_key) {
+
+        }
         unimplemented!() //TODO
     }
 
