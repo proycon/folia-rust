@@ -195,7 +195,9 @@ fn test008_selector() {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
             let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
-            assert_matches!(selector.setselector, SetSelector::SomeSet(_));
+            assert_matches!(selector.selector.setselector, SetSelector::SomeSet(_));
+            assert_matches!(selector.selector.classselector, ClassSelector::SomeClass(_));
+            assert!(selector.selector.matchable());
             let mut count = 0;
             for (i, item) in selector.enumerate() {
                 count += 1;

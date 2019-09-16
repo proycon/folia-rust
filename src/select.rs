@@ -89,19 +89,34 @@ impl Selector {
                 if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
                     false
                 } else if let Some(element) = store.get(*key) {
-                    match &self.setselector {
-                         SetSelector::SomeSet(set) => {
-                             if let Some(set2) = element.set_key() {
-                                 *set == set2
+                    let setmatch: bool = match &self.setselector {
+                         SetSelector::SomeSet(refset) => {
+                             if let Some(set) = element.set_key() {
+                                 set == *refset
                              } else {
                                  false
                              }
                          },
-                         SetSelector::NoSet => {
-                             element.set_key().is_none()
-                         },
+                         SetSelector::NoSet => element.set_key().is_none(),
                          SetSelector::AnySet => true,
                          SetSelector::Unmatchable => false,
+                    };
+                    if setmatch {
+                        let classmatch: bool = match &self.classselector {
+                            ClassSelector::SomeClass(refclass) => {
+                                if let Some(class) = element.class_key() {
+                                    class == *refclass
+                                } else {
+                                    false
+                                }
+                            },
+                            ClassSelector::NoClass => element.class_key().is_none(),
+                            ClassSelector::AnyClass => true,
+                            ClassSelector::Unmatchable => false,
+                        };
+                        classmatch
+                    } else {
+                        setmatch
                     }
                 } else {
                     //element does not exist, can never match
@@ -189,8 +204,8 @@ impl Default for TypeSelector {
 
 ///Implements a depth-first search
 pub struct SelectIterator<'a> {
-    pub(crate) store: &'a ElementStore,
-    pub(crate) selector: Selector,
+    pub store: &'a ElementStore,
+    pub selector: Selector,
     ///The current stack, containing the element and cursor within that element
     pub(crate) stack: Vec<(ElementKey,usize)>,
     pub(crate) iteration: usize,
