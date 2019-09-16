@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate matches;
+
 use std::str;
 use folia::*;
 
@@ -192,19 +195,13 @@ fn test008_selector() {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
             let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            assert_matches!(selector.setselector, SetSelector::SomeSet(_));
+            let mut count = 0;
             for (i, item) in selector.enumerate() {
-                match i {
-                    1 = {
-                        assert_eq!(DataType::Element(), item)
-
-                    },
-                    2 = {
-
-                    }
-
-                }
+                count += 1;
+                assert_matches!(*item, DataType::Element(_));
             }
-
+            assert_eq!(count, 2, "Checking whether we have the right amount of matches");
         }
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
