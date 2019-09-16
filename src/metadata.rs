@@ -39,7 +39,8 @@ impl CheckEncoded for String { }
 
 impl MaybeIdentifiable for Declaration {
     fn maybe_id(&self) -> Option<Cow<str>> {
-        Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set.map(|s| s.as_str()))))
+        //let set_str: &str = &self.set.as_ref().expect("unwrapping set str");
+        Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set.as_ref().map(String::as_str))))
     }
 }
 
@@ -123,7 +124,7 @@ impl DeclarationStore {
     ///Declares a new annotation type and set or returns the key of an existing one
     pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
         //first we simply check the index
-        if let Some(found_key) = self.id_to_key(Self::index_id(annotationtype, &set.map(|x| x.as_str()) ).as_str()) {
+        if let Some(found_key) = self.id_to_key(Self::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
             return Ok(found_key);
         }
 

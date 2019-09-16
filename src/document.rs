@@ -113,8 +113,8 @@ impl Document {
             textclass
         } else {
             "current"
-        }
-        unimplemented! //TODO
+        };
+        unimplemented!() //TODO
     }
 
 

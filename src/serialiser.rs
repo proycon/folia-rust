@@ -197,7 +197,7 @@ impl Document {
         //Select children
         let mut stack = vec![];
         let mut previous_depth = 0;
-        for item in self.elementstore.select(root_key,Selector::new(TypeSelector::AnyType, SetSelector::AnySet),true) {
+        for item in self.elementstore.select(root_key,Selector::new(TypeSelector::AnyType, SetSelector::AnySet, ClassSelector::AnyClass),true) {
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
