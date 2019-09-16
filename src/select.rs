@@ -27,6 +27,12 @@ impl Selector {
         Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, next: None }
     }
 
+
+    pub fn new_with(document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
+        Selector::default().with(document, elementtype, set, class)
+    }
+
+
     ///Encodes a selector
     pub fn with(mut self, document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
         self.typeselector = TypeSelector::SomeElement(elementtype);
@@ -220,16 +226,18 @@ impl Default for TypeSelector {
 pub struct SelectIterator<'a> {
     pub store: &'a ElementStore,
     pub selector: Selector,
+    pub recursive: bool,
     ///The current stack, containing the element and cursor within that element
     pub(crate) stack: Vec<(ElementKey,usize)>,
     pub(crate) iteration: usize,
 }
 
 impl<'a> SelectIterator<'a> {
-    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey) -> SelectIterator<'a> {
+    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey, recursive: bool) -> SelectIterator<'a> {
         SelectIterator {
             store: store,
             selector: selector,
+            recursive: recursive,
             stack: vec![(key,0)],
             iteration: 0,
         }
@@ -277,9 +285,11 @@ impl<'a> Iterator for SelectIterator<'a> {
                     let current_depth = self.stack.len();
 
                     //we have an element, push to stack so we descend into its on next iteraton
-                    if let DataType::Element(key) = item {
-                        self.stack.push((*key,0));
-                    };
+                    if self.recursive {
+                        if let DataType::Element(key) = item {
+                            self.stack.push((*key,0));
+                        };
+                    }
 
                     //return the current one
                     if self.selector.matches(self.store, item) {
@@ -311,13 +321,13 @@ pub trait Select<'a> {
 
 impl<'a> Select<'a> for ElementStore {
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
-        SelectIterator::new(self, selector, key)
+        SelectIterator::new(self, selector, key, recursive)
     }
 }
 
 impl<'a> Select<'a> for Document {
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
-        SelectIterator::new(&self.elementstore, selector, key)
+        SelectIterator::new(&self.elementstore, selector, key, recursive)
     }
 }
 
@@ -327,9 +337,9 @@ pub struct SelectElementsIterator<'a> {
 }
 
 impl<'a> SelectElementsIterator<'a> {
-    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey) -> SelectElementsIterator<'a> {
+    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey, recursive: bool) -> SelectElementsIterator<'a> {
         SelectElementsIterator {
-            iterator: SelectIterator::new(&store, selector, key)
+            iterator: SelectIterator::new(&store, selector, key, recursive)
         }
     }
 
@@ -340,14 +350,14 @@ impl<'a> SelectElementsIterator<'a> {
 }
 
 pub struct SelectElementsItem<'a> {
-    pub data: &'a FoliaElement,
+    pub element: &'a FoliaElement,
 }
 
 impl<'a> Deref for SelectElementsItem<'a> {
     type Target = FoliaElement;
 
     fn deref(&self) -> &Self::Target {
-        self.data
+        self.element
     }
 }
 
@@ -361,7 +371,7 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
             match *selectitem {
                 DataType::Element(key) => {
                     let element = self.iterator.store.get(key).expect("Getting key from elementstore for SelectElementsIterator");
-                    Some(Self::Item { data: &**element })
+                    Some(Self::Item { element: &**element })
                 },
                 _ => {
                     //recurse
@@ -380,12 +390,12 @@ pub trait SelectElements<'a> {
 
 impl<'a> SelectElements<'a> for ElementStore {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
-        SelectElementsIterator::new(self, selector, key)
+        SelectElementsIterator::new(self, selector, key, recursive)
     }
 }
 
 impl<'a> SelectElements<'a> for Document {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
-        SelectElementsIterator::new(&self.elementstore, selector, key)
+        SelectElementsIterator::new(&self.elementstore, selector, key, recursive)
     }
 }
