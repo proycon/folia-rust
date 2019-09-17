@@ -179,7 +179,9 @@ impl Selector {
 }
 
 
-///Represents
+///Represents a selector value prior to encoding; such as a particular FoLiA set or FoLiA class as
+///a string. This SelectorValue can then be passed when creating selectors with ``with()`` or ``new_with()``, which
+///will take care of encoding the set/class.
 #[derive(Debug,Clone)]
 pub enum SelectorValue<'a> {
     Some(&'a str),
@@ -193,6 +195,7 @@ impl<'a> Default for SelectorValue<'a> {
     }
 }
 
+///Specifies what set to select (where the set is already encoded as a key)
 #[derive(Debug,Clone,PartialEq)]
 pub enum SetSelector {
     SomeSet(DecKey),
@@ -207,6 +210,7 @@ impl Default for SetSelector {
 
 
 
+///Specifies what class to select (where the class is already encoded as a key)
 #[derive(Debug,Clone,PartialEq)]
 pub enum ClassSelector {
     SomeClass(ClassKey),
