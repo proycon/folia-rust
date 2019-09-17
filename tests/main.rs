@@ -139,11 +139,11 @@ fn test005_decode() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
-                let set = word.decoded_set(&doc.declarationstore);
+                let set = word.set_decode(&doc.declarationstore);
                 assert_eq!(set.expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
-                let class = word.decoded_class(&doc.declarationstore);
+                let class = word.class_decode(&doc.declarationstore);
                 assert_eq!(class.expect("Unwrapping class"), "WORD");
-                let processor = word.decoded_processor(&doc.provenancestore);
+                let processor = word.processor_decode(&doc.provenancestore);
                 assert_eq!(processor.expect("Unwrapping class"), "p1");
             } else {
                 assert!(false, "Word not found");
@@ -215,7 +215,7 @@ fn test008b_selector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
-            let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            let selector = doc.select(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
             assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
             assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
             assert!(selector.selector.matchable());
@@ -237,14 +237,14 @@ fn test008c_elementselector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
-            let selector = doc.select_elements(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            let selector = doc.select_elements(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
             assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
             assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
                 count += 1;
-                assert_matches!(item.decoded_class(&doc.declarationstore), Some("PUNCTUATION"));
+                assert_matches!(item.class_decode(&doc.declarationstore), Some("PUNCTUATION"));
             }
             assert_eq!(count, 2, "Checking whether we have the right amount of matches");
         }

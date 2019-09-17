@@ -180,6 +180,19 @@ impl DeclarationStore {
         }
     }
 
+    ///Returns the class store for the given declaration
+    pub fn get_class_store(&self, dec_key: DecKey) -> Option<&ClassStore> {
+        if let Some(declaration) = self.get(dec_key) {
+            if declaration.classes.is_some() {
+                Some(declaration.classes.as_ref().unwrap())
+            } else {
+                None
+            }
+        } else {
+            panic!("get_class_store: No such declaration");
+        }
+    }
+
     ///Returns the class store for the given declaration (mutably)
     pub fn get_class_store_mut(&mut self, dec_key: DecKey) -> &mut ClassStore {
         if let Some(mut declaration) = self.get_mut(dec_key) {
@@ -192,8 +205,11 @@ impl DeclarationStore {
         }
     }
 
-    ///Encode a class, adding it to the class store if needed
-    pub fn encode_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
+
+
+    ///Encode a class, adding it to the class store if needed, returning the existing one if
+    ///already present
+    pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
         let mut class_store = self.get_class_store_mut(dec_key);
         if let Some(class_key) = class_store.id_to_key(class) {
             Ok(class_key)
@@ -206,6 +222,27 @@ impl DeclarationStore {
             }
         }
     }
+
+
+    ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
+    pub fn encode_class(&self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
+        if let Some(class_store) = self.get_class_store(dec_key) {
+            if let Some(class_key) = class_store.id_to_key(class) {
+                Ok(class_key)
+            } else {
+                let class_key = class_store.get_key(class);
+                if let Some(class_key) = class_key {
+                    Ok(class_key)
+                } else {
+                    Err(FoliaError::EncodeError("Class does not exist".to_string()))
+                }
+            }
+        } else {
+            Err(FoliaError::InternalError("Declaration not found".to_string()))
+        }
+    }
+
+
 }
 
 impl Store<Declaration,DecKey> for DeclarationStore {

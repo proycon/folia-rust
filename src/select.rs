@@ -24,7 +24,7 @@ pub struct Selector {
 impl Selector {
 
     ///Creates a new selector given its subcomponents, a type selector, a set selector, and a class
-    ///selector. Note that set and class refer to encoded values here. Use ``new_with()``, if you want
+    ///selector. Note that set and class refer to encoded values here. Use ``new_encode()``, if you want
     ///to create a selector with decoded values (strings), which will take care of encoding them
     ///for you.
     pub fn new(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector) -> Self {
@@ -34,13 +34,13 @@ impl Selector {
 
     ///Creates a new selector given its subcomponents, a type selector, a set selector, and a class
     ///selector. This variant actively encodes the set and class you specify.
-    pub fn new_with(document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
-        Selector::default().with(document, elementtype, set, class)
+    pub fn new_encode(document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
+        Selector::default().encode(document, elementtype, set, class)
     }
 
 
     ///Encodes a selector
-    pub fn with(mut self, document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
+    pub fn encode(mut self, document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
         self.typeselector = TypeSelector::SomeElement(elementtype);
         if let Some(annotationtype) = elementtype.annotationtype() {
             self.setselector = match set {

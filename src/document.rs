@@ -45,8 +45,8 @@ impl Document {
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
         let mut elementstore = ElementStore::default();
         elementstore.add(match bodytype {
-            BodyType::Text => FoliaElement::new_encoded(ElementType::Text),
-            BodyType::Speech => FoliaElement::new_encoded(ElementType::Speech),
+            BodyType::Text => FoliaElement::new_as_encoded(ElementType::Text),
+            BodyType::Speech => FoliaElement::new_as_encoded(ElementType::Speech),
         })?;
         Ok(Self {
             id: id.to_string(),
@@ -133,24 +133,18 @@ impl Document {
         } else {
             "current"
         };
-        for element in self.select_elements(element_key, Selector::new_with(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
+        for element in self.select_elements(element_key, Selector::new_encode(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
             return Some(element.element);
         }
         None
     }
 
-    ///Get the text for the given element key
-    pub fn text(&self, element_key: ElementKey, textclass: Option<&str>) -> Cow<str> {
-        let textclass: &str = if let Some(textclass) = textclass {
-            textclass
-        } else {
-            "current"
-        };
-        if let Some(element) = self.elementstore.get(element_key) {
 
-        }
-        unimplemented!() //TODO
+    ///Returns the text of the given element
+    pub fn text(&self, element_key: ElementKey, set: DecKey, textclass: ClassKey) -> Result<Cow<str>,FoliaError> {
+        unimplemented!()
     }
+
 
 
 

@@ -220,14 +220,14 @@ impl Document {
                             //check if the declaration is the default, no need to serialise set then
                             if !dec_is_default.get(declaration_key as usize).expect("checking default") {
                                 //decode encoded attributes
-                                if let Some(set) = element.decoded_set(&self.declarationstore) {
+                                if let Some(set) = element.set_decode(&self.declarationstore) {
                                     start.push_attribute(("set", set) );
                                 }
                             }
-                            if let Some(class) = element.decoded_class(&self.declarationstore) {
+                            if let Some(class) = element.class_decode(&self.declarationstore) {
                                 start.push_attribute(("class", class) );
                             }
-                            if let Some(processor) = element.decoded_processor(&self.provenancestore) {
+                            if let Some(processor) = element.processor_decode(&self.provenancestore) {
                                 //check if this processor is the default one, if so we don't need
                                 //to serialise it
                                 let is_default: bool = if let Some(declaration) = self.declarationstore.get(declaration_key) {
