@@ -9,6 +9,9 @@ use crate::element::*;
 use crate::store::*;
 
 
+///Represent a declaration for a particular annotation type, a set (optional), and associated with
+///zero or more annotators or processors. Also holds and owns
+///the class store for any classes in that set.
 #[derive(Clone)]
 pub struct Declaration {
     pub annotationtype: AnnotationType,
@@ -19,6 +22,7 @@ pub struct Declaration {
 }
 
 impl Declaration {
+    ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()``.
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
         Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None }
     }
@@ -46,6 +50,9 @@ impl MaybeIdentifiable for Declaration {
 
 
 #[derive(Default,Clone)]
+///The declaration store holds all classes that occur (e.g. in a document for a given set and
+///annotation type). There are multiple class stores, which are owned by their respective ``Declaration`` (for a given set and
+///annotation type).
 pub struct ClassStore {
     items: Vec<Option<Box<Class>>>, //heap-allocated
     index: HashMap<Class,ClassKey>
@@ -81,6 +88,7 @@ impl Store<Class,ClassKey> for ClassStore {
 
 
 #[derive(Default)]
+///The declaration store holds all declarations (e.g. for a document)
 pub struct DeclarationStore {
     items: Vec<Option<Box<Declaration>>>, //heap-allocated
     index: HashMap<String,DecKey>,
@@ -246,6 +254,7 @@ impl Store<Processor,ProcKey> for ProvenanceStore {
 }
 
 impl ProvenanceStore {
+    ///Adds a processor to the provenance chain
     pub fn add_to_chain(&mut self, child: Processor) -> Result<ProcKey,FoliaError> {
         let child_key = self.add(child);
         if let Ok(child_key) = child_key {
@@ -290,6 +299,7 @@ impl ProvenanceStore {
 
 
 #[derive(Debug,PartialEq,Clone,Copy)]
+///Represents the type of a processor
 pub enum ProcessorType {
     Auto,
     Manual,
@@ -320,6 +330,7 @@ impl fmt::Display for ProcessorType {
 }
 
 #[derive(Default,Clone)]
+///Represents a processor
 pub struct Processor {
     pub id: String,
     pub name: String,
@@ -349,6 +360,9 @@ impl MaybeIdentifiable for Processor {
 }
 
 #[derive(Default,Clone)]
+///A key/value store (``data``) containing arbitrary metadata (FoLiA native metadata)
+///Instead of using the key/value store, it may also refer to an external metadata source
+///(``src``).
 pub struct Metadata {
     pub data: HashMap<String,String>,
     pub src: Option<String>,

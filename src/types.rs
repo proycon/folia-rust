@@ -34,6 +34,7 @@ pub enum ElementGroup {
 }
 
 impl ElementGroup {
+    ///Returns an array of all element types includes in this group
     pub fn elementtypes(&self) -> &'static [ElementType] {
         //foliaspec:elementgroup_elementtypes_map:self
         match self {
@@ -42,6 +43,7 @@ impl ElementGroup {
         }
     }
 
+    ///Checks whether the specified element type is a member of this group
     pub fn contains(&self, elementtype: ElementType) -> bool {
         self.elementtypes().contains(&elementtype)
     }
@@ -53,7 +55,7 @@ impl ElementGroup {
 pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
 
 impl AnnotationType {
-    //Maps annotation types to strings
+    ///Maps annotation types to strings
     pub fn as_str(&self) -> &'static str {
         //foliaspec:annotationtype_string_map:self
         match self {

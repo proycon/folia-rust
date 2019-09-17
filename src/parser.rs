@@ -23,8 +23,8 @@ use crate::select::*;
 use crate::document::Document;
 
 impl Document {
-    ///Parse a FoLiA document
-    pub fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
+    ///Parses a FoLiA document given a reader
+    pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
 
         let mut body: Option<FoliaElement> = None;
         let mut buf = Vec::new();
@@ -293,7 +293,7 @@ impl Document {
     }
 
     ///Parses all elementsm from XML, this in turn invokes all parsers for the subelements
-    pub fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
+    pub(crate) fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
         if !self.elementstore.is_empty() {
             let mut stack: Vec<ElementKey> = vec![0]; //0 is the root/body element, we always start with it
             loop {
@@ -407,7 +407,7 @@ impl Processor {
 
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
-    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<Processor, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<Processor, FoliaError> {
         let mut processor = Processor::default();
         for attrib in event.attributes()  {
             if let Ok(attrib) = attrib {
@@ -459,7 +459,7 @@ impl FoliaElement {
 
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
-    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
         let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
         let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement::new(elementtype).with_attribs(attributes))
@@ -467,7 +467,7 @@ impl FoliaElement {
 }
 
 impl Declaration {
-    pub fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart, tag: &[u8]) -> Result<Declaration, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart, tag: &[u8]) -> Result<Declaration, FoliaError> {
         let declaration_type = get_declaration_type(str::from_utf8(tag).unwrap())?;
         let mut set: Option<String> = None;
         let mut alias: Option<String> = None;

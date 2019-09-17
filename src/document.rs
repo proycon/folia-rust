@@ -55,7 +55,7 @@ impl Document {
         })
     }
 
-    ///Load a FoliA document from file
+    ///Load a FoliA document from file. Invokes the XML parser and loads it all into memory.
     pub fn from_file(filename: &str) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_file(Path::new(filename))?;
         reader.trim_text(true);
@@ -65,7 +65,7 @@ impl Document {
         Ok(doc)
     }
 
-    ///Load a FoliA document from XML string representation
+    ///Load a FoliA document from XML string representation, loading it all into memory.
     pub fn from_str(data: &str) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_str(data);
         reader.trim_text(true);
@@ -80,7 +80,7 @@ impl Document {
     }
 
 
-    ///REmove an element from the document
+    ///Remove an element from the document
     pub fn remove(&mut self, key: ElementKey) {
         //self.elementstore.remove(key)
         unimplemented!()
