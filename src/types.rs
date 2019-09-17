@@ -21,14 +21,30 @@ pub type Class = String;
 #[derive(Copy,Clone,PartialEq)]
 pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
-#[derive(Copy,Clone,PartialEq)]
+//foliaspec:elementgroup
+#[derive(Copy,Clone,PartialEq,Debug)]
 pub enum ElementGroup {
     Structure,
     Inline,
     Span,
     SpanRole,
     TextMarkup,
+    Subtoken,
     HigherOrder,
+}
+
+impl ElementGroup {
+    pub fn elementtypes(&self) -> &Vec<ElementType> {
+        //foliaspec:elementgroup_elementtypes_map:self
+        match self {
+            ElementGroup::Structure => &vec![ElementType::Word],
+            _ => &vec![],
+        }
+    }
+
+    pub fn contains(&self, elementtype: ElementType) -> bool {
+        self.elementtypes().contains(&elementtype)
+    }
 }
 
 //foliaspec:annotationtype
@@ -39,6 +55,7 @@ pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, 
 impl AnnotationType {
     //Maps annotation types to strings
     pub fn as_str(&self) -> &'static str {
+        //foliaspec:annotationtype_string_map:self
         match self {
           AnnotationType::ALTERNATIVE => "alternative",
           AnnotationType::CHUNKING => "chunking",
@@ -96,9 +113,11 @@ impl AnnotationType {
           AnnotationType::WHITESPACE => "whitespace",
           AnnotationType::TOKEN => "token",
         }
+
     }
 
     pub fn from_str(s: &str) -> Option<Self> {
+        //foliaspec:string_annotationtype_map:s
         match s {
           "alternative" => Some(AnnotationType::ALTERNATIVE),
           "chunking" => Some(AnnotationType::CHUNKING),
@@ -157,6 +176,7 @@ impl AnnotationType {
           "token" => Some(AnnotationType::TOKEN),
           _ => None,
         }
+
     }
 
     pub fn as_element_str(&self) -> &'static str {
@@ -219,6 +239,7 @@ impl AnnotationType {
           AnnotationType::WHITESPACE => "whitespace",
           AnnotationType::TOKEN => "w",
         }
+
     }
 }
 
@@ -237,7 +258,7 @@ impl fmt::Display for AnnotationType {
 
 impl AnnotationType {
     pub fn elementtype(&self) -> ElementType {
-        //foliaspec:annotationtype_elementtype_map
+        //foliaspec:annotationtype_elementtype_map:self
         //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
         match self {
             AnnotationType::ALTERNATIVE => ElementType::Alternative,
@@ -300,15 +321,9 @@ impl AnnotationType {
 }
 
 impl ElementType {
-    pub fn is_in_group(&self, group: ElementGroup) -> bool {
-        match (self, group) {
-            (ElementType::Alternative, ElementGroup::HigherOrder) => true,
-            //tODO
-        }
-    }
 
     pub fn annotationtype(&self) -> Option<AnnotationType> {
-        //foliaspec:elementtype_annotationtype_map
+        //foliaspec:elementtype_annotationtype_map:self
         match self {
             ElementType::Alternative => Some(AnnotationType::ALTERNATIVE),
             ElementType::Chunk => Some(AnnotationType::CHUNKING),
@@ -367,12 +382,17 @@ impl ElementType {
             ElementType::Word => Some(AnnotationType::TOKEN),
             _ => None,
         }
+
     }
 }
 
 impl ElementType {
+    pub fn is_in_group(&self, group: ElementGroup) -> bool {
+        group.contains(*self)
+    }
+
     pub fn as_str(&self) -> &'static str {
-        //foliaspec:elementtype_string_map
+        //foliaspec:elementtype_string_map:self
         match self {
           ElementType::ActorFeature => "actor",
           ElementType::Alternative => "alt",
@@ -485,6 +505,7 @@ impl ElementType {
           ElementType::Word => "w",
           ElementType::WordReference => "wref",
         }
+
     }
 }
 
@@ -519,7 +540,7 @@ impl std::str::FromStr for ElementType {
     type Err = FoliaError;
 
     fn from_str(tag: &str) -> Result<Self, Self::Err> {
-        //foliaspec:string_elementtype_map
+        //foliaspec:string_elementtype_map:tag
         match tag {
           "actor" =>  Ok(ElementType::ActorFeature),
           "alt" =>  Ok(ElementType::Alternative),
@@ -633,6 +654,7 @@ impl std::str::FromStr for ElementType {
           "wref" =>  Ok(ElementType::WordReference),
             _ => Err(FoliaError::ParseError(format!("Unknown tag has no associated element type: {}",tag).to_string()))
         }
+
     }
 }
 
