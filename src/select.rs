@@ -12,6 +12,7 @@ use crate::elementstore::*;
 
 
 
+///The selector defines matching criteria for a SelectIterator
 #[derive(Debug,Clone,Default)]
 pub struct Selector {
     pub typeselector: TypeSelector,
@@ -22,12 +23,17 @@ pub struct Selector {
 
 impl Selector {
 
-    ///Creates a new selector
+    ///Creates a new selector given its subcomponents, a type selector, a set selector, and a class
+    ///selector. Note that set and class refer to encoded values here. Use ``new_with()``, if you want
+    ///to create a selector with decoded values (strings), which will take care of encoding them
+    ///for you.
     pub fn new(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector) -> Self {
         Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, next: None }
     }
 
 
+    ///Creates a new selector given its subcomponents, a type selector, a set selector, and a class
+    ///selector. This variant actively encodes the set and class you specify.
     pub fn new_with(document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
         Selector::default().with(document, elementtype, set, class)
     }
@@ -72,7 +78,8 @@ impl Selector {
         self
     }
 
-
+    ///Add another selector, the resulting selection will then consist of the union
+    ///of the selectors. This can be chained multiple times.
     pub fn and(mut self, selector: Selector) -> Self {
         self.next = Some(Box::new(selector));
         self
@@ -88,6 +95,8 @@ impl Selector {
         self.classselector != ClassSelector::Unmatchable
     }
 
+    ///Tests if the selector matches against the specified data item, given an element store.
+    ///There is no need to invoke this directly if you use a ``SelectIterator``.
     pub fn matches(&self, store: &ElementStore, item: &DataType) -> bool {
         //we attempt to falsify the match
         let matches = match item {
@@ -170,6 +179,7 @@ impl Selector {
 }
 
 
+///Represents
 #[derive(Debug,Clone)]
 pub enum SelectorValue<'a> {
     Some(&'a str),
@@ -226,17 +236,24 @@ impl Default for TypeSelector {
     fn default() -> Self { TypeSelector::AnyType }
 }
 
-///Implements a depth-first search
+///Iterator over data items (elements, text, comments, i.e. a ``DataType``).
+///This implements a depth-first search.
 pub struct SelectIterator<'a> {
+    ///The element store to draw elements from
     pub store: &'a ElementStore,
+    ///The selector to apply to test for matching data items
     pub selector: Selector,
+    ///Apply the selector recursively (depth-first search) or not (plain linear search)
     pub recursive: bool,
+
     ///The current stack, containing the element and cursor within that element
     pub(crate) stack: Vec<(ElementKey,usize)>,
     pub(crate) iteration: usize,
 }
 
 impl<'a> SelectIterator<'a> {
+    ///Creates a new ``SelectIterator``. This is usually not invoked directly but through a
+    ///``selects()`` method (provided by the ``Select`` trait) which is implement by for instance a ``Document`` or an ``ElementStore``.
     pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey, recursive: bool) -> SelectIterator<'a> {
         SelectIterator {
             store: store,
@@ -247,12 +264,14 @@ impl<'a> SelectIterator<'a> {
         }
     }
 
+    ///Returns the selector component of the iterator
     pub fn selector(&self) -> &Selector {
         &self.selector
     }
 
 }
 
+///The ``Item`` returned by a ``SelectIterator``. It dereferences into ``&DataType``>
 #[derive(Debug)]
 pub struct SelectItem<'a> {
     pub data: &'a DataType,
@@ -318,24 +337,33 @@ impl<'a> Iterator for SelectIterator<'a> {
 
 }
 
+///This trait is for collections for which a ``SelectIterator`` can be created to iterate over data
+///items contained in it.
 pub trait Select<'a> {
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a>;
 }
 
 
 impl<'a> Select<'a> for ElementStore {
+    ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element specified by
+    ///``key``.
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
         SelectIterator::new(self, selector, key, recursive)
     }
 }
 
 impl<'a> Select<'a> for Document {
+    ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
+    ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
+    ///is enabled). This is the primary means of iterating over anything in the document.
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
         SelectIterator::new(&self.elementstore, selector, key, recursive)
     }
 }
 
-///Implements a depth-first search
+///This is a higher-level iterator that iterates over elements only (i.e. not over text, comments,
+///etc). It is implemented as a wrapper around ``SelectIterator`` and is identical in many regards. However, this iterator returns
+///``SelectElementsItem``, which dereferences directly to ``&FoliaElement``.
 pub struct SelectElementsIterator<'a> {
     iterator: SelectIterator<'a>
 }
@@ -353,6 +381,7 @@ impl<'a> SelectElementsIterator<'a> {
 
 }
 
+///The Item returned by SelectElementsIterator, this dereferences directly to ``&FoliaElement``
 pub struct SelectElementsItem<'a> {
     pub element: &'a FoliaElement,
 }
@@ -388,17 +417,26 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
     }
 
 }
+
+///This trait is for collections for which a ``SelectElementsIterator`` can be created to iterate over data
+///items contained in it.
 pub trait SelectElements<'a> {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
 }
 
 impl<'a> SelectElements<'a> for ElementStore {
+    ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
+    ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
+    ///is enabled).
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
         SelectElementsIterator::new(self, selector, key, recursive)
     }
 }
 
 impl<'a> SelectElements<'a> for Document {
+    ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
+    ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
+    ///is enabled).
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
         SelectElementsIterator::new(&self.elementstore, selector, key, recursive)
     }
