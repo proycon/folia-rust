@@ -440,8 +440,28 @@ impl FoliaElement {
     }
 
     ///Returns the text content of a given element, only makes sense if the element is a text
-    pub fn text(&self, elementstore: &ElementStore, set: Option<DecKey>, textclass: Option<ClassKey>) -> Result<Cow<str>,FoliaError> {
-        unimplemented!()
+    pub fn text(&self, doc: &Document, set: DecKey, textclass: ClassKey) -> Result<Cow<str>,FoliaError> {
+        unimplemented!() //TODO
+    }
+
+    ///Returns the text content of a given element, only makes sense if the element is a text
+    pub fn text_encode(&self, doc: &Document, set: Option<&str>, textclass: Option<&str>) -> Result<Cow<str>,FoliaError> {
+        let set: &str = if let Some(set) = set {
+            set
+        } else {
+            DEFAULT_TEXT_SET
+        };
+        let textclass: &str = if let Some(textclass) = textclass {
+            textclass
+        } else {
+            "current"
+        };
+        if let Some(dec_key) = doc.declarationstore.id_to_key(DeclarationStore::index_id(AnnotationType::TOKEN, &Some(set)).as_str()) {
+            let class_key = doc.declarationstore.encode_class(dec_key, textclass)?;
+            self.text(doc, dec_key, class_key)
+        } else {
+            Err(FoliaError::EncodeError("No declaration for the specified text set/class".to_string()))
+        }
     }
 
 }

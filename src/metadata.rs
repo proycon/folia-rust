@@ -225,12 +225,13 @@ impl DeclarationStore {
 
 
     ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
-    pub fn encode_class(&self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
+    pub fn encode_class(&self, dec_key: DecKey, class: &str) -> Result<ClassKey,FoliaError> {
         if let Some(class_store) = self.get_class_store(dec_key) {
             if let Some(class_key) = class_store.id_to_key(class) {
                 Ok(class_key)
             } else {
-                let class_key = class_store.get_key(class);
+                let class = class.to_string();
+                let class_key = class_store.get_key(&class);
                 if let Some(class_key) = class_key {
                     Ok(class_key)
                 } else {
