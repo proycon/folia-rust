@@ -193,7 +193,7 @@ fn test007_metadata() {
 fn test008a_selector_any() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
-            let selector = doc.select(0, Selector::default().with(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
+            let selector = doc.select(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
             assert_matches!(selector.selector.setselector, SetSelector::AnySet);
             assert_matches!(selector.selector.classselector, ClassSelector::AnyClass);
             assert!(selector.selector.matchable());
