@@ -28,9 +28,13 @@ pub struct Document {
     ///The FoLiA version of the document
     pub version: String,
     pub filename: Option<String>,
+    ///The element store holds and owns all elements in a document
     pub elementstore: ElementStore,
+    ///The provenance store holds and owns all processors and a representation of the  provenance chain
     pub provenancestore: ProvenanceStore,
+    ///The declaration store holds all annotation declarations
     pub declarationstore: DeclarationStore,
+    ///Metadata consists of a simple key/value store (or a reference to external metadata)
     pub metadata: Metadata,
 }
 
@@ -73,7 +77,7 @@ impl Document {
     }
 
 
-    ///Add an element to the document, this will result in an orphaned element, use add_to() instead
+    ///Add an element to the document, this will result in an orphaned element, use ``add_to()`` instead
     pub fn add(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
         let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
         self.elementstore.add(element)
@@ -86,24 +90,35 @@ impl Document {
         unimplemented!()
     }
 
+    ///Adds a new element (``element``) as a child of an existing one (``parent_key``). Takes
+    ///ownership of the element. Returns the key.
     pub fn add_to(&mut self, parent_key: ElementKey, element: FoliaElement) -> Result<ElementKey, FoliaError> {
         let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
         self.elementstore.add_to(parent_key, element)
     }
 
+    ///Add a processor to the the provenance chain
+    ///Returns the key
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        self.provenancestore.add(processor)
+        self.provenancestore.add_to_chain(processor)
     }
 
+    ///Add a declaration. It is strongly recommended to use ``declare()`` instead.
+    ///Returns the key.
     pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
         self.declarationstore.add(declaration)
     }
 
+    ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
+    ///key of the existing one.
     pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
         self.declarationstore.declare(annotationtype, set, alias)
     }
 
+    ///Returns the ID of the document
     pub fn id(&self) -> &str { &self.id }
+
+    ///Returns the filename associated with this document (i.e. the file from which it was loaded)
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
 
