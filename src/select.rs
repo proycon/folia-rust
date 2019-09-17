@@ -99,6 +99,9 @@ impl Selector {
                         TypeSelector::SomeElement(refelementtype) => {
                             element.elementtype == *refelementtype
                         },
+                        TypeSelector::SomeElementGroup(elementgroup) => {
+                            elementgroup.contains(element.elementtype)
+                        },
                         TypeSelector::AnyElement => true,
                         TypeSelector::AnyType => true,
                         TypeSelector::Unmatchable => false,

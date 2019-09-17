@@ -253,3 +253,23 @@ fn test008c_elementselector_set_class() {
         }
     }
 }
+
+#[test]
+fn test008d_selector_elementgroup() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+        Ok(doc) => {
+            let selector = doc.select(0, Selector::new(TypeSelector::SomeElementGroup(ElementGroup::Structure), SetSelector::AnySet, ClassSelector::AnyClass), true);
+            assert_matches!(selector.selector().typeselector, TypeSelector::SomeElementGroup(_));
+            assert!(selector.selector.matchable());
+            let mut count = 0;
+            for item in selector {
+                count += 1;
+                assert_matches!(*item, DataType::Element(_));
+            }
+            assert_eq!(count, 14, "Checking whether we have the right amount of matches");
+        }
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}

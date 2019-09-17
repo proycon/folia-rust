@@ -34,11 +34,11 @@ pub enum ElementGroup {
 }
 
 impl ElementGroup {
-    pub fn elementtypes(&self) -> &Vec<ElementType> {
+    pub fn elementtypes(&self) -> &'static [ElementType] {
         //foliaspec:elementgroup_elementtypes_map:self
         match self {
-            ElementGroup::Structure => &vec![ElementType::Word],
-            _ => &vec![],
+            ElementGroup::Structure => &[ElementType::Word, ElementType::Paragraph, ElementType::Sentence, ElementType::Text],
+            _ => &[],
         }
     }
 
