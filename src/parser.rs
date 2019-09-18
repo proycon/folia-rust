@@ -88,7 +88,7 @@ impl Document {
                             eprintln!("Parsing processor");
                             let processor = Processor::parse(&reader, &e)?;
                             if processor_stack.is_empty() {
-                                let processor_key = provenancestore.add_to_chain(processor)?;
+                                provenancestore.add_to_chain(processor)?;
                             } else {
                                 let parent_key = processor_stack.last().expect("Polling processor stack");
                                 provenancestore.add_to(*parent_key, processor)?;
@@ -284,7 +284,7 @@ impl Document {
 
         let mut doc = Self { id: id, filename: None, version: version, elementstore: ElementStore::default(), provenancestore: provenancestore, declarationstore: declarationstore, metadata: metadata };
         if let Some(body) = body {
-            let key = doc.add(body);
+            doc.add(body)?;
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
@@ -347,7 +347,7 @@ impl Document {
                         if text.trim() != "" {
                             //eprintln!("TEXT: {}", text);
                             if let Some(parent_key) = stack.last() {
-                                self.elementstore.get_mut(*parent_key).map( |mut parent| {
+                                self.elementstore.get_mut(*parent_key).map( |parent| {
                                     parent.push(DataType::Text(text));
                                 });
                             }
@@ -357,7 +357,7 @@ impl Document {
                         let text = reader.decode(&s)?;
                         if text.trim() != "" {
                             if let Some(parent_key) = stack.last() {
-                                self.elementstore.get_mut(*parent_key).map( |mut parent| {
+                                self.elementstore.get_mut(*parent_key).map( |parent| {
                                     parent.push(DataType::Text(text.to_string()));
                                 });
                             }
@@ -367,7 +367,7 @@ impl Document {
                         let comment = reader.decode(&s)?;
                         if comment.trim() != "" {
                             if let Some(parent_key) = stack.last() {
-                                self.elementstore.get_mut(*parent_key).map( |mut parent| {
+                                self.elementstore.get_mut(*parent_key).map( |parent| {
                                     parent.push(DataType::Comment(comment.to_string()));
                                 });
                             }

@@ -120,13 +120,13 @@ impl Selector {
                     if typematch {
                         let setmatch: bool = match &self.setselector {
                              SetSelector::SomeSet(refset) => {
-                                 if let Some(set) = element.set_key() {
+                                 if let Some(set) = element.declaration_key() {
                                      set == *refset
                                  } else {
                                      false
                                  }
                              },
-                             SetSelector::NoSet => element.set_key().is_none(),
+                             SetSelector::NoSet => element.declaration_key().is_none(),
                              SetSelector::AnySet => true,
                              SetSelector::Unmatchable => false,
                         };

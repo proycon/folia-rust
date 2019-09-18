@@ -18,7 +18,7 @@ use crate::attrib::*;
 use crate::elementstore::*;
 use crate::store::*;
 use crate::metadata::*;
-use crate::parser::*;
+use crate::select::*;
 use crate::document::{Document};
 
 
@@ -73,15 +73,15 @@ pub struct FoliaElement {
     pub attribs: Vec<Attribute>,
 
     //encoded (inter-element)
-    data: Vec<DataType>,
-    parent: Option<ElementKey>,
+    pub(crate) data: Vec<DataType>,
+    pub(crate) key: Option<ElementKey>,
+    pub(crate) parent: Option<ElementKey>,
 
     //encoded attributes
-    enc_attribs: Option<EncodedAttributes>,
+    pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
-
-impl MaybeIdentifiable for FoliaElement {
+impl Storable<ElementKey> for FoliaElement {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
             Some(attrib.value())
@@ -89,11 +89,19 @@ impl MaybeIdentifiable for FoliaElement {
             None
         }
     }
-}
 
-impl CheckEncoded for FoliaElement {
-    fn encoded(&self) -> bool {
+    fn is_encoded(&self) -> bool {
         self.enc_attribs.is_some()
+    }
+
+    ///Returns the key of the current element
+    fn key(&self) -> Option<ElementKey> {
+        self.key
+    }
+
+    ///Sets the key of the current element
+    fn set_key(&mut self, key: ElementKey) {
+        self.key = Some(key);
     }
 }
 
@@ -277,7 +285,7 @@ impl FoliaElement {
 
     ///Get the declaration from the declaration store, given an encoded element
     pub fn declaration<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a Declaration>) {
-        if let Some(declaration_key) = self.set_key() {
+        if let Some(declaration_key) = self.declaration_key() {
            declarationstore.get(declaration_key).map(|b| &**b)
         } else {
             None
@@ -333,10 +341,6 @@ impl FoliaElement {
         }
     }
 
-    ///Alias for declaration_key
-    pub fn set_key(&self) -> Option<DecKey> {
-        self.declaration_key()
-    }
 
     ///Get the class (encoded) aka the class keyy
     pub fn class_key(&self) -> Option<ClassKey> {
@@ -375,6 +379,7 @@ impl FoliaElement {
         }
         self
     }
+
 
     ///Returns the key of the parent element of this element
     pub fn get_parent(&self) -> Option<ElementKey> {
@@ -444,20 +449,28 @@ impl FoliaElement {
 
     ///Simple constructor for an empty element (optionally with attributes)
     pub fn new(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, enc_attribs: None }
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None }
     }
 
     ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes
     pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, enc_attribs: Some(EncodedAttributes::default()) }
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()) }
     }
 
-    ///Returns the text content of a given element, only makes sense if the element is a text
+    ///Returns the text content of a given element
     pub fn text(&self, doc: &Document, set: DecKey, textclass: ClassKey) -> Result<Cow<str>,FoliaError> {
+        /*
+        if let Some(key) = self.key() {
+            for element in self.select_elements(element_key, Selector::new_encode(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
+                return Some(element.element);
+            }
+        } else {
+
+        }*/
         unimplemented!() //TODO
     }
 
-    ///Returns the text content of a given element, only makes sense if the element is a text
+    ///Returns the text content of a given element
     ///This method takes string parameters for set and textclass, which can be set to None to
     ///fallback to the default text set and "current class".
     pub fn text_encode(&self, doc: &Document, set: Option<&str>, textclass: Option<&str>) -> Result<Cow<str>,FoliaError> {
@@ -478,6 +491,25 @@ impl FoliaElement {
             Err(FoliaError::EncodeError("No declaration for the specified text set/class".to_string()))
         }
     }
+
+    /*
+    pub fn textelement_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&FoliaElement> {
+        let set: &str = if let Some(set) = set {
+            set
+        } else {
+            DEFAULT_TEXT_SET
+        };
+        let textclass: &str = if let Some(textclass) = textclass {
+            textclass
+        } else {
+            "current"
+        };
+        for element in self.select_elements(element_key, Selector::new_encode(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
+            return Some(element.element);
+        }
+        None
+    }
+    */
 
 }
 

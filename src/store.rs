@@ -10,24 +10,31 @@ use crate::error::*;
 use crate::element::*;
 use crate::document::*;
 
-///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
 
-pub trait MaybeIdentifiable {
+///This trait needs to be implemented on  items that are storable in a ``Store``. It is a very lax trait where storable elements *MAY BE* identifiable and *MAY BE* storing their own key (the default implementation does neither)
+pub trait Storable<K> {
     fn maybe_id(&self) -> Option<Cow<str>> {
         None
     }
-}
 
-
-pub trait CheckEncoded {
-    fn encoded(&self) -> bool {
+    fn is_encoded(&self) -> bool {
         true
+    }
+
+    ///Get the key of the current item (if supported by the item)
+    fn key(&self) -> Option<K> {
+        None
+    }
+
+    ///Set the key of the current item (if supported by the item)
+    fn set_key(&mut self, key: K) {
+        //does nothing by default, override in implementations
     }
 }
 
 
-pub trait Store<T,K> where T: MaybeIdentifiable,
-                           T: CheckEncoded,
+///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
+pub trait Store<T,K> where T: Storable<K>,
                            K: TryFrom<usize> + Copy + Debug,
                            usize: std::convert::TryFrom<K>,
                            <usize as std::convert::TryFrom<K>>::Error : std::fmt::Debug {
@@ -41,19 +48,21 @@ pub trait Store<T,K> where T: MaybeIdentifiable,
 
     ///Add a new item to the store (takes ownership)
     fn add(&mut self, item: T) -> Result<K,FoliaError> {
-        if !item.encoded() {
+        if !item.is_encoded() {
             return Err(FoliaError::InternalError(format!("Store.add(). Item is not properly encoded")));
         }
         if let Some(key) = self.get_key(&item) {
             return Ok(key);
         }
 
+        //Get the ID fo the item (if any)
         let id: Option<String> = item.maybe_id().map(|x| x.to_owned().to_string());
 
         //add the item anew
-        let boxed = Box::new(item);
-        self.items_mut().push( Some(boxed) );
-        if let Ok(key) = K::try_from(self.items().len() - 1) {
+        let mut boxed = Box::new(item);
+        if let Ok(key) = K::try_from(self.items().len()) {
+            boxed.set_key(key); //set the key so the item knows it's own key (if supported)
+            self.items_mut().push( Some(boxed) );
             if let Some(id) = id {
                 self.index_mut().insert(id,key);
             }

@@ -5,7 +5,6 @@ use std::borrow::Cow;
 use crate::common::*;
 use crate::error::*;
 use crate::types::*;
-use crate::element::*;
 use crate::store::*;
 
 
@@ -14,6 +13,7 @@ use crate::store::*;
 ///the class store for any classes in that set.
 #[derive(Clone)]
 pub struct Declaration {
+    pub key: Option<DecKey>,
     pub annotationtype: AnnotationType,
     pub set: Option<String>,
     pub alias: Option<String>,
@@ -24,7 +24,7 @@ pub struct Declaration {
 impl Declaration {
     ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()``.
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None }
+        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None, key: None }
     }
 
     ///Returns the key of default processor, if any
@@ -37,17 +37,28 @@ impl Declaration {
     }
 }
 
-impl CheckEncoded for Declaration { }
-
-impl CheckEncoded for String { }
-
-impl MaybeIdentifiable for Declaration {
+impl Storable<DecKey> for Declaration {
     fn maybe_id(&self) -> Option<Cow<str>> {
         //let set_str: &str = &self.set.as_ref().expect("unwrapping set str");
         Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set.as_ref().map(String::as_str))))
     }
+
+    ///Returns the key of the current element
+    fn key(&self) -> Option<DecKey> {
+        self.key
+    }
+
+    ///Sets the key of the current element
+    fn set_key(&mut self, key: DecKey) {
+        self.key = Some(key);
+    }
 }
 
+impl Storable<ClassKey> for Class {
+    fn maybe_id(&self) -> Option<Cow<str>> {
+        Some(Cow::from(self))
+    }
+}
 
 #[derive(Default,Clone)]
 ///The declaration store holds all classes that occur (e.g. in a document for a given set and
@@ -56,13 +67,6 @@ impl MaybeIdentifiable for Declaration {
 pub struct ClassStore {
     items: Vec<Option<Box<Class>>>, //heap-allocated
     index: HashMap<Class,ClassKey>
-}
-
-
-impl MaybeIdentifiable for String { //for classes
-    fn maybe_id(&self) -> Option<Cow<str>> {
-        Some(Cow::from(self))
-    }
 }
 
 
@@ -210,7 +214,7 @@ impl DeclarationStore {
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present
     pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
-        let mut class_store = self.get_class_store_mut(dec_key);
+        let class_store = self.get_class_store_mut(dec_key);
         if let Some(class_key) = class_store.id_to_key(class) {
             Ok(class_key)
         } else {
@@ -387,11 +391,20 @@ pub struct Processor {
     pub resourcelink: String,
     pub parent: Option<ProcKey>,
     pub metadata: Metadata,
+    pub key: Option<ProcKey>
 }
 
-impl CheckEncoded for Processor { }
+impl Storable<ProcKey> for Processor {
+    ///Returns the key of the current processor
+    fn key(&self) -> Option<ProcKey> {
+        self.key
+    }
 
-impl MaybeIdentifiable for Processor {
+    ///Sets the key of the current processor
+    fn set_key(&mut self, key: ProcKey) {
+        self.key = Some(key);
+    }
+
     fn maybe_id(&self) -> Option<Cow<str>> {
         Some(Cow::from(&self.id))
     }

@@ -255,6 +255,8 @@ impl Document {
                     writer.write_event(Event::Text(text)).map_err(to_serialisation_error)?;
                 },
                 DataType::Comment(comment) => {
+                    let text = BytesText::from_plain_str(comment.as_str());
+                    writer.write_event(Event::Comment(text)).map_err(to_serialisation_error)?;
                 }
             }
             previous_depth = item.depth;

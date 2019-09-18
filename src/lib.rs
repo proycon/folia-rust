@@ -1,4 +1,6 @@
+#![allow(unused_imports,dead_code)] //TODO: remove later!
 extern crate quick_xml;
+
 
 pub mod common;
 pub mod types;

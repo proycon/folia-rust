@@ -21,6 +21,7 @@ pub enum FoliaError {
     ///Internal errors should never occur
     InternalError(String),
     EncodeError(String),
+    KeyError(String),
     IndexError,
 }
 
@@ -46,6 +47,7 @@ impl Error for FoliaError {
             FoliaError::ValidationError(ref err) => err,
             FoliaError::InternalError(ref err) => err,
             FoliaError::EncodeError(ref err) => err,
+            FoliaError::KeyError(ref err) => err,
             FoliaError::IndexError => "invalid index",
         }
     }
@@ -59,6 +61,7 @@ impl Error for FoliaError {
             FoliaError::ValidationError(ref _err) => None, //TODO
             FoliaError::InternalError(ref _err) => None, //TODO
             FoliaError::EncodeError(ref _err) => None, //TODO
+            FoliaError::KeyError(ref _err) => None, //TODO
             FoliaError::IndexError => None,
         }
     }
@@ -74,6 +77,7 @@ impl fmt::Display for FoliaError {
             FoliaError::ValidationError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::InternalError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::EncodeError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::KeyError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
         }
     }

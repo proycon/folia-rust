@@ -122,7 +122,7 @@ impl Document {
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
 
-    pub fn textelement(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&FoliaElement> {
+    pub fn textelement_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&FoliaElement> {
         let set: &str = if let Some(set) = set {
             set
         } else {
@@ -142,7 +142,20 @@ impl Document {
 
     ///Returns the text of the given element
     pub fn text(&self, element_key: ElementKey, set: DecKey, textclass: ClassKey) -> Result<Cow<str>,FoliaError> {
-        unimplemented!()
+        if let Some(element) = self.elementstore.get(element_key) {
+            element.text(self, set, textclass)
+        } else {
+            Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
+        }
+    }
+
+    ///Returns the text of the given element
+    pub fn text_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Result<Cow<str>,FoliaError> {
+        if let Some(element) = self.elementstore.get(element_key) {
+            element.text_encode(self, set, textclass)
+        } else {
+            Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
+        }
     }
 
 
