@@ -81,7 +81,7 @@ pub struct FoliaElement {
     pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
-impl Storable<ElementKey> for FoliaElement {
+impl Storable<ElementKey,Document> for FoliaElement {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
             Some(attrib.value())
@@ -103,15 +103,13 @@ impl Storable<ElementKey> for FoliaElement {
     fn set_key(&mut self, key: ElementKey) {
         self.key = Some(key);
     }
-}
 
-impl FoliaElement {
     ///Encode for storage, this only encodes attributes (set,class,processor) maintained
     ///in other stores, which are inherent to the element.
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store (but this is instead invoked as part of adding an element
     ///to the store). This function takes and returns ownership.
-    pub fn encode(mut self, declarationstore: &mut DeclarationStore, provenancestore: &mut ProvenanceStore) -> Result<Self, FoliaError> {
+    fn encode(&mut self, context: &mut Document) -> Result<(), FoliaError> {
         let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
 
         //encode the element for storage
@@ -120,18 +118,18 @@ impl FoliaElement {
         if let Some(annotationtype) = self.elementtype.annotationtype() {
             //Declare the element (either declares anew or just resolves the to the right
             //declaration.
-            let deckey = declarationstore.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
+            let deckey = context.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
             enc_attribs.declaration = Some(deckey);
 
             if let Some(class) = self.attrib(AttribType::CLASS) {
                 if let Attribute::Class(class) = class {
-                    if let Ok(class_key) = declarationstore.add_class(deckey, class) {
+                    if let Ok(class_key) = context.declarationstore.add_class(deckey, class, context) {
                         enc_attribs.class = Some(class_key);
                     }
                 }
             }
 
-            if let Some(declaration) = declarationstore.get(deckey) {
+            if let Some(declaration) = context.declarationstore.get(deckey) {
                 enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
             }
         }
@@ -139,7 +137,7 @@ impl FoliaElement {
         if let Some(processor) = self.attrib(AttribType::PROCESSOR) {
             let processor_id: &str  = &processor.value();
 
-            if let Some(processor_key) = provenancestore.id_to_key(processor_id) {
+            if let Some(processor_key) = context.provenancestore.id_to_key(processor_id) {
                 enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
             }
         }
@@ -152,8 +150,11 @@ impl FoliaElement {
 
         self.set_enc_attribs(Some(enc_attribs));
 
-        Ok(self)
+        Ok(())
     }
+}
+
+impl FoliaElement {
 
     ///Decodes an element and returns a **copy**, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent), only set, class
@@ -452,7 +453,7 @@ impl FoliaElement {
         Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None }
     }
 
-    ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes
+    ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes (OBSOLETE?)
     pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement {
         Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()) }
     }

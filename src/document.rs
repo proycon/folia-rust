@@ -43,20 +43,20 @@ pub struct Document {
 impl Document {
     ///Create a new FoLiA document from scratch
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
-        let mut elementstore = ElementStore::default();
-        elementstore.add(match bodytype {
-            BodyType::Text => FoliaElement::new_as_encoded(ElementType::Text),
-            BodyType::Speech => FoliaElement::new_as_encoded(ElementType::Speech),
-        })?;
-        Ok(Self {
+        let mut document = Self {
             id: id.to_string(),
             filename: None,
             version: FOLIAVERSION.to_string(),
-            elementstore: elementstore,
+            elementstore: ElementStore::default(),
             provenancestore:  ProvenanceStore::default(),
             declarationstore: DeclarationStore::default(),
             metadata: Metadata::default(),
-        })
+        };
+        document.add(match bodytype {
+            BodyType::Text => FoliaElement::new(ElementType::Text),
+            BodyType::Speech => FoliaElement::new(ElementType::Speech),
+        })?;
+        Ok(document)
     }
 
     ///Load a FoliA document from file. Invokes the XML parser and loads it all into memory.
@@ -77,42 +77,58 @@ impl Document {
     }
 
 
-    ///Add an element to the document, this will result in an orphaned element, use ``add_to()`` instead
     pub fn add(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
-        self.elementstore.add(element)
+        self.elementstore.add(element, self)
     }
 
-
-    ///Remove an element from the document
-    pub fn remove(&mut self, key: ElementKey) {
-        //self.elementstore.remove(key)
-        unimplemented!()
-    }
-
-    ///Adds a new element (``element``) as a child of an existing one (``parent_key``). Takes
-    ///ownership of the element. Returns the key.
-    pub fn add_to(&mut self, parent_key: ElementKey, element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        let element = element.encode(&mut self.declarationstore, &mut self.provenancestore)?;
-        self.elementstore.add_to(parent_key, element)
-    }
-
-    ///Add a processor to the the provenance chain
+    ///Add an element to the provenance chain
     ///Returns the key
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        self.provenancestore.add_to_chain(processor)
+        self.provenancestore.add_to_chain(processor, self)
     }
 
-    ///Add a declaration. It is strongly recommended to use ``declare()`` instead.
+    ///Add a processor as a subprocessor
+    ///Returns the key
+    pub fn add_subprocessor(&mut self, parent_processor: ProcKey, processor: Processor) -> Result<ProcKey, FoliaError> {
+        self.provenancestore.add_to(parent_processor, processor, self)
+    }
+
+    ///Add a declaration. It is strongly recommended to use ``declare()`` instead
+    ///because this one adds a declaration without any checks.
     ///Returns the key.
     pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
-        self.declarationstore.add(declaration)
+        self.declarationstore.add(declaration, self)
     }
 
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
     ///key of the existing one.
     pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
-        self.declarationstore.declare(annotationtype, set, alias)
+        //first we simply check the index
+        if let Some(found_key) = self.declarationstore.id_to_key(DeclarationStore::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
+            return Ok(found_key);
+        }
+
+        //If not found, we search for a default
+        if let Some(default_key) = self.declarationstore.get_default_key(annotationtype) {
+            if let Some(declaration) = self.declarationstore.get(default_key) {
+                if set.is_some() {
+                    //there is an explicit set defined, only return the default if the sets are not
+                    //in conflict
+                    if let Some(declared_set) = &declaration.set {
+                        if *declared_set == *set.as_ref().unwrap() {
+                            return Ok(default_key);
+                        }
+                    }
+                } else {
+                    //no set defined, that means we inherit the default set
+                    return Ok(default_key);
+                }
+            }
+        }
+
+        //if we reach this point we have no defaults and add a new declaration
+        let added_key = self.add_declaration(Declaration::new(annotationtype, set.clone(), alias.clone()))?;
+        Ok(added_key)
     }
 
     ///Returns the ID of the document

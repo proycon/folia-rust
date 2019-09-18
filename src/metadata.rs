@@ -6,6 +6,7 @@ use crate::common::*;
 use crate::error::*;
 use crate::types::*;
 use crate::store::*;
+use crate::document::*;
 
 
 ///Represent a declaration for a particular annotation type, a set (optional), and associated with
@@ -37,7 +38,7 @@ impl Declaration {
     }
 }
 
-impl Storable<DecKey> for Declaration {
+impl Storable<DecKey,Document> for Declaration {
     fn maybe_id(&self) -> Option<Cow<str>> {
         //let set_str: &str = &self.set.as_ref().expect("unwrapping set str");
         Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set.as_ref().map(String::as_str))))
@@ -54,7 +55,7 @@ impl Storable<DecKey> for Declaration {
     }
 }
 
-impl Storable<ClassKey> for Class {
+impl Storable<ClassKey,Document> for Class {
     fn maybe_id(&self) -> Option<Cow<str>> {
         Some(Cow::from(self))
     }
@@ -70,7 +71,7 @@ pub struct ClassStore {
 }
 
 
-impl Store<Class,ClassKey> for ClassStore {
+impl Store<Class,ClassKey,Document> for ClassStore {
 
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Class>>> {
         &mut self.items
@@ -133,36 +134,6 @@ impl DeclarationStore {
         mask
     }
 
-    ///Declares a new annotation type and set or returns the key of an existing one
-    pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
-        //first we simply check the index
-        if let Some(found_key) = self.id_to_key(Self::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
-            return Ok(found_key);
-        }
-
-        //If not found, we search for a default
-        if let Some(default_key) = self.get_default_key(annotationtype) {
-            if let Some(declaration) = self.get(default_key) {
-                if set.is_some() {
-                    //there is an explicit set defined, only return the default if the sets are not
-                    //in conflict
-                    if let Some(declared_set) = &declaration.set {
-                        if *declared_set == *set.as_ref().unwrap() {
-                            return Ok(default_key);
-                        }
-                    }
-                } else {
-                    //no set defined, that means we inherit the default set
-                    return Ok(default_key);
-                }
-            }
-        }
-
-        //if we reach this point we have no defaults and add a new declaration
-        let added_key = self.add(Declaration::new(annotationtype, set.clone(), alias.clone()))?;
-        Ok(added_key)
-    }
-
     ///Retrieves the key for the default annotation for the given annotationtype (if there is a
     ///default)
     pub fn get_default_key(&self, annotationtype: AnnotationType) -> Option<DecKey> {
@@ -213,7 +184,7 @@ impl DeclarationStore {
 
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present
-    pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
+    pub fn add_class(&mut self, dec_key: DecKey, class: &Class, context: &mut Document) -> Result<ClassKey,FoliaError> {
         let class_store = self.get_class_store_mut(dec_key);
         if let Some(class_key) = class_store.id_to_key(class) {
             Ok(class_key)
@@ -222,7 +193,7 @@ impl DeclarationStore {
             if let Some(class_key) = class_key {
                 Ok(class_key)
             } else {
-                class_store.add(class.to_owned())
+                class_store.add(class.to_owned(), context)
             }
         }
     }
@@ -250,7 +221,7 @@ impl DeclarationStore {
 
 }
 
-impl Store<Declaration,DecKey> for DeclarationStore {
+impl Store<Declaration,DecKey,Document> for DeclarationStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
         &mut self.items
     }
@@ -276,7 +247,7 @@ pub struct ProvenanceStore {
     pub chain: Vec<ProcKey>,
 }
 
-impl Store<Processor,ProcKey> for ProvenanceStore {
+impl Store<Processor,ProcKey,Document> for ProvenanceStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Processor>>> {
         &mut self.items
     }
@@ -297,8 +268,8 @@ impl Store<Processor,ProcKey> for ProvenanceStore {
 
 impl ProvenanceStore {
     ///Adds a processor to the provenance chain
-    pub fn add_to_chain(&mut self, child: Processor) -> Result<ProcKey,FoliaError> {
-        let child_key = self.add(child);
+    pub fn add_to_chain(&mut self, child: Processor, context: &mut Document) -> Result<ProcKey,FoliaError> {
+        let child_key = self.add(child, context);
         if let Ok(child_key) = child_key {
             self.chain.push(child_key);
         }
@@ -307,8 +278,8 @@ impl ProvenanceStore {
 
     ///Adds a processor as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_to(&mut self, parent_key: ProcKey, child: Processor) -> Result<ProcKey,FoliaError> {
-        let child_key = self.add(child);
+    pub fn add_to(&mut self, parent_key: ProcKey, child: Processor, context: &mut Document) -> Result<ProcKey,FoliaError> {
+        let child_key = self.add(child, context);
         if let Ok(child_key) = child_key {
             self.attach(parent_key, child_key)?;
         }
@@ -394,7 +365,7 @@ pub struct Processor {
     pub key: Option<ProcKey>
 }
 
-impl Storable<ProcKey> for Processor {
+impl Storable<ProcKey,Document> for Processor {
     ///Returns the key of the current processor
     fn key(&self) -> Option<ProcKey> {
         self.key

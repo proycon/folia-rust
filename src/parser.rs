@@ -31,9 +31,8 @@ impl Document {
         let mut nsbuf = Vec::new();
         let mut id: String = String::new();
         let mut version: String = FOLIAVERSION.to_string();
-        let mut metadata = Metadata::default();
-        let mut declarationstore = DeclarationStore::default();
-        let mut provenancestore = ProvenanceStore::default();
+
+        let mut doc = Self { id: id, filename: None, version: version, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: Metadata::default() };
 
         //parse root
         loop {
@@ -88,10 +87,10 @@ impl Document {
                             eprintln!("Parsing processor");
                             let processor = Processor::parse(&reader, &e)?;
                             if processor_stack.is_empty() {
-                                provenancestore.add_to_chain(processor)?;
+                                doc.add_processor(processor)?;
                             } else {
                                 let parent_key = processor_stack.last().expect("Polling processor stack");
-                                provenancestore.add_to(*parent_key, processor)?;
+                                doc.add_subprocessor(*parent_key, processor)?;
                             }
                         },
                         (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
@@ -130,10 +129,10 @@ impl Document {
                                 if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
                                     match attrib.key {
                                         b"src" => {
-                                            metadata.src = Some(value);
+                                            doc.metadata.src = Some(value);
                                         },
                                         b"type" => {
-                                            metadata.metadatatype = Some(value);
+                                            doc.metadata.metadatatype = Some(value);
                                         },
                                         otherwise => {
                                             eprintln!("WARNING: Unhandled attribute metadata/@{:?}",otherwise);
@@ -169,17 +168,17 @@ impl Document {
                             eprintln!("Parsing processor");
                             let processor = Processor::parse(&reader, &e)?;
                             if processor_stack.is_empty() {
-                                let processor_key = provenancestore.add_to_chain(processor)?;
+                                let processor_key = doc.add_processor(processor)?;
                                 processor_stack.push(processor_key);
                             } else {
                                 let parent_key = processor_stack.last().expect("Polling processor stack");
-                                let processor_key = provenancestore.add_to(*parent_key, processor)?;
+                                let processor_key = doc.add_subprocessor(*parent_key, processor)?;
                                 processor_stack.push(processor_key);
                             }
                         },
                         (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
                             let declaration = Declaration::parse(&reader, e, tag)?;
-                            let result = declarationstore.add(declaration)?;
+                            let result = doc.add_declaration(declaration)?;
                             declaration_key = Some(result);
                         },
                         (Some(ns), tag) if ns == NSFOLIA => {
@@ -214,8 +213,8 @@ impl Document {
                             //we are done with provenance, we can now assign processors to
                             //declarations using our temporary structure
                             for (dec_key, processor_id) in annotators.iter() {
-                                if let Some(processor_key) = provenancestore.id_to_key(processor_id) {
-                                    if let Some(declaration) = declarationstore.get_mut(*dec_key) {
+                                if let Some(processor_key) = doc.provenancestore.id_to_key(processor_id) {
+                                    if let Some(declaration) = doc.declarationstore.get_mut(*dec_key) {
                                         declaration.processors.push(processor_key);
                                     }
                                 }
@@ -226,7 +225,7 @@ impl Document {
                         },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             if let (Some(text), Some(meta_id)) = (&text, &meta_id) {
-                                metadata.data.insert(meta_id.clone(), text.clone());
+                                doc.metadata.data.insert(meta_id.clone(), text.clone());
                             }
                         },
                         (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
@@ -282,7 +281,6 @@ impl Document {
         };
 
 
-        let mut doc = Self { id: id, filename: None, version: version, elementstore: ElementStore::default(), provenancestore: provenancestore, declarationstore: declarationstore, metadata: metadata };
         if let Some(body) = body {
             doc.add(body)?;
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
