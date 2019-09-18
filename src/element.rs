@@ -54,6 +54,8 @@ pub struct Properties {
 }
 
 #[derive(Default,Clone)]
+///Encoded attributes represents attributes that are encoded, i.e. attributes that are mapped to a
+///numeric key rather than left as decoded strings. Encodes attributes are: Declarations (sets), classes and processors.
 pub struct EncodedAttributes {
     //encoded (relation to other stores)
     processor: Option<ProcKey>,
@@ -62,6 +64,10 @@ pub struct EncodedAttributes {
 }
 
 #[derive(Clone)]
+///This is the structure that represents any instance of a FoLiA element. The type of the structure
+///is represented by ``elementtype``. An elements holds and owns attributes, encoded attributes (if
+///it is encoded already),  data items (which may be text, comments or child elements (by key)), and a link
+///to its parent (by key).
 pub struct FoliaElement {
     pub elementtype: ElementType,
     pub attribs: Vec<Attribute>,
@@ -370,22 +376,27 @@ impl FoliaElement {
         self
     }
 
+    ///Returns the key of the parent element of this element
     pub fn get_parent(&self) -> Option<ElementKey> {
         self.parent
     }
 
+    ///Returns the key of the processor associated with this element
     pub fn get_processor(&self) -> Option<ProcKey> {
         self.enc_attribs.as_ref().map(|enc_attribs| enc_attribs.processor).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
+    ///Returns the key of the declaration associated with this element
     pub fn get_declaration(&self) -> Option<DecKey> {
         self.enc_attribs.as_ref().map(|enc_attribs| enc_attribs.declaration).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
     }
 
+    ///Sets the key of the parent element of this element
     pub fn set_parent(&mut self, parent: Option<ElementKey>) {
         self.parent = parent;
     }
 
+    ///Builder method (can be chained) that sets the key of the parent element of this element
     pub fn with_parent(mut self, parent: Option<ElementKey>) -> Self {
         self.set_parent(parent);
         self
@@ -396,10 +407,12 @@ impl FoliaElement {
         self.data.get(index)
     }
 
+    ///Returns the number of data items contained in this element
     pub fn len(&self) -> usize {
         self.data.len()
     }
 
+    ///Returns the index of the specified data item (``refchild``)
     pub fn index(&self, refchild: &DataType) -> Option<usize> {
         self.data.iter().position(|child| *child == *refchild)
     }
@@ -445,6 +458,8 @@ impl FoliaElement {
     }
 
     ///Returns the text content of a given element, only makes sense if the element is a text
+    ///This method takes string parameters for set and textclass, which can be set to None to
+    ///fallback to the default text set and "current class".
     pub fn text_encode(&self, doc: &Document, set: Option<&str>, textclass: Option<&str>) -> Result<Cow<str>,FoliaError> {
         let set: &str = if let Some(set) = set {
             set
