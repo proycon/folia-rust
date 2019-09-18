@@ -12,7 +12,7 @@ use crate::document::*;
 
 
 ///This trait needs to be implemented on  items that are storable in a ``Store``. It is a very lax trait where storable elements *MAY BE* identifiable and *MAY BE* storing their own key (the default implementation does neither)
-pub trait Storable<K> {
+pub trait Storable<Key> {
     fn maybe_id(&self) -> Option<Cow<str>> {
         None
     }
@@ -22,32 +22,32 @@ pub trait Storable<K> {
     }
 
     ///Get the key of the current item (if supported by the item)
-    fn key(&self) -> Option<K> {
+    fn key(&self) -> Option<Key> {
         None
     }
 
     ///Set the key of the current item (if supported by the item)
-    fn set_key(&mut self, key: K) {
+    fn set_key(&mut self, key: Key) {
         //does nothing by default, override in implementations
     }
 }
 
 
 ///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
-pub trait Store<T,K> where T: Storable<K>,
-                           K: TryFrom<usize> + Copy + Debug,
-                           usize: std::convert::TryFrom<K>,
-                           <usize as std::convert::TryFrom<K>>::Error : std::fmt::Debug {
+pub trait Store<T,Key> where T: Storable<Key>,
+                           Key: TryFrom<usize> + Copy + Debug,
+                           usize: std::convert::TryFrom<Key>,
+                           <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
 
     fn items_mut(&mut self) -> &mut Vec<Option<Box<T>>>;
-    fn index_mut(&mut self) -> &mut HashMap<String,K>;
+    fn index_mut(&mut self) -> &mut HashMap<String,Key>;
 
     fn items(&self) -> &Vec<Option<Box<T>>>;
     fn iter(&self) -> std::slice::Iter<Option<Box<T>>>;
-    fn index(&self) -> &HashMap<String,K>;
+    fn index(&self) -> &HashMap<String,Key>;
 
     ///Add a new item to the store (takes ownership)
-    fn add(&mut self, item: T) -> Result<K,FoliaError> {
+    fn add(&mut self, item: T) -> Result<Key,FoliaError> {
         if !item.is_encoded() {
             return Err(FoliaError::InternalError(format!("Store.add(). Item is not properly encoded")));
         }
@@ -60,7 +60,7 @@ pub trait Store<T,K> where T: Storable<K>,
 
         //add the item anew
         let mut boxed = Box::new(item);
-        if let Ok(key) = K::try_from(self.items().len()) {
+        if let Ok(key) = Key::try_from(self.items().len()) {
             boxed.set_key(key); //set the key so the item knows it's own key (if supported)
             self.items_mut().push( Some(boxed) );
             if let Some(id) = id {
@@ -74,7 +74,7 @@ pub trait Store<T,K> where T: Storable<K>,
 
     ///Checks if an item is already in the store and returns the key if so, only works for
     ///identifiable items (so it's guaranteed O(1))
-    fn get_key(&self, item: &T) -> Option<K> {
+    fn get_key(&self, item: &T) -> Option<Key> {
         let id: &Option<Cow<str>> = &item.maybe_id();
         if let Some(id) = id.as_ref() {
             let id: &str = id; //coerce the Cow<str> into &str
@@ -95,7 +95,7 @@ pub trait Store<T,K> where T: Storable<K>,
     }
 
     ///Retrieves an element from the store
-    fn get(&self, key: K) -> Option<&Box<T>> {
+    fn get(&self, key: Key) -> Option<&Box<T>> {
         if let Some(item) = self.items().get(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
             item.as_ref()
         } else {
@@ -104,7 +104,7 @@ pub trait Store<T,K> where T: Storable<K>,
     }
 
     ///Retrieves an element from the store
-    fn get_mut(&mut self, key: K) -> Option<&mut Box<T>> {
+    fn get_mut(&mut self, key: Key) -> Option<&mut Box<T>> {
         if let Some(item) = self.items_mut().get_mut(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
             item.as_mut()
         } else {
@@ -113,7 +113,7 @@ pub trait Store<T,K> where T: Storable<K>,
     }
 
     ///Resolve an ID to a Key using the index
-    fn id_to_key(&self, id: &str) -> Option<K> {
+    fn id_to_key(&self, id: &str) -> Option<Key> {
         self.index().get(id).map( |&key| key )
     }
 
