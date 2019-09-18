@@ -38,7 +38,7 @@ impl Declaration {
     }
 }
 
-impl Storable<DecKey,Document> for Declaration {
+impl Storable<DecKey> for Declaration {
     fn maybe_id(&self) -> Option<Cow<str>> {
         //let set_str: &str = &self.set.as_ref().expect("unwrapping set str");
         Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set.as_ref().map(String::as_str))))
@@ -55,7 +55,7 @@ impl Storable<DecKey,Document> for Declaration {
     }
 }
 
-impl Storable<ClassKey,Document> for Class {
+impl Storable<ClassKey> for Class {
     fn maybe_id(&self) -> Option<Cow<str>> {
         Some(Cow::from(self))
     }
@@ -71,7 +71,7 @@ pub struct ClassStore {
 }
 
 
-impl Store<Class,ClassKey,Document> for ClassStore {
+impl Store<Class,ClassKey> for ClassStore {
 
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Class>>> {
         &mut self.items
@@ -184,7 +184,7 @@ impl DeclarationStore {
 
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present
-    pub fn add_class(&mut self, dec_key: DecKey, class: &Class, context: &mut Document) -> Result<ClassKey,FoliaError> {
+    pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
         let class_store = self.get_class_store_mut(dec_key);
         if let Some(class_key) = class_store.id_to_key(class) {
             Ok(class_key)
@@ -193,7 +193,7 @@ impl DeclarationStore {
             if let Some(class_key) = class_key {
                 Ok(class_key)
             } else {
-                class_store.add(class.to_owned(), context)
+                class_store.add(class.to_owned())
             }
         }
     }
@@ -221,7 +221,7 @@ impl DeclarationStore {
 
 }
 
-impl Store<Declaration,DecKey,Document> for DeclarationStore {
+impl Store<Declaration,DecKey> for DeclarationStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
         &mut self.items
     }
@@ -247,7 +247,7 @@ pub struct ProvenanceStore {
     pub chain: Vec<ProcKey>,
 }
 
-impl Store<Processor,ProcKey,Document> for ProvenanceStore {
+impl Store<Processor,ProcKey> for ProvenanceStore {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Processor>>> {
         &mut self.items
     }
@@ -268,8 +268,8 @@ impl Store<Processor,ProcKey,Document> for ProvenanceStore {
 
 impl ProvenanceStore {
     ///Adds a processor to the provenance chain
-    pub fn add_to_chain(&mut self, child: Processor, context: &mut Document) -> Result<ProcKey,FoliaError> {
-        let child_key = self.add(child, context);
+    pub fn add_to_chain(&mut self, child: Processor) -> Result<ProcKey,FoliaError> {
+        let child_key = self.add(child);
         if let Ok(child_key) = child_key {
             self.chain.push(child_key);
         }
@@ -278,8 +278,8 @@ impl ProvenanceStore {
 
     ///Adds a processor as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_to(&mut self, parent_key: ProcKey, child: Processor, context: &mut Document) -> Result<ProcKey,FoliaError> {
-        let child_key = self.add(child, context);
+    pub fn add_to(&mut self, parent_key: ProcKey, child: Processor) -> Result<ProcKey,FoliaError> {
+        let child_key = self.add(child);
         if let Ok(child_key) = child_key {
             self.attach(parent_key, child_key)?;
         }
@@ -365,7 +365,7 @@ pub struct Processor {
     pub key: Option<ProcKey>
 }
 
-impl Storable<ProcKey,Document> for Processor {
+impl Storable<ProcKey> for Processor {
     ///Returns the key of the current processor
     fn key(&self) -> Option<ProcKey> {
         self.key

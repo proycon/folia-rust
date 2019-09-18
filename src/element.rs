@@ -58,9 +58,9 @@ pub struct Properties {
 ///numeric key rather than left as decoded strings. Encodes attributes are: Declarations (sets), classes and processors.
 pub struct EncodedAttributes {
     //encoded (relation to other stores)
-    processor: Option<ProcKey>,
-    declaration: Option<DecKey>,
-    class: Option<ClassKey>
+    pub processor: Option<ProcKey>,
+    pub declaration: Option<DecKey>,
+    pub class: Option<ClassKey>
 }
 
 #[derive(Clone)]
@@ -81,7 +81,7 @@ pub struct FoliaElement {
     pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
-impl Storable<ElementKey,Document> for FoliaElement {
+impl Storable<ElementKey> for FoliaElement {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
             Some(attrib.value())
@@ -104,54 +104,6 @@ impl Storable<ElementKey,Document> for FoliaElement {
         self.key = Some(key);
     }
 
-    ///Encode for storage, this only encodes attributes (set,class,processor) maintained
-    ///in other stores, which are inherent to the element.
-    ///It does not handle relations between elements (data/children and parent)
-    ///nor does it add the element itself to the store (but this is instead invoked as part of adding an element
-    ///to the store). This function takes and returns ownership.
-    fn encode(&mut self, context: &mut Document) -> Result<(), FoliaError> {
-        let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
-
-        //encode the element for storage
-        let set = self.attrib(AttribType::SET);
-
-        if let Some(annotationtype) = self.elementtype.annotationtype() {
-            //Declare the element (either declares anew or just resolves the to the right
-            //declaration.
-            let deckey = context.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
-            enc_attribs.declaration = Some(deckey);
-
-            if let Some(class) = self.attrib(AttribType::CLASS) {
-                if let Attribute::Class(class) = class {
-                    if let Ok(class_key) = context.declarationstore.add_class(deckey, class, context) {
-                        enc_attribs.class = Some(class_key);
-                    }
-                }
-            }
-
-            if let Some(declaration) = context.declarationstore.get(deckey) {
-                enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
-            }
-        }
-
-        if let Some(processor) = self.attrib(AttribType::PROCESSOR) {
-            let processor_id: &str  = &processor.value();
-
-            if let Some(processor_key) = context.provenancestore.id_to_key(processor_id) {
-                enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
-            }
-        }
-
-        //remove encoded attributes
-        self.attribs.retain(|a| match a {
-            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => false,
-            _ => true
-        });
-
-        self.set_enc_attribs(Some(enc_attribs));
-
-        Ok(())
-    }
 }
 
 impl FoliaElement {
@@ -520,4 +472,59 @@ impl Select for FoliaElement {
     }
 }
 */
+
+impl Encoder<FoliaElement> for Document {
+    ///Actively encode for storage, this encodes attributes that need to be encoded (such as set,class,processor), and adds them to their respective stores.
+    ///It does not handle relations between elements (data/children and parent)
+    ///nor does it add the element itself to the store
+    ///to the store).
+    fn encode(&mut self, element: &mut FoliaElement) -> Result<(), FoliaError> {
+        if element.is_encoded() {
+            //already encoded, nothing to do
+            return Ok(());
+        }
+
+        let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
+
+        //encode the element for storage
+        let set = element.attrib(AttribType::SET);
+
+        if let Some(annotationtype) = element.elementtype.annotationtype() {
+            //Declare the element (either declares anew or just resolves the to the right
+            //declaration.
+            let deckey = self.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
+            enc_attribs.declaration = Some(deckey);
+
+            if let Some(class) = element.attrib(AttribType::CLASS) {
+                if let Attribute::Class(class) = class {
+                    if let Ok(class_key) = self.declarationstore.add_class(deckey, class) {
+                        enc_attribs.class = Some(class_key);
+                    }
+                }
+            }
+
+            if let Some(declaration) = self.declarationstore.get(deckey) {
+                enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
+            }
+        }
+
+        if let Some(processor) = element.attrib(AttribType::PROCESSOR) {
+            let processor_id: &str  = &processor.value();
+
+            if let Some(processor_key) = self.provenancestore.id_to_key(processor_id) {
+                enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
+            }
+        }
+
+        //remove encoded attributes
+        element.attribs.retain(|a| match a {
+            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => false,
+            _ => true
+        });
+
+        element.set_enc_attribs(Some(enc_attribs));
+
+        Ok(())
+    }
+}
 

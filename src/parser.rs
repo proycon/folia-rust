@@ -29,10 +29,16 @@ impl Document {
         let mut body: Option<FoliaElement> = None;
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
-        let mut id: String = String::new();
-        let mut version: String = FOLIAVERSION.to_string();
 
-        let mut doc = Self { id: id, filename: None, version: version, elementstore: ElementStore::default(), provenancestore: ProvenanceStore::default(), declarationstore: DeclarationStore::default(), metadata: Metadata::default() };
+        let mut doc = Self {
+                            id: "untitled".to_string(),
+                            filename: None,
+                            version: FOLIAVERSION.to_string(),
+                            elementstore: ElementStore::default(),
+                            provenancestore: ProvenanceStore::default(),
+                            declarationstore: DeclarationStore::default(),
+                            metadata: Metadata::default()
+        };
 
         //parse root
         loop {
@@ -45,10 +51,10 @@ impl Document {
                                 let attrib: quick_xml::events::attributes::Attribute = attrib.unwrap();
                                 match attrib.key {
                                     b"xml:id" => {
-                                        id = attrib.unescape_and_decode_value(&reader).expect("Parsing ID")
+                                        doc.id = attrib.unescape_and_decode_value(&reader).expect("Parsing ID")
                                     }
                                     b"version" => {
-                                        version = attrib.unescape_and_decode_value(&reader).expect("Parsing version")
+                                        doc.version = attrib.unescape_and_decode_value(&reader).expect("Parsing version")
                                     }
                                     _ => {}
                                 };

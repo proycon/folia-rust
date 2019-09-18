@@ -52,10 +52,13 @@ impl Document {
             declarationstore: DeclarationStore::default(),
             metadata: Metadata::default(),
         };
-        document.add(match bodytype {
+        let mut body = match bodytype {
             BodyType::Text => FoliaElement::new(ElementType::Text),
             BodyType::Speech => FoliaElement::new(ElementType::Speech),
-        })?;
+        };
+        document.encode(&mut body)?;
+        assert!(body.is_encoded());
+        document.add(body)?;
         Ok(document)
     }
 
@@ -77,27 +80,37 @@ impl Document {
     }
 
 
-    pub fn add(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        self.elementstore.add(element, self)
+    ///Add an element to the document (but the element will be an orphan unless it is the very
+    ///first one, you may want to use ``add_to`` instead)
+    pub fn add(&mut self, mut element: FoliaElement) -> Result<ElementKey, FoliaError> {
+        self.encode(&mut element)?;
+        self.elementstore.add(element)
+    }
+
+    ///Adds an element as a child of another, this is a higher-level function that/
+    ///takes care of adding and attaching for you.
+    pub fn add_to(&mut self, parent_key: ElementKey, mut element: FoliaElement) -> Result<ElementKey, FoliaError> {
+        self.encode(&mut element)?;
+        self.elementstore.add_to(parent_key, element)
     }
 
     ///Add an element to the provenance chain
     ///Returns the key
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        self.provenancestore.add_to_chain(processor, self)
+        self.provenancestore.add_to_chain(processor)
     }
 
     ///Add a processor as a subprocessor
     ///Returns the key
     pub fn add_subprocessor(&mut self, parent_processor: ProcKey, processor: Processor) -> Result<ProcKey, FoliaError> {
-        self.provenancestore.add_to(parent_processor, processor, self)
+        self.provenancestore.add_to(parent_processor, processor)
     }
 
     ///Add a declaration. It is strongly recommended to use ``declare()`` instead
     ///because this one adds a declaration without any checks.
     ///Returns the key.
     pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
-        self.declarationstore.add(declaration, self)
+        self.declarationstore.add(declaration)
     }
 
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
@@ -178,3 +191,5 @@ impl Document {
 
 
 }
+
+

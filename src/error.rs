@@ -41,7 +41,7 @@ impl Error for FoliaError {
     fn description(&self) -> &str {
         match *self {
             FoliaError::IoError(ref err) => err.description(),
-            FoliaError::XmlError(ref _err) => "XML Error",
+            FoliaError::XmlError(ref err) => "XML Error",
             FoliaError::ParseError(ref err) => err,
             FoliaError::SerialisationError(ref err) => err,
             FoliaError::ValidationError(ref err) => err,
@@ -72,11 +72,11 @@ impl fmt::Display for FoliaError {
         match *self {
             FoliaError::IoError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::XmlError(ref err) => fmt::Display::fmt(err, f),
-            FoliaError::ParseError(ref err) => fmt::Display::fmt(err, f),
-            FoliaError::SerialisationError(ref err) => fmt::Display::fmt(err, f),
-            FoliaError::ValidationError(ref err) => fmt::Display::fmt(err, f),
-            FoliaError::InternalError(ref err) => fmt::Display::fmt(err, f),
-            FoliaError::EncodeError(ref err) => fmt::Display::fmt(err, f),
+            FoliaError::ParseError(ref err) |
+            FoliaError::SerialisationError(ref err) |
+            FoliaError::ValidationError(ref err) |
+            FoliaError::InternalError(ref err) |
+            FoliaError::EncodeError(ref err) |
             FoliaError::KeyError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
         }

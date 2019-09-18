@@ -12,7 +12,7 @@ use crate::document::*;
 
 
 ///This trait needs to be implemented on  items that are storable in a ``Store``. It is a very lax trait where storable elements *MAY BE* identifiable and *MAY BE* storing their own key (the default implementation does neither)
-pub trait Storable<Key,Context> {
+pub trait Storable<Key> {
     fn maybe_id(&self) -> Option<Cow<str>> {
         None
     }
@@ -31,14 +31,15 @@ pub trait Storable<Key,Context> {
         //does nothing by default, override in implementations
     }
 
-    fn encode(&mut self, context: &mut Context) -> Result<(), FoliaError> {
-        Ok(())
-    }
+}
+
+pub trait Encoder<T> {
+   fn encode(&mut self, item: &mut T) -> Result<(),FoliaError>;
 }
 
 
 ///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
-pub trait Store<T,Key,Context> where T: Storable<Key,Context>,
+pub trait Store<T,Key> where T: Storable<Key>,
                            Key: TryFrom<usize> + Copy + Debug,
                            usize: std::convert::TryFrom<Key>,
                            <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
@@ -50,11 +51,13 @@ pub trait Store<T,Key,Context> where T: Storable<Key,Context>,
     fn iter(&self) -> std::slice::Iter<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,Key>;
 
+
     ///Add a new item to the store (takes ownership)
-    fn add(&mut self, mut item: T, context: &mut Context) -> Result<Key,FoliaError> {
+    fn add(&mut self, item: T) -> Result<Key,FoliaError> {
         if !item.is_encoded() {
-            item.encode(context)?;
+            return Err(FoliaError::EncodeError(format!("Item is not encoded yet")));
         }
+
         if let Some(key) = self.get_key(&item) {
             return Ok(key);
         }
