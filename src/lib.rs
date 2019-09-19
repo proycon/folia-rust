@@ -16,6 +16,7 @@ pub mod store;
 pub mod elementstore;
 pub mod metadata;
 pub mod select;
+pub mod text;
 pub mod document;
 pub mod parser;
 pub mod serialiser;
@@ -32,6 +33,7 @@ pub use elementstore::*;
 pub use attrib::*;
 pub use select::*;
 pub use specification::*;
+pub use text::*;
 
 
 
