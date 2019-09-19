@@ -684,3 +684,10 @@ pub enum BodyType {
     Speech
 }
 
+
+impl ElementType {
+
+//foliaspec:properties
+
+
+}

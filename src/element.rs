@@ -30,28 +30,6 @@ pub enum ValidationStrategy {
     DeepValidation
 }
 
-pub struct Properties {
-    xmltag: String,
-    annotationtype: AnnotationType,
-    accepted_data: Vec<ElementType>,
-    required_attribs: Vec<AttribType>,
-    optional_attribs: Vec<AttribType>,
-    occurrences: u32, //How often can this element occur under the parent? (0 = unlimited)
-    occurrences_per_set: u32, //How often can a particular element+set combination occur under the parent (0 = unlimited)
-    textdelimiter: Option<String>, //Delimiter to use when dynamically gathering text
-    printable: bool, //Is this element printable? (i.e. can the text() method be called?)
-    speakable: bool, //Is this element phonetically representablly? (i.e. can the phon() method be called?)
-    hidden: bool, //Is this element hidden? (only applies to Hiddenword for now)
-    xlink: bool, //Can the element carry xlink references?
-    textcontainer: bool, //Does the element directly take textual content (e.g. TextContent (t) is a textcontainer)
-    phoncontainer: bool, //Does the element directly take phonetic content (e.g. PhonContent (ph) is a phoncontainer)
-    subset: Option<String>, //used for Feature subclasses
-    auth: bool, //The default authoritative state for this element
-    primaryelement: bool, //Is this the primary element for the advertised annotation type?
-    auto_generate_id: bool, //Automatically generate an ID if none was provided?
-    setonly: bool, //States that the element may take a set property only, and not a class property
-    wrefable: bool //Indicates whether this element is referable as a token/word (applies only to a very select few elements, such as w, morpheme, and phoneme)
-}
 
 #[derive(Default,Clone)]
 ///Encoded attributes represents attributes that are encoded, i.e. attributes that are mapped to a
@@ -411,22 +389,21 @@ impl FoliaElement {
     }
 
     ///Returns the text content of a given element
-    pub fn text(&self, doc: &Document, set: DecKey, textclass: ClassKey) -> Result<Cow<str>,FoliaError> {
-        /*
+    pub fn text(&self, doc: &Document, set: DecKey, textclass: ClassKey, strict: bool) -> Result<Cow<str>,FoliaError> {
+        let key = self.key().ok_or(FoliaError::KeyError("Element has no key".to_string()))?;
         if let Some(key) = self.key() {
-            for element in self.select_elements(element_key, Selector::new_encode(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
+            for item in doc.select(key, Selector::new(TypeSelector::SomeElement(ElementType::TextContent), SetSelector::SomeSet(set), ClassSelector::SomeClass(textclass)), false)  {
                 return Some(element.element);
             }
-        } else {
 
-        }*/
+        }
         unimplemented!() //TODO
     }
 
     ///Returns the text content of a given element
     ///This method takes string parameters for set and textclass, which can be set to None to
     ///fallback to the default text set and "current class".
-    pub fn text_encode(&self, doc: &Document, set: Option<&str>, textclass: Option<&str>) -> Result<Cow<str>,FoliaError> {
+    pub fn text_encode(&self, doc: &Document, set: Option<&str>, textclass: Option<&str>, strict: bool) -> Result<Cow<str>,FoliaError> {
         let set: &str = if let Some(set) = set {
             set
         } else {
@@ -439,7 +416,7 @@ impl FoliaElement {
         };
         if let Some(dec_key) = doc.declarationstore.id_to_key(DeclarationStore::index_id(AnnotationType::TOKEN, &Some(set)).as_str()) {
             let class_key = doc.declarationstore.encode_class(dec_key, textclass)?;
-            self.text(doc, dec_key, class_key)
+            self.text(doc, dec_key, class_key,strict)
         } else {
             Err(FoliaError::EncodeError("No declaration for the specified text set/class".to_string()))
         }
