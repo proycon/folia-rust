@@ -3,6 +3,9 @@ use crate::types::*;
 use crate::element::*;
 use crate::attrib::*;
 
+use std::collections::HashMap;
+
+use strum::IntoEnumIterator;
 
 #[derive(Debug)]
 pub enum AcceptedData {
@@ -35,6 +38,15 @@ pub struct Properties {
     pub setonly: bool, //States that the element may take a set property only, and not a class property
     pub wrefable: bool, //Indicates whether this element is referable as a token/word (applies only to a very select few elements, such as w, morpheme, and phoneme)
     pub label: &'static str
+}
+
+
+fn init_properties() -> HashMap<ElementType,Properties> {
+    let mut properties = HashMap::new();
+    for elementtype in ElementType::iter() {
+        properties.insert( elementtype, Properties::new(elementtype) );
+    }
+    properties
 }
 
 impl Properties {
