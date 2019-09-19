@@ -3,6 +3,8 @@ use std::fmt;
 
 use crate::error::FoliaError;
 
+use strum_macros::EnumIter;
+
 ///Internal ID Type, also an Integer ID Type, these are valid only as long as store is in memory
 pub type ElementKey = u32;
 
@@ -18,11 +20,11 @@ pub type ClassKey = u32;
 pub type Class = String;
 
 //foliaspec:elementtype
-#[derive(Copy,Clone,PartialEq)]
+#[derive(Copy,Clone,PartialEq,EnumIter)]
 pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
 //foliaspec:elementgroup
-#[derive(Copy,Clone,PartialEq,Debug)]
+#[derive(Copy,Clone,PartialEq,Debug,EnumIter)]
 pub enum ElementGroup {
     Structure,
     Inline,
@@ -52,7 +54,7 @@ impl ElementGroup {
 
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)
-#[derive(Debug,Copy,Clone,PartialEq,Eq,Hash)]
+#[derive(Debug,Copy,Clone,PartialEq,Eq,Hash,EnumIter)]
 pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
 
 impl AnnotationType {

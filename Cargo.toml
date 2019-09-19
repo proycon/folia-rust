@@ -7,3 +7,5 @@ edition = "2018"
 [dependencies]
 quick-xml = "0.16.0"
 matches = "0.1.8"
+strum = "0.16.0"
+strum_macros = "0.16.0"
