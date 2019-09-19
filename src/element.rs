@@ -514,33 +514,8 @@ impl FoliaElement {
         }
     }
 
-    /*
-    pub fn textelement_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&FoliaElement> {
-        let set: &str = if let Some(set) = set {
-            set
-        } else {
-            DEFAULT_TEXT_SET
-        };
-        let textclass: &str = if let Some(textclass) = textclass {
-            textclass
-        } else {
-            "current"
-        };
-        for element in self.select_elements(element_key, Selector::new_encode(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
-            return Some(element.element);
-        }
-        None
-    }
-    */
-
 }
 
-/*
-impl Select for FoliaElement {
-    fn select(&self, selector: Selector) -> SelectIterator {
-    }
-}
-*/
 
 impl Encoder<FoliaElement> for Document {
     ///Actively encode for storage, this encodes attributes that need to be encoded (such as set,class,processor), and adds them to their respective stores.
