@@ -171,18 +171,18 @@ impl Document {
 
 
     ///Returns the text of the given element
-    pub fn text(&self, element_key: ElementKey, set: DecKey, textclass: ClassKey, strict: bool) -> Result<Cow<str>,FoliaError> {
+    pub fn text(&self, element_key: ElementKey, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
         if let Some(element) = self.elementstore.get(element_key) {
-            element.text(self, set, textclass, strict)
+            element.text(self, set, textclass, strict, retaintokenisation,None)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
         }
     }
 
     ///Returns the text of the given element
-    pub fn text_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>, strict: bool) -> Result<Cow<str>,FoliaError> {
+    pub fn text_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
         if let Some(element) = self.elementstore.get(element_key) {
-            element.text_encode(self, set, textclass, strict)
+            element.text_encode(self, set, textclass, strict, retaintokenisation)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
         }
