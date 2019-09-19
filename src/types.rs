@@ -31,6 +31,7 @@ pub enum ElementGroup {
     TextMarkup,
     Subtoken,
     HigherOrder,
+    Layer,
 }
 
 impl ElementGroup {
