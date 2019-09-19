@@ -68,12 +68,26 @@ impl Default for Properties {
     }
 }
 
-fn init_properties() -> HashMap<ElementType,Properties> {
-    let mut properties = HashMap::new();
-    for elementtype in ElementType::iter() {
-        properties.insert( elementtype, Properties::new(elementtype) );
+pub struct Specification {
+    pub properties: HashMap<ElementType,Properties>
+}
+
+impl Default for Specification {
+    fn default() -> Self {
+        let mut spec = Self {
+            properties: HashMap::new()
+        };
+        for elementtype in ElementType::iter() {
+            spec.properties.insert( elementtype, Properties::new(elementtype) );
+        }
+        spec
     }
-    properties
+}
+
+impl Specification {
+    fn get(&self, elementtype: ElementType) -> &Properties {
+        self.properties.get(&elementtype).expect("Unwrapping properties for element type")
+    }
 }
 
 impl Properties {

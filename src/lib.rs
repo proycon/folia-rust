@@ -19,7 +19,7 @@ pub mod select;
 pub mod document;
 pub mod parser;
 pub mod serialiser;
-pub mod properties;
+pub mod specification;
 
 
 pub use common::*;
@@ -31,7 +31,7 @@ pub use store::*;
 pub use elementstore::*;
 pub use attrib::*;
 pub use select::*;
-pub use properties::*;
+pub use specification::*;
 
 
 
