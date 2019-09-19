@@ -85,7 +85,7 @@ impl Default for Specification {
 }
 
 impl Specification {
-    fn get(&self, elementtype: ElementType) -> &Properties {
+    pub fn get(&self, elementtype: ElementType) -> &Properties {
         self.properties.get(&elementtype).expect("Unwrapping properties for element type")
     }
 }

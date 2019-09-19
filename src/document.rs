@@ -22,6 +22,7 @@ use crate::metadata::*;
 use crate::select::*;
 use crate::serialiser::*;
 use crate::parser::*;
+use crate::specification::*;
 
 pub struct Document {
     pub id: String,
@@ -187,6 +188,11 @@ impl Document {
         }
     }
 
+
+    ///Get properties from the specification (a shortcut)
+    pub fn props(&self, elementtype: ElementType) -> &Properties {
+        self.elementstore.specification.get(elementtype)
+    }
 
 
 
