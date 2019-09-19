@@ -9,6 +9,7 @@ use crate::metadata::*;
 use crate::select::*;
 use crate::document::*;
 
+
 impl FoliaElement {
 
     ///Returns the text content of a given element

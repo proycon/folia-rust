@@ -279,7 +279,10 @@ fn test009_text() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.2.w.4") {
-
+                match word.text_encode(&doc, None, None, false, true) {
+                    Ok(text) => assert_eq!(text, "example"),
+                    Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
+                }
             } else {
                 assert!(false, "word not found");
             }
