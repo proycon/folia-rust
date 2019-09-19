@@ -393,7 +393,7 @@ impl FoliaElement {
         let key = self.key().ok_or(FoliaError::KeyError("Element has no key".to_string()))?;
         if let Some(key) = self.key() {
             for item in doc.select(key, Selector::new(TypeSelector::SomeElement(ElementType::TextContent), SetSelector::SomeSet(set), ClassSelector::SomeClass(textclass)), false)  {
-                return Some(element.element);
+                //TODO
             }
 
         }

@@ -1,7 +1,10 @@
 use crate::common::*;
 use crate::types::*;
+use crate::element::*;
+use crate::attrib::*;
 
 
+#[derive(Debug)]
 pub enum AcceptedData {
     AcceptElementType(ElementType),
     AcceptElementGroup(ElementGroup),
@@ -11,10 +14,10 @@ pub enum AcceptedData {
 pub struct Properties {
     pub xmltag: String,
     pub annotationtype: AnnotationType,
-    pub accepted_data: [AcceptedData],
-    pub required_data: [AcceptedData],
-    pub required_attribs: [AttribType],
-    pub optional_attribs: [AttribType],
+    pub accepted_data: Vec<AcceptedData>,
+    pub required_data: Vec<AcceptedData>,
+    pub required_attribs: Vec<AttribType>,
+    pub optional_attribs: Vec<AttribType>,
     pub occurrences: u32, //How often can this element occur under the parent? (0 = unlimited)
     pub occurrences_per_set: u32, //How often can a particular element+set combination occur under the parent (0 = unlimited)
     pub textdelimiter: Option<String>, //Delimiter to use when dynamically gathering text
@@ -34,7 +37,7 @@ pub struct Properties {
 
 impl Properties {
     pub fn new(elementtype: ElementType) -> Self {
-        //foliaspec:setelementproperties:elementtype
+        //foliaspec:setelementproperties(elementtype)
 
     }
 }

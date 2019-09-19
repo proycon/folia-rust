@@ -36,7 +36,7 @@ pub enum ElementGroup {
 impl ElementGroup {
     ///Returns an array of all element types includes in this group
     pub fn elementtypes(&self) -> &'static [ElementType] {
-        //foliaspec:elementgroup_elementtypes_map:self
+        //foliaspec:elementgroup_elementtypes_map(self)
         match self {
             ElementGroup::Structure => &[ElementType::Word, ElementType::Paragraph, ElementType::Sentence, ElementType::Text],
             _ => &[],
@@ -57,7 +57,7 @@ pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, 
 impl AnnotationType {
     ///Maps annotation types to strings
     pub fn as_str(&self) -> &'static str {
-        //foliaspec:annotationtype_string_map:self
+        //foliaspec:annotationtype_string_map(self)
         match self {
           AnnotationType::ALTERNATIVE => "alternative",
           AnnotationType::CHUNKING => "chunking",
@@ -119,7 +119,7 @@ impl AnnotationType {
     }
 
     pub fn from_str(s: &str) -> Option<Self> {
-        //foliaspec:string_annotationtype_map:s
+        //foliaspec:string_annotationtype_map(s)
         match s {
           "alternative" => Some(AnnotationType::ALTERNATIVE),
           "chunking" => Some(AnnotationType::CHUNKING),
@@ -182,7 +182,7 @@ impl AnnotationType {
     }
 
     pub fn as_element_str(&self) -> &'static str {
-        //foliaspec:annotationtype_xml_map:self
+        //foliaspec:annotationtype_xml_map(self)
         //A mapping from annotation types to xml tags (strings)
         match self {
           AnnotationType::ALTERNATIVE => "alt",
@@ -260,7 +260,7 @@ impl fmt::Display for AnnotationType {
 
 impl AnnotationType {
     pub fn elementtype(&self) -> ElementType {
-        //foliaspec:annotationtype_elementtype_map:self
+        //foliaspec:annotationtype_elementtype_map(self)
         //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
         match self {
             AnnotationType::ALTERNATIVE => ElementType::Alternative,
@@ -325,7 +325,7 @@ impl AnnotationType {
 impl ElementType {
 
     pub fn annotationtype(&self) -> Option<AnnotationType> {
-        //foliaspec:elementtype_annotationtype_map:self
+        //foliaspec:elementtype_annotationtype_map(self)
         match self {
             ElementType::Alternative => Some(AnnotationType::ALTERNATIVE),
             ElementType::Chunk => Some(AnnotationType::CHUNKING),
@@ -394,7 +394,7 @@ impl ElementType {
     }
 
     pub fn as_str(&self) -> &'static str {
-        //foliaspec:elementtype_string_map:self
+        //foliaspec:elementtype_string_map(self)
         match self {
           ElementType::ActorFeature => "actor",
           ElementType::Alternative => "alt",
@@ -542,7 +542,7 @@ impl std::str::FromStr for ElementType {
     type Err = FoliaError;
 
     fn from_str(tag: &str) -> Result<Self, Self::Err> {
-        //foliaspec:string_elementtype_map:tag
+        //foliaspec:string_elementtype_map(tag)
         match tag {
           "actor" =>  Ok(ElementType::ActorFeature),
           "alt" =>  Ok(ElementType::Alternative),
@@ -685,9 +685,3 @@ pub enum BodyType {
 }
 
 
-impl ElementType {
-
-//foliaspec:properties
-
-
-}
