@@ -122,7 +122,7 @@ fn test003_parse() {
 fn test004_get_word_from_index() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
-            if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
                 assert!(true);
             } else {
                 assert!(false, "unable to get word");
@@ -138,12 +138,12 @@ fn test004_get_word_from_index() {
 fn test005_decode() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
-            if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.1.w.1") {
-                let set = word.set_decode(&doc.declarationstore);
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
+                let set = word.set_decode(&doc);
                 assert_eq!(set.expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
-                let class = word.class_decode(&doc.declarationstore);
+                let class = word.class_decode(&doc);
                 assert_eq!(class.expect("Unwrapping class"), "WORD");
-                let processor = word.processor_decode(&doc.provenancestore);
+                let processor = word.processor_decode(&doc);
                 assert_eq!(processor.expect("Unwrapping class"), "p1");
             } else {
                 assert!(false, "Word not found");
@@ -244,7 +244,7 @@ fn test008c_elementselector_set_class() {
             let mut count = 0;
             for item in selector {
                 count += 1;
-                assert_matches!(item.class_decode(&doc.declarationstore), Some("PUNCTUATION"));
+                assert_matches!(item.class_decode(&doc), Some("PUNCTUATION"));
             }
             assert_eq!(count, 2, "Checking whether we have the right amount of matches");
         }

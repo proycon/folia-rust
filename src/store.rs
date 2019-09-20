@@ -51,9 +51,9 @@ pub trait Store<T,Key> where T: Storable<Key>,
     }
 
     ///Add a new item to the store (takes ownership)
-    fn add(&mut self, item: T) -> Result<Key,FoliaError> {
+    fn add(&mut self, mut item: T) -> Result<Key,FoliaError> {
         if !item.is_encoded() {
-            return Err(FoliaError::EncodeError(format!("Item is not encoded yet")));
+            item = self.encode(item)?;
         }
 
         if let Some(key) = self.get_key(&item) {
