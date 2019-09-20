@@ -363,21 +363,6 @@ impl FoliaElement {
         }
     }
 
-    /*
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut DataType> {
-        self.data.get_mut(index)
-    }
-
-    pub fn get_mut_last(&mut self) -> Option<&mut DataType> {
-        let index = self.data.len() - 1;
-        self.data.get_mut(index)
-    }
-
-    pub fn get_last(&self) -> Option<&DataType> {
-        let index = self.data.len() - 1;
-        self.data.get(index)
-    }
-    */
 
     ///Simple constructor for an empty element (optionally with attributes)
     pub fn new(elementtype: ElementType) -> FoliaElement {
@@ -423,7 +408,7 @@ impl Encoder<FoliaElement> for Document {
                 }
             }
 
-            if let Some(declaration) = self.declarationstore.get(deckey) {
+            if let Some(declaration) = self.get_declaration(deckey) {
                 enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
             }
         }
@@ -447,4 +432,5 @@ impl Encoder<FoliaElement> for Document {
         Ok(())
     }
 }
+
 

@@ -95,7 +95,7 @@ impl Document {
                 } else {
                     writer.write_event(Event::Start(dec_start)).map_err(to_serialisation_error)?;
                     for proc_key in declaration.processors.iter() {
-                        if let Some(processor) = self.provenancestore.get(*proc_key) {
+                        if let Some(processor) = self.get_processor(*proc_key) {
                             let mut ann_start = BytesStart::borrowed_name(b"annotator");
                             ann_start.push_attribute(("processor", processor.id.as_str() ));
                             writer.write_event(Event::Empty(ann_start)).map_err(to_serialisation_error)?;
@@ -125,7 +125,7 @@ impl Document {
     }
 
     fn xml_processor(&self, writer: &mut Writer<Cursor<Vec<u8>>>, processor_key: ProcKey) -> Result<(),FoliaError> {
-        if let Some(processor) = self.provenancestore.get(processor_key) {
+        if let Some(processor) = self.get_processor(processor_key) {
             let mut processor_start = BytesStart::borrowed_name(b"processor");
             processor_start.push_attribute(("xml:id", processor.id.as_str() ));
             processor_start.push_attribute(("name", processor.name.as_str() ));
@@ -179,7 +179,7 @@ impl Document {
 
     fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
         //Start the root tag (and obtain data for its end)
-        let root_end = if let Some(element) = self.elementstore.get(root_key) {
+        let root_end = if let Some(element) = self.get_element(root_key) {
             let tagstring = element.elementtype.to_string();
             let tag = tagstring.as_bytes();
             let start = BytesStart::owned(tag.to_vec(), tag.len());
@@ -208,7 +208,7 @@ impl Document {
             }
             match item.data {
                 DataType::Element(key) => {
-                    if let Some(element) = self.elementstore.get(*key) {
+                    if let Some(element) = self.get_element(*key) {
                         let tagstring = element.elementtype.to_string();
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());

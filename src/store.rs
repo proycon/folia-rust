@@ -38,6 +38,32 @@ pub trait Encoder<T> {
 }
 
 
+pub trait Decoder<'a,Key,Item> where Item: Storable<Key> + 'a,
+                           Key: TryFrom<usize> + Copy + Debug + 'a,
+                           usize: std::convert::TryFrom<Key>,
+                           <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
+    fn store(&'a self) -> &'a dyn Store<Item,Key>;
+    fn store_mut(&'a mut self) -> &'a mut dyn Store<Item,Key>;
+    fn get(&'a self, key: Key) -> Option<&'a Item> {
+        self.store().get(key).map(|b| b.as_ref())
+    }
+    fn get_mut(&'a mut self, key: Key) -> Option<&'a mut Item> {
+        self.store_mut().get_mut(key).map(|b| b.as_mut())
+    }
+    fn get_by_id(&'a self, id: &str) -> Option<&'a Item> {
+        self.store().get_by_id(id).map(|b| b.as_ref())
+    }
+    fn get_mut_by_id(&'a mut self, id: &str) -> Option<&'a mut Item> {
+        self.store_mut().get_mut_by_id(id).map(|b| b.as_mut())
+    }
+    fn id_to_key(&'a self, id: &str) -> Option<Key> {
+        self.store().id_to_key(id)
+    }
+    fn get_key(&'a self, item: &Item) -> Option<Key> {
+        self.store().get_key(item)
+    }
+}
+
 ///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
 pub trait Store<T,Key> where T: Storable<Key>,
                            Key: TryFrom<usize> + Copy + Debug,
