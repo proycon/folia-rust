@@ -27,7 +27,7 @@ impl FoliaElement {
                         text += &item_text;
                     },
                     DataType::Element(element_key) => {
-                        if let Some(element) = doc.elementstore.get(*element_key) {
+                        if let Some(element) = doc.get_element(*element_key) {
                             let properties = doc.props(element.elementtype);
                             if properties.printable {
                                 if !text.is_empty() {
@@ -53,7 +53,7 @@ impl FoliaElement {
             let mut textcontent_element: Option<&FoliaElement> = None;
             for element in self.data.iter() {
                 if let DataType::Element(element_key) = element {
-                    if let Some(element) = doc.elementstore.get(*element_key) {
+                    if let Some(element) = doc.get_element(*element_key) {
                         if ElementGroup::Structure.contains(element.elementtype) ||
                            element.elementtype == ElementType::Correction ||
                            ElementGroup::Span.contains(element.elementtype) {
@@ -130,8 +130,8 @@ impl FoliaElement {
         } else {
             "current"
         };
-        if let Some(dec_key) = doc.declarationstore.id_to_key(DeclarationStore::index_id(AnnotationType::TOKEN, &Some(set)).as_str()) {
-            let class_key = doc.declarationstore.encode_class(dec_key, textclass)?;
+        if let Some(dec_key) = doc.get_declaration_key_by_id(Declaration::index_id(AnnotationType::TOKEN, &Some(set)).as_str()) {
+            let class_key = doc.encode_class(dec_key, textclass)?;
             self.text(doc, dec_key, class_key,strict,retaintokenisation, None)
         } else {
             Err(FoliaError::EncodeError("No declaration for the specified text set/class".to_string()))
@@ -142,7 +142,7 @@ impl FoliaElement {
 impl Document {
     ///Returns the text of the given element
     pub fn text(&self, element_key: ElementKey, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
-        if let Some(element) = self.elementstore.get(element_key) {
+        if let Some(element) = self.get_element(element_key) {
             element.text(self, set, textclass, strict, retaintokenisation,None)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
@@ -151,7 +151,7 @@ impl Document {
 
     ///Returns the text of the given element
     pub fn text_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
-        if let Some(element) = self.elementstore.get(element_key) {
+        if let Some(element) = self.get_element(element_key) {
             element.text_encode(self, set, textclass, strict, retaintokenisation)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))

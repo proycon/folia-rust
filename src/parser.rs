@@ -219,7 +219,7 @@ impl Document {
                             //we are done with provenance, we can now assign processors to
                             //declarations using our temporary structure
                             for (dec_key, processor_id) in annotators.iter() {
-                                if let Some(processor_key) = doc.provenancestore.id_to_key(processor_id) {
+                                if let Some(processor_key) = doc.get_processor_key_by_id(processor_id) {
                                     if let Some(declaration) = doc.get_mut_declaration(*dec_key) {
                                         declaration.processors.push(processor_key);
                                     }
@@ -298,7 +298,7 @@ impl Document {
 
     ///Parses all elementsm from XML, this in turn invokes all parsers for the subelements
     pub(crate) fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
-        if !self.elementstore.is_empty() {
+        if !self.elementstore.items.is_empty() {
             let mut stack: Vec<ElementKey> = vec![0]; //0 is the root/body element, we always start with it
             loop {
                 let e = reader.read_namespaced_event(&mut buf, &mut nsbuf)?;
@@ -312,7 +312,7 @@ impl Document {
 
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_key) = stack.last() {
-                            self.elementstore.attach(*parent_key, key)?;
+                            self.attach_element(*parent_key, key)?;
                         }
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
@@ -343,7 +343,7 @@ impl Document {
 
                         //add element to parent (the previous one in the stack)
                         if let Some(parent_key) = stack.last() {
-                            self.elementstore.attach(*parent_key, key)?;
+                            self.attach_element(*parent_key, key)?;
                         }
                     },
                     (None, Event::Text(s)) => {

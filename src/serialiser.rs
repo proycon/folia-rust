@@ -79,7 +79,7 @@ impl Document {
     fn xml_declarations(&self, writer: &mut Writer<Cursor<Vec<u8>>>) -> Result<(), FoliaError> {
         writer.write_event(Event::Start( BytesStart::borrowed_name(b"annotations"))).map_err(to_serialisation_error)?;
         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
-        for declaration in self.declarationstore.iter() {
+        for declaration in self.declarations() {
             if let Some(declaration) = declaration {
                 let tagname = format!("{}-annotation", declaration.annotationtype.as_str());
                 let mut dec_start = BytesStart::owned_name(tagname.as_bytes());
@@ -197,7 +197,7 @@ impl Document {
         //Select children
         let mut stack = vec![];
         let mut previous_depth = 0;
-        for item in self.elementstore.select(root_key,Selector::new(TypeSelector::AnyType, SetSelector::AnySet, ClassSelector::AnyClass),true) {
+        for item in self.select(root_key,Selector::new(TypeSelector::AnyType, SetSelector::AnySet, ClassSelector::AnyClass),true) {
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
@@ -220,17 +220,17 @@ impl Document {
                             //check if the declaration is the default, no need to serialise set then
                             if !dec_is_default.get(declaration_key as usize).expect("checking default") {
                                 //decode encoded attributes
-                                if let Some(set) = element.set_decode(&self.declarationstore) {
+                                if let Some(set) = element.set_decode(&self) {
                                     start.push_attribute(("set", set) );
                                 }
                             }
-                            if let Some(class) = element.class_decode(&self.declarationstore) {
+                            if let Some(class) = element.class_decode(&self) {
                                 start.push_attribute(("class", class) );
                             }
-                            if let Some(processor) = element.processor_decode(&self.provenancestore) {
+                            if let Some(processor) = element.processor_decode(&self) {
                                 //check if this processor is the default one, if so we don't need
                                 //to serialise it
-                                let is_default: bool = if let Some(declaration) = self.declarationstore.get(declaration_key) {
+                                let is_default: bool = if let Some(declaration) = self.get_declaration(declaration_key) {
                                     if declaration.processors.len() == 1 {
                                         declaration.processors.get(0) == element.processor_key().as_ref()
                                     } else {

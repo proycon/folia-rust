@@ -33,47 +33,6 @@ pub trait Storable<Key> {
 
 }
 
-pub trait IntoStore<'a,Item,Key>: FromStore<'a, Key, Item>
-                           where Item: Storable<Key> + 'a,
-                           Key: TryFrom<usize> + Copy + Debug + 'a,
-                           usize: std::convert::TryFrom<Key>,
-                           <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
-   fn encode(&mut self, item: &mut Item) -> Result<(),FoliaError> {
-       Ok(()) //we assume the item does not need to be decoded by default
-   }
-   fn add(&'a mut self, mut item: Item) -> Result<Key,FoliaError> {
-       self.encode(&mut item)?;
-       self.store_mut().add(item)
-   }
-}
-
-
-pub trait FromStore<'a,Key,Item> where Item: Storable<Key> + 'a,
-                           Key: TryFrom<usize> + Copy + Debug + 'a,
-                           usize: std::convert::TryFrom<Key>,
-                           <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
-    fn store(&'a self) -> &'a dyn Store<Item,Key>;
-    fn store_mut(&'a mut self) -> &'a mut dyn Store<Item,Key>;
-    fn get(&'a self, key: Key) -> Option<&'a Item> {
-        self.store().get(key).map(|b| b.as_ref())
-    }
-    fn get_mut(&'a mut self, key: Key) -> Option<&'a mut Item> {
-        self.store_mut().get_mut(key).map(|b| b.as_mut())
-    }
-    fn get_by_id(&'a self, id: &str) -> Option<&'a Item> {
-        self.store().get_by_id(id).map(|b| b.as_ref())
-    }
-    fn get_mut_by_id(&'a mut self, id: &str) -> Option<&'a mut Item> {
-        self.store_mut().get_mut_by_id(id).map(|b| b.as_mut())
-    }
-    fn id_to_key(&'a self, id: &str) -> Option<Key> {
-        self.store().id_to_key(id)
-    }
-    fn get_key(&'a self, item: &Item) -> Option<Key> {
-        self.store().get_key(item)
-    }
-}
-
 ///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
 pub trait Store<T,Key> where T: Storable<Key>,
                            Key: TryFrom<usize> + Copy + Debug,
@@ -87,6 +46,9 @@ pub trait Store<T,Key> where T: Storable<Key>,
     fn iter(&self) -> std::slice::Iter<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,Key>;
 
+    fn encode(&mut self, mut item: T) -> Result<T,FoliaError> {
+       Ok(item) //we assume the item does not need to be decoded by default
+    }
 
     ///Add a new item to the store (takes ownership)
     fn add(&mut self, item: T) -> Result<Key,FoliaError> {
@@ -138,18 +100,18 @@ pub trait Store<T,Key> where T: Storable<Key>,
     }
 
     ///Retrieves an element from the store
-    fn get(&self, key: Key) -> Option<&Box<T>> {
+    fn get(&self, key: Key) -> Option<&T> {
         if let Some(item) = self.items().get(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
-            item.as_ref()
+            item.as_ref().map(|item| item.as_ref())
         } else {
             None
         }
     }
 
     ///Retrieves an element from the store
-    fn get_mut(&mut self, key: Key) -> Option<&mut Box<T>> {
+    fn get_mut(&mut self, key: Key) -> Option<&mut T> {
         if let Some(item) = self.items_mut().get_mut(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
-            item.as_mut()
+            item.as_mut().map(|item| item.as_mut())
         } else {
             None
         }
@@ -162,7 +124,7 @@ pub trait Store<T,Key> where T: Storable<Key>,
 
     ///Get by key, where key is still a string to be resolved. Shortcut function calling key() and
     ///get()
-    fn get_by_id(&self, id: &str) -> Option<&Box<T>> {
+    fn get_by_id(&self, id: &str) -> Option<&T> {
         self.id_to_key(id).map( |key| {
             self.get(key)
         }).map(|o| o.unwrap())
@@ -170,7 +132,7 @@ pub trait Store<T,Key> where T: Storable<Key>,
 
     ///Get (mutably) by key, where key is still a string to be resolved. Shortcut function calling
     ///key() and get_mut()
-    fn get_mut_by_id(&mut self, id: &str) -> Option<&mut Box<T>> {
+    fn get_mut_by_id(&mut self, id: &str) -> Option<&mut T> {
         self.id_to_key(id).map( move |key| {
             self.get_mut(key)
         }).map(|o| o.unwrap())

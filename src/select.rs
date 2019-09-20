@@ -46,9 +46,9 @@ impl Selector {
         if let Some(annotationtype) = elementtype.annotationtype() {
             self.setselector = match set {
                 SelectorValue::Some(set) => {
-                    let id = DeclarationStore::index_id(annotationtype, &Some(set));
+                    let id = Declaration::index_id(annotationtype, &Some(set));
                     //add a set filter,
-                    if let Some(dec_key) = document.declarationstore.id_to_key(id.as_str()) {
+                    if let Some(dec_key) = document.get_declaration_key_by_id(id.as_str()) {
                         SetSelector::SomeSet(dec_key)
                     } else {
                         SetSelector::Unmatchable
@@ -62,7 +62,7 @@ impl Selector {
                     //add a class filter
                     let mut result = ClassSelector::Unmatchable;
                     if let SetSelector::SomeSet(dec_key) = self.setselector {
-                        if let Some(declaration) = document.declarationstore.get(dec_key) {
+                        if let Some(declaration) = document.get_declaration(dec_key) {
                             if let Some(classes) = &declaration.classes {
                                 if let Some(class_key) = classes.id_to_key(class) {
                                       result = ClassSelector::SomeClass(class_key);
@@ -98,13 +98,13 @@ impl Selector {
 
     ///Tests if the selector matches against the specified data item, given an element store.
     ///There is no need to invoke this directly if you use a ``SelectIterator``.
-    pub fn matches(&self, store: &ElementStore, item: &DataType) -> bool {
+    pub fn matches(&self, document: &Document, item: &DataType) -> bool {
         //we attempt to falsify the match
         let matches = match item {
             DataType::Element(key) => {
                 if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
                     false
-                } else if let Some(element) = store.get(*key) {
+                } else if let Some(element) = document.get_element(*key) {
                     let typematch: bool = match &self.typeselector {
                         TypeSelector::SomeElement(refelementtype) => {
                             element.elementtype == *refelementtype
@@ -172,7 +172,7 @@ impl Selector {
             }
         };
         if let Some(next) = &self.next {
-            matches || next.matches(store, item)
+            matches || next.matches(document, item)
         } else {
             matches
         }
@@ -245,7 +245,7 @@ impl Default for TypeSelector {
 ///This implements a depth-first search.
 pub struct SelectIterator<'a> {
     ///The element store to draw elements from
-    pub store: &'a ElementStore,
+    pub document: &'a Document,
     ///The selector to apply to test for matching data items
     pub selector: Selector,
     ///Apply the selector recursively (depth-first search) or not (plain linear search)
@@ -259,9 +259,9 @@ pub struct SelectIterator<'a> {
 impl<'a> SelectIterator<'a> {
     ///Creates a new ``SelectIterator``. This is usually not invoked directly but through a
     ///``selects()`` method (provided by the ``Select`` trait) which is implement by for instance a ``Document`` or an ``ElementStore``.
-    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey, recursive: bool) -> SelectIterator<'a> {
+    pub fn new(document: &'a Document, selector: Selector, key: ElementKey, recursive: bool) -> SelectIterator<'a> {
         SelectIterator {
-            store: store,
+            document: document,
             selector: selector,
             recursive: recursive,
             stack: vec![(key,0)],
@@ -306,7 +306,7 @@ impl<'a> Iterator for SelectIterator<'a> {
             }
         }
         if let Some((key,cursor)) = self.stack.pop() {
-            if let Some(parent) = self.store.get(key) {
+            if let Some(parent) = self.document.get_element(key) {
                 if let Some(item) = parent.get(cursor) {
                     //increment the cursor and push back to the stack
                     self.stack.push((key, cursor+1));
@@ -320,7 +320,7 @@ impl<'a> Iterator for SelectIterator<'a> {
                     }
 
                     //return the current one
-                    if self.selector.matches(self.store, item) {
+                    if self.selector.matches(self.document, item) {
                         Some(SelectItem { data: item, parent_key: key, cursor: cursor, depth: current_depth})
                     } else {
                         self.next() //recurse
@@ -349,20 +349,13 @@ pub trait Select<'a> {
 }
 
 
-impl<'a> Select<'a> for ElementStore {
-    ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element specified by
-    ///``key``.
-    fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
-        SelectIterator::new(self, selector, key, recursive)
-    }
-}
 
 impl<'a> Select<'a> for Document {
     ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
     ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
     ///is enabled). This is the primary means of iterating over anything in the document.
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
-        SelectIterator::new(&self.elementstore, selector, key, recursive)
+        SelectIterator::new(&self, selector, key, recursive)
     }
 }
 
@@ -374,9 +367,9 @@ pub struct SelectElementsIterator<'a> {
 }
 
 impl<'a> SelectElementsIterator<'a> {
-    pub fn new(store: &'a ElementStore, selector: Selector, key: ElementKey, recursive: bool) -> SelectElementsIterator<'a> {
+    pub fn new(document: &'a Document, selector: Selector, key: ElementKey, recursive: bool) -> SelectElementsIterator<'a> {
         SelectElementsIterator {
-            iterator: SelectIterator::new(&store, selector, key, recursive)
+            iterator: SelectIterator::new(document, selector, key, recursive)
         }
     }
 
@@ -408,8 +401,8 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
         if let Some(selectitem) = selectitem {
             match *selectitem {
                 DataType::Element(key) => {
-                    let element = self.iterator.store.get(key).expect("Getting key from elementstore for SelectElementsIterator");
-                    Some(Self::Item { element: &**element })
+                    let element = self.iterator.document.get_element(key).expect("Getting key from elementstore for SelectElementsIterator");
+                    Some(Self::Item { element: element })
                 },
                 _ => {
                     //recurse
@@ -429,20 +422,11 @@ pub trait SelectElements<'a> {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
 }
 
-impl<'a> SelectElements<'a> for ElementStore {
-    ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
-    ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
-    ///is enabled).
-    fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
-        SelectElementsIterator::new(self, selector, key, recursive)
-    }
-}
-
 impl<'a> SelectElements<'a> for Document {
     ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
     ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
     ///is enabled).
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
-        SelectElementsIterator::new(&self.elementstore, selector, key, recursive)
+        SelectElementsIterator::new(&self, selector, key, recursive)
     }
 }

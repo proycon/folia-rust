@@ -7,6 +7,7 @@ use std::str;
 use std::str::FromStr;
 use std::borrow::Cow;
 use std::string::ToString;
+use std::collections::HashMap;
 
 use quick_xml::{Reader,Writer};
 use quick_xml::events::{Event,BytesStart,BytesEnd,BytesText};
@@ -57,7 +58,7 @@ impl Document {
             BodyType::Text => FoliaElement::new(ElementType::Text),
             BodyType::Speech => FoliaElement::new(ElementType::Speech),
         };
-        document.encode(&mut body)?;
+        body = document.encode(body)?;
         assert!(body.is_encoded());
         document.add(body)?;
         Ok(document)
@@ -121,21 +122,21 @@ impl Document {
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
     pub fn add_element(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        <Self as IntoStore<FoliaElement,ElementKey>>::add(self, element)
+        <Self as Store<FoliaElement,ElementKey>>::add(self, element)
     }
 
     ///Add a declaration. It is strongly recommended to use ``declare()`` instead
     ///because this one adds a declaration without any checks.
     ///Returns the key.
     pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
-        <Self as IntoStore<Declaration,DecKey>>::add(self, declaration)
+        <Self as Store<Declaration,DecKey>>::add(self, declaration)
     }
 
     ///Add an processor the document (but the processor will be an orphan and not in the processor
     ///chain!). You may want to use ``add_processor()`` instead to add to the provenance chain or
     ///``add_subprocessor()`` to add a processor as a subprocessor.
     pub fn add_provenance(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        <Self as IntoStore<Processor,ProcKey>>::add(self, processor)
+        <Self as Store<Processor,ProcKey>>::add(self, processor)
     }
 
     //************** Higher-order methods for adding things ********************
@@ -143,33 +144,127 @@ impl Document {
     ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
     pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        <Self as IntoStore<FoliaElement,ElementKey>>::encode(self, &mut element)?;
-        self.elementstore.add_to(parent_key, element)
+        match self.add_element(element) {
+            Ok(child_key) => {
+                self.attach_element(parent_key, child_key)?;
+                Ok(child_key)
+            },
+            Err(err) => {
+                Err(FoliaError::InternalError(format!("Unable to add element to parent: {}", err)))
+            }
+        }
+    }
+
+    ///Adds the child element to the parent element, automatically takes care
+    ///of removing the old parent (if any).
+    pub fn attach_element(&mut self, parent_key: ElementKey, child_key: ElementKey) -> Result<(),FoliaError> {
+        //ensure the parent exists
+        if !self.get(parent_key).is_some() {
+            return Err(FoliaError::InternalError(format!("Parent element does not exist: {}", parent_key)));
+        };
+
+        let oldparent_key = if let Some(child) = self.get_mut(child_key) {
+            //add the new parent and return the old parent
+            let tmp = child.get_parent();
+            child.set_parent(Some(parent_key));
+            tmp
+        } else {
+            //child does not exist
+            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_key)));
+        };
+
+        if let Some(parent) = self.get_mut(parent_key) {
+            parent.push(DataType::Element(child_key));
+        }
+
+        if let Some(oldparent_key) = oldparent_key {
+            //detach child from the old parent
+            if let Some(oldparent) = self.get_mut(oldparent_key) {
+                if let Some(index) = oldparent.index(&DataType::Element(child_key)) {
+                    oldparent.remove(index);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    ///Removes the child from the parent, orphaning it, does NOT remove the element entirely
+    pub fn detach_element(&mut self, child_key: ElementKey) -> Result<(),FoliaError> {
+        let oldparent_key = if let Some(child) = self.get_mut(child_key) {
+            //add the new parent and return the old parent
+            let tmp = child.get_parent();
+            child.set_parent(None);
+            tmp
+        } else {
+            //child does not exist
+            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_key)));
+        };
+
+        if let Some(oldparent_key) = oldparent_key {
+            //detach child from the old parent
+            if let Some(oldparent) = self.get_mut(oldparent_key) {
+                if let Some(index) = oldparent.index(&DataType::Element(child_key)) {
+                    oldparent.remove(index);
+                }
+            }
+        }
+        Ok(())
     }
 
     ///Add an element to the provenance chain
     ///Returns the key
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        self.provenancestore.add_to_chain(processor)
+        let child_key = self.add(processor);
+        if let Ok(child_key) = child_key {
+            self.provenancestore.chain.push(child_key);
+        }
+        child_key
     }
 
     ///Add a processor as a subprocessor
     ///Returns the key
-    pub fn add_subprocessor(&mut self, parent_processor: ProcKey, processor: Processor) -> Result<ProcKey, FoliaError> {
-        self.provenancestore.add_to(parent_processor, processor)
+    pub fn add_subprocessor(&mut self, parent_key: ProcKey, processor: Processor) -> Result<ProcKey, FoliaError> {
+        let child_key = self.add(processor);
+        if let Ok(child_key) = child_key {
+            self.attach_processor(parent_key, child_key)?;
+        }
+        child_key
+    }
+
+    ///Adds the processor element to the parent element, automatically takes care
+    ///of removing the old parent (if any).
+    pub fn attach_processor(&mut self, parent_key: ProcKey, child_key: ProcKey) -> Result<(),FoliaError> {
+        //ensure the parent exists
+        if !self.get_processor(parent_key).is_some() {
+            return Err(FoliaError::InternalError(format!("Parent does not exist: {}", parent_key)));
+        };
+
+        if let Some(child) = self.get_mut_processor(child_key) {
+            //add the new parent and return the old parent
+            child.parent = Some(parent_key);
+        } else {
+            //child does not exist
+            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_key)));
+        };
+
+        if let Some(parent) = self.get_mut_processor(parent_key) {
+            parent.processors.push(child_key);
+        }
+
+        Ok(())
     }
 
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
     ///key of the existing one.
     pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
         //first we simply check the index
-        if let Some(found_key) = self.declarationstore.id_to_key(DeclarationStore::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
+        if let Some(found_key) = <Self as Store<Declaration,DecKey>>::id_to_key(self,Declaration::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
             return Ok(found_key);
         }
 
         //If not found, we search for a default
         if let Some(default_key) = self.declarationstore.get_default_key(annotationtype) {
-            if let Some(declaration) = self.declarationstore.get(default_key) {
+            if let Some(declaration) = self.get_declaration(default_key) {
                 if set.is_some() {
                     //there is an explicit set defined, only return the default if the sets are not
                     //in conflict
@@ -192,83 +287,87 @@ impl Document {
 
     //************** Methods providing easy access to FromStore ****************
     pub fn get_element(&self, key: ElementKey) -> Option<&FoliaElement> {
-        <Self as FromStore<ElementKey,FoliaElement>>::get(self, key)
+        <Self as Store<FoliaElement,ElementKey>>::get(self, key)
     }
     pub fn get_element_by_id(&self, id: &str) -> Option<&FoliaElement> {
-        <Self as FromStore<ElementKey,FoliaElement>>::get_by_id(self, id)
+        <Self as Store<FoliaElement,ElementKey>>::get_by_id(self, id)
     }
     pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut FoliaElement> {
-        <Self as FromStore<ElementKey,FoliaElement>>::get_mut(self, key)
+        <Self as Store<FoliaElement,ElementKey>>::get_mut(self, key)
     }
     pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut FoliaElement> {
-        <Self as FromStore<ElementKey,FoliaElement>>::get_mut_by_id(self, id)
+        <Self as Store<FoliaElement,ElementKey>>::get_mut_by_id(self, id)
+    }
+    pub fn get_element_key_by_id(&self, id: &str) -> Option<ElementKey> {
+        <Self as Store<FoliaElement,ElementKey>>::id_to_key(self, id)
     }
     pub fn get_declaration(&self, key: DecKey) -> Option<&Declaration> {
-        <Self as FromStore<DecKey,Declaration>>::get(self, key)
+        <Self as Store<Declaration,DecKey>>::get(self, key)
     }
     pub fn get_declaration_by_id(&self, id: &str) -> Option<&Declaration> {
-        <Self as FromStore<DecKey,Declaration>>::get_by_id(self, id)
+        <Self as Store<Declaration,DecKey>>::get_by_id(self, id)
+    }
+    pub fn get_declaration_key_by_id(&self, id: &str) -> Option<DecKey> {
+        <Self as Store<Declaration,DecKey>>::id_to_key(self, id)
     }
     pub fn get_mut_declaration(&mut self, key: DecKey) -> Option<&mut Declaration> {
-        <Self as FromStore<DecKey,Declaration>>::get_mut(self, key)
+        <Self as Store<Declaration,DecKey>>::get_mut(self, key)
     }
     pub fn get_mut_declaration_by_id(&mut self, id: &str) -> Option<&mut Declaration> {
-        <Self as FromStore<DecKey,Declaration>>::get_mut_by_id(self, id)
+        <Self as Store<Declaration,DecKey>>::get_mut_by_id(self, id)
+    }
+    pub fn declarations(&self) -> std::slice::Iter<Option<Box<Declaration>>>  { //TODO: simplify output type
+        <Self as Store<Declaration,DecKey>>::iter(self)
     }
     pub fn get_processor(&self, key: ProcKey) -> Option<&Processor> {
-        <Self as FromStore<ProcKey,Processor>>::get(self, key)
+        <Self as Store<Processor,ProcKey>>::get(self, key)
     }
     pub fn get_processor_by_id(&self, id: &str) -> Option<&Processor> {
-        <Self as FromStore<ProcKey,Processor>>::get_by_id(self, id)
+        <Self as Store<Processor,ProcKey>>::get_by_id(self, id)
+    }
+    pub fn get_processor_key_by_id(&self, id: &str) -> Option<ProcKey> {
+        <Self as Store<Processor,ProcKey>>::id_to_key(self, id)
     }
     pub fn get_mut_processor(&mut self, key: ProcKey) -> Option<&mut Processor> {
-        <Self as FromStore<ProcKey,Processor>>::get_mut(self, key)
+        <Self as Store<Processor,ProcKey>>::get_mut(self, key)
     }
     pub fn get_mut_processor_by_id(&mut self, id: &str) -> Option<&mut Processor> {
-        <Self as FromStore<ProcKey,Processor>>::get_mut_by_id(self, id)
+        <Self as Store<Processor,ProcKey>>::get_mut_by_id(self, id)
     }
 
 
 
 }
 
-impl FromStore<'_,ElementKey, FoliaElement> for Document {
-    fn store(&self) -> &dyn Store<FoliaElement,ElementKey> {
-        &self.elementstore
-    }
-    fn store_mut(&mut self) -> &mut dyn Store<FoliaElement,ElementKey> {
-        &mut self.elementstore
-    }
-}
 
+impl Store<FoliaElement,ElementKey> for Document {
 
-impl FromStore<'_,DecKey, Declaration> for Document {
-    fn store(&self) -> &dyn Store<Declaration,DecKey> {
-        &self.declarationstore
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
+        &mut self.elementstore.items
     }
-    fn store_mut (&mut self) -> &mut dyn Store<Declaration,DecKey> {
-        &mut self.declarationstore
+    fn index_mut(&mut self) -> &mut HashMap<String,ElementKey> {
+        &mut self.elementstore.index
     }
-}
 
-impl FromStore<'_,ProcKey, Processor> for Document {
-    fn store(&self) -> &dyn Store<Processor,ProcKey> {
-        &self.provenancestore
+    fn items(&self) -> &Vec<Option<Box<FoliaElement>>> {
+        &self.elementstore.items
     }
-    fn store_mut (&mut self) -> &mut dyn Store<Processor,ProcKey> {
-        &mut self.provenancestore
+    fn index(&self) -> &HashMap<String,ElementKey> {
+        &self.elementstore.index
     }
-}
 
-impl IntoStore<'_,FoliaElement,ElementKey> for Document {
+    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement>>> {
+        self.elementstore.items.iter()
+    }
+
     ///Actively encode element for storage, this encodes attributes that need to be encoded (such as set,class,processor), and adds them to their respective stores.
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store
     ///to the store).
-    fn encode(&mut self, element: &mut FoliaElement) -> Result<(), FoliaError> {
+    fn encode(&mut self, mut element: FoliaElement) -> Result<FoliaElement, FoliaError> {
         if element.is_encoded() {
             //already encoded, nothing to do
-            return Ok(());
+            return Ok(element);
         }
 
         let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
@@ -284,7 +383,7 @@ impl IntoStore<'_,FoliaElement,ElementKey> for Document {
 
             if let Some(class) = element.attrib(AttribType::CLASS) {
                 if let Attribute::Class(class) = class {
-                    if let Ok(class_key) = self.declarationstore.add_class(deckey, class) {
+                    if let Ok(class_key) = self.add_class(deckey, class) {
                         enc_attribs.class = Some(class_key);
                     }
                 }
@@ -298,7 +397,7 @@ impl IntoStore<'_,FoliaElement,ElementKey> for Document {
         if let Some(processor) = element.attrib(AttribType::PROCESSOR) {
             let processor_id: &str  = &processor.value();
 
-            if let Some(processor_key) = self.provenancestore.id_to_key(processor_id) {
+            if let Some(processor_key) = <Self as Store<Processor,ProcKey>>::id_to_key(self, processor_id) {
                 enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
             }
         }
@@ -311,12 +410,47 @@ impl IntoStore<'_,FoliaElement,ElementKey> for Document {
 
         element.set_enc_attribs(Some(enc_attribs));
 
-        Ok(())
+        Ok(element)
     }
 }
 
-impl IntoStore<'_,Declaration,DecKey> for Document {
+impl Store<Declaration,DecKey> for Document {
+
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
+        &mut self.declarationstore.items
+    }
+    fn index_mut(&mut self) -> &mut HashMap<String,DecKey> {
+        &mut self.declarationstore.index
+    }
+
+    fn items(&self) -> &Vec<Option<Box<Declaration>>> {
+        &self.declarationstore.items
+    }
+    fn index(&self) -> &HashMap<String,DecKey> {
+        &self.declarationstore.index
+    }
+
+    fn iter(&self) -> std::slice::Iter<Option<Box<Declaration>>> {
+        self.declarationstore.items.iter()
+    }
 }
 
-impl IntoStore<'_,Processor,ProcKey> for Document {
+impl Store<Processor,ProcKey> for Document {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<Processor>>> {
+        &mut self.provenancestore.items
+    }
+    fn index_mut(&mut self) -> &mut HashMap<String,ProcKey> {
+        &mut self.provenancestore.index
+    }
+
+    fn items(&self) -> &Vec<Option<Box<Processor>>> {
+        &self.provenancestore.items
+    }
+    fn index(&self) -> &HashMap<String,ProcKey> {
+        &self.provenancestore.index
+    }
+
+    fn iter(&self) -> std::slice::Iter<Option<Box<Processor>>> {
+        self.provenancestore.items.iter()
+    }
 }

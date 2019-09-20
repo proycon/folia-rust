@@ -90,15 +90,15 @@ impl FoliaElement {
     ///Decodes an element and returns a **copy**, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent), only set, class
     ///and processor.
-    pub fn decode(&self, declarationstore: &DeclarationStore, provenancestore: &ProvenanceStore) -> Self {
+    pub fn decode(&self, document: &Document) -> Self {
         let mut decoded_attribs: Vec<Attribute> = self.attribs.iter().map(|a| a.clone()).collect();
-        if let Some(set) = self.set_decode(declarationstore) {
+        if let Some(set) = self.set_decode(document) {
             decoded_attribs.push(Attribute::Set(set.to_string()));
         }
-        if let Some(class) = self.class_decode(declarationstore) {
+        if let Some(class) = self.class_decode(document) {
             decoded_attribs.push(Attribute::Class(class.to_string()));
         }
-        if let Some(processor) = self.processor_decode(provenancestore) {
+        if let Some(processor) = self.processor_decode(document) {
             decoded_attribs.push(Attribute::Processor(processor.to_string()));
         }
         Self::new(self.elementtype).with_attribs(decoded_attribs)
@@ -216,35 +216,35 @@ impl FoliaElement {
     }
 
     ///Get the declaration from the declaration store, given an encoded element
-    pub fn declaration<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a Declaration>) {
+    pub fn declaration<'a>(&self, document: &'a Document) -> (Option<&'a Declaration>) {
         if let Some(declaration_key) = self.declaration_key() {
-           declarationstore.get(declaration_key).map(|b| &**b)
+           document.get_declaration(declaration_key)
         } else {
             None
         }
     }
 
     ///Get the processor from the provenance store, given an encoded element
-    pub fn processor<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a Processor>) {
+    pub fn processor<'a>(&self, document: &'a Document) -> (Option<&'a Processor>) {
         if let Some(processor_key) = self.processor_key() {
-            provenancestore.get(processor_key).map(|b| &**b)
+            document.get_processor(processor_key)
         } else {
             None
         }
     }
 
     ///Get set as a str from an encoded element.
-    pub fn set_decode<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
-        if let Some(declaration) = self.declaration(declarationstore) {
+    pub fn set_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
+        if let Some(declaration) = self.declaration(document) {
                 return declaration.set.as_ref().map(|s| &**s);
         }
         None
     }
 
     ///Get a class as a str from an encoded element
-    pub fn class_decode<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
+    pub fn class_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
         if let Some(class_key) = self.class_key() {
-            if let Some(declaration) = self.declaration(declarationstore) {
+            if let Some(declaration) = self.declaration(document) {
                 if let Some(classes) = &declaration.classes {
                     if let Some(class) = classes.get(class_key) {
                         return Some(class.as_str());
@@ -255,8 +255,8 @@ impl FoliaElement {
         None
     }
 
-    pub fn processor_decode<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a str>) {
-        if let Some(processor) = self.processor(provenancestore) {
+    pub fn processor_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
+        if let Some(processor) = self.processor(document) {
             Some(processor.id.as_str())
         } else {
             None

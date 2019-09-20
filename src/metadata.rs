@@ -36,12 +36,21 @@ impl Declaration {
             None
         }
     }
+
+    ///Create a id to use with the index
+    pub fn index_id(annotationtype: AnnotationType, set: &Option<&str>) -> String {
+        if let Some(set) = set {
+            format!("{}/{}", annotationtype, set)
+        } else {
+            format!("{}", annotationtype)
+        }
+    }
 }
 
 impl Storable<DecKey> for Declaration {
     fn maybe_id(&self) -> Option<Cow<str>> {
         //let set_str: &str = &self.set.as_ref().expect("unwrapping set str");
-        Some(Cow::from(DeclarationStore::index_id(self.annotationtype,&self.set.as_ref().map(String::as_str))))
+        Some(Cow::from(Declaration::index_id(self.annotationtype,&self.set.as_ref().map(String::as_str))))
     }
 
     ///Returns the key of the current element
@@ -95,20 +104,12 @@ impl Store<Class,ClassKey> for ClassStore {
 #[derive(Default)]
 ///The declaration store holds all declarations (e.g. for a document)
 pub struct DeclarationStore {
-    items: Vec<Option<Box<Declaration>>>, //heap-allocated
-    index: HashMap<String,DecKey>,
+    pub(crate) items: Vec<Option<Box<Declaration>>>, //heap-allocated
+    pub(crate) index: HashMap<String,DecKey>,
 }
 
 impl DeclarationStore {
 
-    ///Create a id to use with the index
-    pub fn index_id(annotationtype: AnnotationType, set: &Option<&str>) -> String {
-        if let Some(set) = set {
-            format!("{}/{}", annotationtype, set)
-        } else {
-            format!("{}", annotationtype)
-        }
-    }
 
     ///Returns a vector of boolean, indicating if the declaration is a default or not. Can be
     ///indexed with DecKey
@@ -155,9 +156,12 @@ impl DeclarationStore {
         }
     }
 
+}
+
+impl Document {
     ///Returns the class store for the given declaration
     pub fn get_class_store(&self, dec_key: DecKey) -> Option<&ClassStore> {
-        if let Some(declaration) = self.get(dec_key) {
+        if let Some(declaration) = self.get_declaration(dec_key) {
             if declaration.classes.is_some() {
                 Some(declaration.classes.as_ref().unwrap())
             } else {
@@ -170,7 +174,7 @@ impl DeclarationStore {
 
     ///Returns the class store for the given declaration (mutably)
     pub fn get_class_store_mut(&mut self, dec_key: DecKey) -> &mut ClassStore {
-        if let Some(mut declaration) = self.get_mut(dec_key) {
+        if let Some(mut declaration) = self.get_mut_declaration(dec_key) {
             if declaration.classes.is_none() {
                 declaration.classes = Some(ClassStore::default());
             }
@@ -217,98 +221,15 @@ impl DeclarationStore {
             Err(FoliaError::InternalError("Declaration not found".to_string()))
         }
     }
-
-
-}
-
-impl Store<Declaration,DecKey> for DeclarationStore {
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
-        &mut self.items
-    }
-    fn index_mut(&mut self) -> &mut HashMap<String,DecKey> {
-        &mut self.index
-    }
-
-    fn items(&self) -> &Vec<Option<Box<Declaration>>> {
-        &self.items
-    }
-    fn index(&self) -> &HashMap<String,DecKey> {
-        &self.index
-    }
-    fn iter(&self) -> std::slice::Iter<Option<Box<Declaration>>> {
-        self.items.iter()
-    }
 }
 
 #[derive(Default)]
 pub struct ProvenanceStore {
-    items: Vec<Option<Box<Processor>>>, //heap-allocated
-    index: HashMap<String,ProcKey>,
+    pub(crate) items: Vec<Option<Box<Processor>>>, //heap-allocated
+    pub(crate) index: HashMap<String,ProcKey>,
     pub chain: Vec<ProcKey>,
 }
 
-impl Store<Processor,ProcKey> for ProvenanceStore {
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<Processor>>> {
-        &mut self.items
-    }
-    fn index_mut(&mut self) -> &mut HashMap<String,ProcKey> {
-        &mut self.index
-    }
-
-    fn items(&self) -> &Vec<Option<Box<Processor>>> {
-        &self.items
-    }
-    fn index(&self) -> &HashMap<String,ProcKey> {
-        &self.index
-    }
-    fn iter(&self) -> std::slice::Iter<Option<Box<Processor>>> {
-        self.items.iter()
-    }
-}
-
-impl ProvenanceStore {
-    ///Adds a processor to the provenance chain
-    pub fn add_to_chain(&mut self, child: Processor) -> Result<ProcKey,FoliaError> {
-        let child_key = self.add(child);
-        if let Ok(child_key) = child_key {
-            self.chain.push(child_key);
-        }
-        child_key
-    }
-
-    ///Adds a processor as a child of another, this is a higher-level function that/
-    ///takes care of adding and attaching for you.
-    pub fn add_to(&mut self, parent_key: ProcKey, child: Processor) -> Result<ProcKey,FoliaError> {
-        let child_key = self.add(child);
-        if let Ok(child_key) = child_key {
-            self.attach(parent_key, child_key)?;
-        }
-        child_key
-    }
-
-    ///Adds the processor element to the parent element, automatically takes care
-    ///of removing the old parent (if any).
-    pub fn attach(&mut self, parent_key: ProcKey, child_key: ProcKey) -> Result<(),FoliaError> {
-        //ensure the parent exists
-        if !self.get(parent_key).is_some() {
-            return Err(FoliaError::InternalError(format!("Parent does not exist: {}", parent_key)));
-        };
-
-        if let Some(child) = self.get_mut(child_key) {
-            //add the new parent and return the old parent
-            child.parent = Some(parent_key);
-        } else {
-            //child does not exist
-            return Err(FoliaError::InternalError(format!("Child does not exist: {}", child_key)));
-        };
-
-        if let Some(parent) = self.get_mut(parent_key) {
-            parent.processors.push(child_key);
-        }
-
-        Ok(())
-    }
-}
 
 
 #[derive(Debug,PartialEq,Clone,Copy)]
