@@ -33,12 +33,22 @@ pub trait Storable<Key> {
 
 }
 
-pub trait Encoder<T> {
-   fn encode(&mut self, item: &mut T) -> Result<(),FoliaError>;
+pub trait IntoStore<'a,Item,Key>: FromStore<'a, Key, Item>
+                           where Item: Storable<Key> + 'a,
+                           Key: TryFrom<usize> + Copy + Debug + 'a,
+                           usize: std::convert::TryFrom<Key>,
+                           <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
+   fn encode(&mut self, item: &mut Item) -> Result<(),FoliaError> {
+       Ok(()) //we assume the item does not need to be decoded by default
+   }
+   fn add(&'a mut self, mut item: Item) -> Result<Key,FoliaError> {
+       self.encode(&mut item)?;
+       self.store_mut().add(item)
+   }
 }
 
 
-pub trait Decoder<'a,Key,Item> where Item: Storable<Key> + 'a,
+pub trait FromStore<'a,Key,Item> where Item: Storable<Key> + 'a,
                            Key: TryFrom<usize> + Copy + Debug + 'a,
                            usize: std::convert::TryFrom<Key>,
                            <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {

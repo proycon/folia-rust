@@ -378,59 +378,5 @@ impl FoliaElement {
 }
 
 
-impl Encoder<FoliaElement> for Document {
-    ///Actively encode for storage, this encodes attributes that need to be encoded (such as set,class,processor), and adds them to their respective stores.
-    ///It does not handle relations between elements (data/children and parent)
-    ///nor does it add the element itself to the store
-    ///to the store).
-    fn encode(&mut self, element: &mut FoliaElement) -> Result<(), FoliaError> {
-        if element.is_encoded() {
-            //already encoded, nothing to do
-            return Ok(());
-        }
-
-        let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
-
-        //encode the element for storage
-        let set = element.attrib(AttribType::SET);
-
-        if let Some(annotationtype) = element.elementtype.annotationtype() {
-            //Declare the element (either declares anew or just resolves the to the right
-            //declaration.
-            let deckey = self.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
-            enc_attribs.declaration = Some(deckey);
-
-            if let Some(class) = element.attrib(AttribType::CLASS) {
-                if let Attribute::Class(class) = class {
-                    if let Ok(class_key) = self.declarationstore.add_class(deckey, class) {
-                        enc_attribs.class = Some(class_key);
-                    }
-                }
-            }
-
-            if let Some(declaration) = self.get_declaration(deckey) {
-                enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
-            }
-        }
-
-        if let Some(processor) = element.attrib(AttribType::PROCESSOR) {
-            let processor_id: &str  = &processor.value();
-
-            if let Some(processor_key) = self.provenancestore.id_to_key(processor_id) {
-                enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
-            }
-        }
-
-        //remove encoded attributes
-        element.attribs.retain(|a| match a {
-            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => false,
-            _ => true
-        });
-
-        element.set_enc_attribs(Some(enc_attribs));
-
-        Ok(())
-    }
-}
 
 

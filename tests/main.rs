@@ -88,13 +88,13 @@ fn test002_append() {
     match Document::new("example", BodyType::Text) {
         Ok(mut doc) => {
             let root: ElementKey = 0;
-            let sentence = doc.add_to(root,
+            let sentence = doc.add_element_to(root,
                                             FoliaElement::new(ElementType::Sentence)
                                                                 .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
-            doc.add_to(sentence,
+            doc.add_element_to(sentence,
                              FoliaElement::new(ElementType::Word)
                                                  .with(DataType::text("hello"))).expect("Adding word 1");
-            doc.add_to(sentence,
+            doc.add_element_to(sentence,
                              FoliaElement::new(ElementType::Word)
                                                  .with(DataType::text("world"))).expect("Adding word 2");
         },
@@ -278,7 +278,7 @@ fn test008d_selector_elementgroup() {
 fn test009_text() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
-            if let Some(word) = doc.elementstore.get_by_id("example.p.1.s.2.w.4") {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
                 match word.text_encode(&doc, None, None, false, true) {
                     Ok(text) => assert_eq!(text, "example"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
