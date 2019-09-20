@@ -33,7 +33,7 @@ pub trait Storable<Key> {
 
 }
 
-pub trait IntoStore<'a,Item,Key>: FromStore<'a, Key, Item>
+pub trait IntoStore<'a,Item,Key>: FromStore<'a,Key, Item>
                            where Item: Storable<Key> + 'a,
                            Key: TryFrom<usize> + Copy + Debug + 'a,
                            usize: std::convert::TryFrom<Key>,
@@ -41,8 +41,10 @@ pub trait IntoStore<'a,Item,Key>: FromStore<'a, Key, Item>
 
    ///Encode the item, takes and returns ownership of item
    fn encode(&mut self, item: Item) -> Result<Item,FoliaError> {
-       Ok(item) //we assume the item does not need to be decoded by default
+       Ok(item) //default implementation assumes the item does not need to be encoded
    }
+
+   ///Add the item to the store (automatically encoding it first if needed)
    fn add(&mut self, mut item: Item) -> Result<Key,FoliaError> {
        item = self.encode(item)?;
        self.store_mut().add(item)
@@ -54,24 +56,29 @@ pub trait FromStore<'a,Key,Item> where Item: Storable<Key> + 'a,
                            Key: TryFrom<usize> + Copy + Debug + 'a,
                            usize: std::convert::TryFrom<Key>,
                            <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
-    fn store(&self) -> &dyn Store<Item,Key>;
-    fn store_mut(&mut self) -> &mut dyn Store<Item,Key>;
-    fn get(&self, key: Key) -> Option<&Item> {
-        self.store().get(key).map(|b| b.as_ref())
+    ///Get the underlying store
+    fn store(&'a self) -> &'a dyn Store<Item,Key>;
+
+    ///Get the underlying store (mutably)
+    fn store_mut(&'a mut self) -> &'a mut dyn Store<Item,Key>;
+
+    ///Get an item from the store given its key
+    fn get(&self, key: Key) -> Option<&'a Item> {
+        self.store().get(key).map(|item| item.as_ref())
     }
-    fn get_mut(&mut self, key: Key) -> Option<&mut Item> {
-        self.store_mut().get_mut(key).map(|b| b.as_mut())
+    fn get_mut(&mut self, key: Key) -> Option<&'a mut Item> {
+        self.store_mut().get_mut(key).map(|item| item.as_mut())
     }
-    fn get_by_id(&self, id: &str) -> Option<&Item> {
-        self.store().get_by_id(id).map(|b| b.as_ref())
+    fn get_by_id(&self, id: &str) -> Option<&'a Item> {
+        self.store().get_by_id(id).map(|item| item.as_ref())
     }
-    fn get_mut_by_id(&'a mut self, id: &str) -> Option<&'a mut Item> {
-        self.store_mut().get_mut_by_id(id).map(|b| b.as_mut())
+    fn get_mut_by_id(&mut self, id: &str) -> Option<&'a mut Item> {
+        self.store_mut().get_mut_by_id(id).map(|item| item.as_mut())
     }
-    fn id_to_key(&'a self, id: &str) -> Option<Key> {
+    fn id_to_key(&self, id: &str) -> Option<Key> {
         self.store().id_to_key(id)
     }
-    fn get_key(&'a self, item: &Item) -> Option<Key> {
+    fn get_key(&self, item: &Item) -> Option<Key> {
         self.store().get_key(item)
     }
 }

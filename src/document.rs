@@ -121,30 +121,30 @@ impl<'a> Document<'a> {
 
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
-    pub fn add_element(&'a mut self, element: FoliaElement<'a>) -> Result<ElementKey, FoliaError> {
+    pub fn add_element(&mut self, element: FoliaElement<'a>) -> Result<ElementKey, FoliaError> {
         <Self as IntoStore<FoliaElement<'a>,ElementKey>>::add(self, element)
     }
 
     ///Add a declaration. It is strongly recommended to use ``declare()`` instead
     ///because this one adds a declaration without any checks.
     ///Returns the key.
-    pub fn add_declaration(&'a mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
-        <Self as IntoStore<'a,Declaration,DecKey>>::add(self, declaration)
+    pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
+        <Self as IntoStore<Declaration,DecKey>>::add(self, declaration)
     }
 
     ///Add an processor the document (but the processor will be an orphan and not in the processor
     ///chain!). You may want to use ``add_processor()`` instead to add to the provenance chain or
     ///``add_subprocessor()`` to add a processor as a subprocessor.
-    pub fn add_provenance(&'a mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        <Self as IntoStore<'a,Processor,ProcKey>>::add(self, processor)
+    pub fn add_provenance(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
+        <Self as IntoStore<Processor,ProcKey>>::add(self, processor)
     }
 
     //************** Higher-order methods for adding things ********************
 
     ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_element_to(&'a mut self, parent_key: ElementKey, mut element: FoliaElement<'a>) -> Result<ElementKey, FoliaError> {
-        element = <Self as IntoStore<'a,FoliaElement<'a>,ElementKey>>::encode(self, element)?;
+    pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: FoliaElement<'a>) -> Result<ElementKey, FoliaError> {
+        element = <Self as IntoStore<FoliaElement<'a>,ElementKey>>::encode(self, element)?;
         self.elementstore.add_to(parent_key, element)
     }
 
@@ -162,7 +162,7 @@ impl<'a> Document<'a> {
 
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
     ///key of the existing one.
-    pub fn declare(&'a mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
+    pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
         //first we simply check the index
         if let Some(found_key) = self.declarationstore.id_to_key(DeclarationStore::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
             return Ok(found_key);
@@ -234,34 +234,34 @@ impl<'a> Document<'a> {
 }
 
 impl<'a> FromStore<'a,ElementKey, FoliaElement<'a>> for Document<'a> {
-    fn store(&self) -> &dyn Store<FoliaElement<'a>,ElementKey> {
-        &self.elementstore
+    fn store(&'a self) -> &'a dyn Store<FoliaElement<'a>,ElementKey> {
+        &'a self.elementstore
     }
-    fn store_mut(&mut self) -> &mut dyn Store<FoliaElement<'a>,ElementKey> {
-        &mut self.elementstore
+    fn store_mut(&'a mut self) -> &'a mut dyn Store<FoliaElement<'a>,ElementKey> {
+        &'a mut self.elementstore
     }
 }
 
 
 impl<'a> FromStore<'a,DecKey, Declaration> for Document<'a> {
-    fn store(&self) -> &dyn Store<Declaration,DecKey> {
+    fn store(&self) -> &'a dyn Store<Declaration,DecKey> {
         &self.declarationstore
     }
-    fn store_mut (&mut self) -> &mut dyn Store<Declaration,DecKey> {
+    fn store_mut (&mut self) -> &'a mut dyn Store<Declaration,DecKey> {
         &mut self.declarationstore
     }
 }
 
 impl<'a> FromStore<'a,ProcKey, Processor> for Document<'a> {
-    fn store(&self) -> &dyn Store<Processor,ProcKey> {
+    fn store(&self) -> &'a dyn Store<Processor,ProcKey> {
         &self.provenancestore
     }
-    fn store_mut(&mut self) -> &mut dyn Store<Processor,ProcKey> {
+    fn store_mut(&mut self) -> &'a mut dyn Store<Processor,ProcKey> {
         &mut self.provenancestore
     }
 }
 
-impl<'a> IntoStore<'a,FoliaElement<'a>,ElementKey> for Document<'a> {
+impl<'a> IntoStore<'a, FoliaElement<'a>,ElementKey> for Document<'a> {
     ///Actively encode element for storage, this encodes attributes that need to be encoded (such as set,class,processor), and adds them to their respective stores.
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store
