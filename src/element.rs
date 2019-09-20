@@ -47,7 +47,7 @@ pub struct EncodedAttributes {
 ///is represented by ``elementtype``. An elements holds and owns attributes, encoded attributes (if
 ///it is encoded already),  data items (which may be text, comments or child elements (by key)), and a link
 ///to its parent (by key).
-pub struct FoliaElement {
+pub struct FoliaElement<'a> {
     pub elementtype: ElementType,
     pub attribs: Vec<Attribute>,
 
@@ -55,12 +55,13 @@ pub struct FoliaElement {
     pub(crate) data: Vec<DataType>,
     pub(crate) key: Option<ElementKey>,
     pub(crate) parent: Option<ElementKey>,
+    pub(crate) doc: Option<&'a Document<'a>>,
 
     //encoded attributes
     pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
-impl Storable<ElementKey> for FoliaElement {
+impl<'a> Storable<ElementKey> for FoliaElement<'a> {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
             Some(attrib.value())
@@ -85,7 +86,7 @@ impl Storable<ElementKey> for FoliaElement {
 
 }
 
-impl FoliaElement {
+impl<'a> FoliaElement<'a> {
 
     ///Decodes an element and returns a **copy**, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent), only set, class
@@ -216,7 +217,7 @@ impl FoliaElement {
     }
 
     ///Get the declaration from the declaration store, given an encoded element
-    pub fn declaration<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a Declaration>) {
+    pub fn declaration<'b>(&self, declarationstore: &'b DeclarationStore) -> (Option<&'b Declaration>) {
         if let Some(declaration_key) = self.declaration_key() {
            declarationstore.get(declaration_key).map(|b| &**b)
         } else {
@@ -225,7 +226,7 @@ impl FoliaElement {
     }
 
     ///Get the processor from the provenance store, given an encoded element
-    pub fn processor<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a Processor>) {
+    pub fn processor<'b>(&self, provenancestore: &'b ProvenanceStore) -> (Option<&'b Processor>) {
         if let Some(processor_key) = self.processor_key() {
             provenancestore.get(processor_key).map(|b| &**b)
         } else {
@@ -234,7 +235,7 @@ impl FoliaElement {
     }
 
     ///Get set as a str from an encoded element.
-    pub fn set_decode<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
+    pub fn set_decode<'b>(&self, declarationstore: &'b DeclarationStore) -> (Option<&'b str>) {
         if let Some(declaration) = self.declaration(declarationstore) {
                 return declaration.set.as_ref().map(|s| &**s);
         }
@@ -242,7 +243,7 @@ impl FoliaElement {
     }
 
     ///Get a class as a str from an encoded element
-    pub fn class_decode<'a>(&self, declarationstore: &'a DeclarationStore) -> (Option<&'a str>) {
+    pub fn class_decode<'b>(&self, declarationstore: &'b DeclarationStore) -> (Option<&'b str>) {
         if let Some(class_key) = self.class_key() {
             if let Some(declaration) = self.declaration(declarationstore) {
                 if let Some(classes) = &declaration.classes {
@@ -255,7 +256,7 @@ impl FoliaElement {
         None
     }
 
-    pub fn processor_decode<'a>(&self, provenancestore: &'a ProvenanceStore) -> (Option<&'a str>) {
+    pub fn processor_decode<'b>(&self, provenancestore: &'b ProvenanceStore) -> (Option<&'b str>) {
         if let Some(processor) = self.processor(provenancestore) {
             Some(processor.id.as_str())
         } else {
@@ -365,13 +366,13 @@ impl FoliaElement {
 
 
     ///Simple constructor for an empty element (optionally with attributes)
-    pub fn new(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None }
+    pub fn new(elementtype: ElementType) -> FoliaElement<'a> {
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None, doc: None }
     }
 
     ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes (OBSOLETE?)
-    pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()) }
+    pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement<'a> {
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()), doc: None }
     }
 
 

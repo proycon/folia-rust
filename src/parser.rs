@@ -22,15 +22,15 @@ use crate::metadata::*;
 use crate::select::*;
 use crate::document::Document;
 
-impl Document {
+impl<'a> Document<'a> {
     ///Parses a FoLiA document given a reader
-    pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Document<'a>, FoliaError> {
 
         let mut body: Option<FoliaElement> = None;
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
 
-        let mut doc = Self {
+        let mut doc = Document {
                             id: "untitled".to_string(),
                             filename: None,
                             version: FOLIAVERSION.to_string(),
@@ -297,7 +297,7 @@ impl Document {
     }
 
     ///Parses all elementsm from XML, this in turn invokes all parsers for the subelements
-    pub(crate) fn parse_elements<R: BufRead>(&mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
+    pub(crate) fn parse_elements<R: BufRead>(&'a mut self, reader: &mut Reader<R>, mut buf: &mut Vec<u8>, mut nsbuf: &mut Vec<u8>) -> Result<(), FoliaError> {
         if !self.elementstore.is_empty() {
             let mut stack: Vec<ElementKey> = vec![0]; //0 is the root/body element, we always start with it
             loop {
@@ -449,7 +449,7 @@ impl Processor {
     }
 }
 
-impl FoliaElement {
+impl<'a> FoliaElement<'a> {
     fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
@@ -463,7 +463,7 @@ impl FoliaElement {
 
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
-    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement<'a>, FoliaError> {
         let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
         let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement::new(elementtype).with_attribs(attributes))

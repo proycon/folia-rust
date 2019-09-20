@@ -38,11 +38,13 @@ pub trait IntoStore<'a,Item,Key>: FromStore<'a, Key, Item>
                            Key: TryFrom<usize> + Copy + Debug + 'a,
                            usize: std::convert::TryFrom<Key>,
                            <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
-   fn encode(&mut self, item: &mut Item) -> Result<(),FoliaError> {
-       Ok(()) //we assume the item does not need to be decoded by default
+
+   ///Encode the item, takes and returns ownership of item
+   fn encode(&mut self, item: Item) -> Result<Item,FoliaError> {
+       Ok(item) //we assume the item does not need to be decoded by default
    }
-   fn add(&'a mut self, mut item: Item) -> Result<Key,FoliaError> {
-       self.encode(&mut item)?;
+   fn add(&mut self, mut item: Item) -> Result<Key,FoliaError> {
+       item = self.encode(item)?;
        self.store_mut().add(item)
    }
 }
@@ -52,15 +54,15 @@ pub trait FromStore<'a,Key,Item> where Item: Storable<Key> + 'a,
                            Key: TryFrom<usize> + Copy + Debug + 'a,
                            usize: std::convert::TryFrom<Key>,
                            <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
-    fn store(&'a self) -> &'a dyn Store<Item,Key>;
-    fn store_mut(&'a mut self) -> &'a mut dyn Store<Item,Key>;
-    fn get(&'a self, key: Key) -> Option<&'a Item> {
+    fn store(&self) -> &dyn Store<Item,Key>;
+    fn store_mut(&mut self) -> &mut dyn Store<Item,Key>;
+    fn get(&self, key: Key) -> Option<&Item> {
         self.store().get(key).map(|b| b.as_ref())
     }
-    fn get_mut(&'a mut self, key: Key) -> Option<&'a mut Item> {
+    fn get_mut(&mut self, key: Key) -> Option<&mut Item> {
         self.store_mut().get_mut(key).map(|b| b.as_mut())
     }
-    fn get_by_id(&'a self, id: &str) -> Option<&'a Item> {
+    fn get_by_id(&self, id: &str) -> Option<&Item> {
         self.store().get_by_id(id).map(|b| b.as_ref())
     }
     fn get_mut_by_id(&'a mut self, id: &str) -> Option<&'a mut Item> {

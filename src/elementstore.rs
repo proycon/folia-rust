@@ -11,8 +11,8 @@ use crate::specification::*;
 
 ///Holds and owns all elements, the index to them and their declarations. The store serves as an abstraction used by Documents
 #[derive(Default)]
-pub struct ElementStore {
-    items: Vec<Option<Box<FoliaElement>>>, //heap-allocated
+pub struct ElementStore<'a> {
+    items: Vec<Option<Box<FoliaElement<'a>>>>, //heap-allocated
     index: HashMap<String,ElementKey>,
 
     ///An ``ElementStore`` holds a copy of the FoLiA specification. Duplicating this for each
@@ -21,31 +21,31 @@ pub struct ElementStore {
     pub specification: Specification,
 }
 
-impl Store<FoliaElement,ElementKey> for ElementStore {
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
+impl<'a> Store<FoliaElement<'a>,ElementKey> for ElementStore<'a> {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement<'a>>>> {
         &mut self.items
     }
     fn index_mut(&mut self) -> &mut HashMap<String,ElementKey> {
         &mut self.index
     }
 
-    fn items(&self) -> &Vec<Option<Box<FoliaElement>>> {
+    fn items(&self) -> &Vec<Option<Box<FoliaElement<'a>>>> {
         &self.items
     }
     fn index(&self) -> &HashMap<String,ElementKey> {
         &self.index
     }
 
-    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement>>> {
+    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement<'a>>>> {
         self.items.iter()
     }
 
 }
 
-impl ElementStore {
+impl<'a> ElementStore<'a> {
     ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_to(&mut self, parent_key: ElementKey, child: FoliaElement) -> Result<ElementKey,FoliaError> {
+    pub fn add_to(&mut self, parent_key: ElementKey, child: FoliaElement<'a>) -> Result<ElementKey,FoliaError> {
         match self.add(child) {
             Ok(child_key) => {
                 self.attach(parent_key, child_key)?;

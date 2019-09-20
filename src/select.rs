@@ -245,7 +245,7 @@ impl Default for TypeSelector {
 ///This implements a depth-first search.
 pub struct SelectIterator<'a> {
     ///The element store to draw elements from
-    pub store: &'a ElementStore,
+    pub store: &'a ElementStore<'a>,
     ///The selector to apply to test for matching data items
     pub selector: Selector,
     ///Apply the selector recursively (depth-first search) or not (plain linear search)
@@ -349,7 +349,7 @@ pub trait Select<'a> {
 }
 
 
-impl<'a> Select<'a> for ElementStore {
+impl<'a> Select<'a> for ElementStore<'a> {
     ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element specified by
     ///``key``.
     fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
@@ -357,7 +357,7 @@ impl<'a> Select<'a> for ElementStore {
     }
 }
 
-impl<'a> Select<'a> for Document {
+impl<'a> Select<'a> for Document<'a> {
     ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
     ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
     ///is enabled). This is the primary means of iterating over anything in the document.
@@ -388,11 +388,11 @@ impl<'a> SelectElementsIterator<'a> {
 
 ///The Item returned by SelectElementsIterator, this dereferences directly to ``&FoliaElement``
 pub struct SelectElementsItem<'a> {
-    pub element: &'a FoliaElement,
+    pub element: &'a FoliaElement<'a>,
 }
 
 impl<'a> Deref for SelectElementsItem<'a> {
-    type Target = FoliaElement;
+    type Target = FoliaElement<'a>;
 
     fn deref(&self) -> &Self::Target {
         self.element
@@ -429,16 +429,16 @@ pub trait SelectElements<'a> {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
 }
 
-impl<'a> SelectElements<'a> for ElementStore {
+impl<'a> SelectElements<'a> for ElementStore<'a> {
     ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
     ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
     ///is enabled).
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
-        SelectElementsIterator::new(self, selector, key, recursive)
+        SelectElementsIterator::new(&self, selector, key, recursive)
     }
 }
 
-impl<'a> SelectElements<'a> for Document {
+impl<'a> SelectElements<'a> for Document<'a> {
     ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
     ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
     ///is enabled).
