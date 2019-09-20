@@ -181,20 +181,38 @@ impl Document {
     pub fn get_element(&self, key: ElementKey) -> Option<&FoliaElement> {
         <Self as Decoder<ElementKey,FoliaElement>>::get(self, key)
     }
+    pub fn get_element_by_id(&self, id: &str) -> Option<&FoliaElement> {
+        <Self as Decoder<ElementKey,FoliaElement>>::get_by_id(self, id)
+    }
     pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut FoliaElement> {
         <Self as Decoder<ElementKey,FoliaElement>>::get_mut(self, key)
+    }
+    pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut FoliaElement> {
+        <Self as Decoder<ElementKey,FoliaElement>>::get_mut_by_id(self, id)
     }
     pub fn get_declaration(&self, key: DecKey) -> Option<&Declaration> {
         <Self as Decoder<DecKey,Declaration>>::get(self, key)
     }
+    pub fn get_declaration_by_id(&self, id: &str) -> Option<&Declaration> {
+        <Self as Decoder<DecKey,Declaration>>::get_by_id(self, id)
+    }
     pub fn get_mut_declaration(&mut self, key: DecKey) -> Option<&mut Declaration> {
         <Self as Decoder<DecKey,Declaration>>::get_mut(self, key)
+    }
+    pub fn get_mut_declaration_by_id(&mut self, id: &str) -> Option<&mut Declaration> {
+        <Self as Decoder<DecKey,Declaration>>::get_mut_by_id(self, id)
     }
     pub fn get_processor(&self, key: ProcKey) -> Option<&Processor> {
         <Self as Decoder<ProcKey,Processor>>::get(self, key)
     }
+    pub fn get_processor_by_id(&self, id: &str) -> Option<&Processor> {
+        <Self as Decoder<ProcKey,Processor>>::get_by_id(self, id)
+    }
     pub fn get_mut_processor(&mut self, key: ProcKey) -> Option<&mut Processor> {
         <Self as Decoder<ProcKey,Processor>>::get_mut(self, key)
+    }
+    pub fn get_mut_processor_by_id(&mut self, id: &str) -> Option<&mut Processor> {
+        <Self as Decoder<ProcKey,Processor>>::get_mut_by_id(self, id)
     }
 
 
