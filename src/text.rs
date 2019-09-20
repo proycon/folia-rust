@@ -10,11 +10,12 @@ use crate::select::*;
 use crate::document::*;
 
 
-impl FoliaElement {
+impl<'a> FoliaElement<'a> {
 
     ///Returns the text content of a given element
-    pub fn text(&self, doc: &Document, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool, previousdelimiter: Option<String>) -> Result<String,FoliaError> {
+    pub fn text(&self, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool, previousdelimiter: Option<String>) -> Result<String,FoliaError> {
         let key = self.key().ok_or(FoliaError::KeyError("Element has no key".to_string()))?;
+        let doc = self.doc();
 
         let properties = doc.props(self.elementtype);
 
@@ -35,7 +36,7 @@ impl FoliaElement {
                                         text += textdelimiter;
                                     }
                                 }
-                                let textpart = element.text(doc,set,textclass,strict, retaintokenisation,None)?;
+                                let textpart = element.text(set,textclass,strict, retaintokenisation,None)?;
                                 text += &textpart;
                             }
                         }
@@ -58,10 +59,10 @@ impl FoliaElement {
                            element.elementtype == ElementType::Correction ||
                            ElementGroup::Span.contains(element.elementtype) {
 
-                           if let Ok(textpart) = element.text(doc,set,textclass,false, retaintokenisation, Some(delimiter.clone())) {
+                           if let Ok(textpart) = element.text(set,textclass,false, retaintokenisation, Some(delimiter.clone())) {
                                //delimiter will be buffered and only printed upon next iteration
                                text += &textpart;
-                               delimiter = element.get_textdelimiter(doc, retaintokenisation).to_string();
+                               delimiter = element.get_textdelimiter(retaintokenisation).to_string();
                            }
                         } else if element.elementtype == ElementType::TextContent {
                             textcontent_element = Some(element);
@@ -70,7 +71,7 @@ impl FoliaElement {
                 }
             }
             if text.is_empty() && textcontent_element.is_some() {
-                if let Ok(parttext) = textcontent_element.unwrap().text(doc,set,textclass,false,retaintokenisation, None) {
+                if let Ok(parttext) = textcontent_element.unwrap().text(set,textclass,false,retaintokenisation, None) {
                     text = parttext
                 }
             }
@@ -88,7 +89,8 @@ impl FoliaElement {
     }
 
     ///Returns the text delimiter for this element
-    pub fn get_textdelimiter(&self, doc: &Document, retaintokenisation: bool) -> &str {
+    pub fn get_textdelimiter(&self, retaintokenisation: bool) -> &str {
+        let doc = self.doc();
         let properties =  doc.props(self.elementtype);
         if properties.textdelimiter.is_none() {
             //no text delimiter of itself, recurse into children to inherit delimiter
@@ -119,7 +121,7 @@ impl FoliaElement {
     ///Returns the text content of a given element
     ///This method takes string parameters for set and textclass, which can be set to None to
     ///fallback to the default text set and "current class".
-    pub fn text_encode(&self, doc: &Document, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
+    pub fn text_encode(&self, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
         let set: &str = if let Some(set) = set {
             set
         } else {
@@ -130,20 +132,21 @@ impl FoliaElement {
         } else {
             "current"
         };
+        let doc = self.doc();
         if let Some(dec_key) = doc.get_declaration_key_by_id(Declaration::index_id(AnnotationType::TOKEN, &Some(set)).as_str()) {
             let class_key = doc.encode_class(dec_key, textclass)?;
-            self.text(doc, dec_key, class_key,strict,retaintokenisation, None)
+            self.text(dec_key, class_key,strict,retaintokenisation, None)
         } else {
             Err(FoliaError::EncodeError("No declaration for the specified text set/class".to_string()))
         }
     }
 }
 
-impl Document {
+impl<'a> Document<'a> {
     ///Returns the text of the given element
     pub fn text(&self, element_key: ElementKey, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
         if let Some(element) = self.get_element(element_key) {
-            element.text(self, set, textclass, strict, retaintokenisation,None)
+            element.text(set, textclass, strict, retaintokenisation,None)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
         }
@@ -152,7 +155,7 @@ impl Document {
     ///Returns the text of the given element
     pub fn text_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
         if let Some(element) = self.get_element(element_key) {
-            element.text_encode(self, set, textclass, strict, retaintokenisation)
+            element.text_encode(set, textclass, strict, retaintokenisation)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
         }

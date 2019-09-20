@@ -22,7 +22,7 @@ use crate::metadata::*;
 use crate::select::*;
 use crate::document::Document;
 
-impl Document {
+impl<'a> Document<'a> {
     ///Parses a FoLiA document given a reader
     pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
 
@@ -449,7 +449,7 @@ impl Processor {
     }
 }
 
-impl FoliaElement {
+impl<'a> FoliaElement<'a> {
     fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
@@ -463,7 +463,7 @@ impl FoliaElement {
 
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
-    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement<'a>, FoliaError> {
         let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
         let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
         Ok(FoliaElement::new(elementtype).with_attribs(attributes))

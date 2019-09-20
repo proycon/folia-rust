@@ -27,7 +27,7 @@ fn to_serialisation_error(err: quick_xml::Error) -> FoliaError {
     FoliaError::SerialisationError(format!("{}",err))
 }
 
-impl Document {
+impl<'a> Document<'a> {
     ///Serialises a document to XML (vector of bytes, utf-8)
     pub fn xml(&self, root_key: ElementKey) -> Result<Vec<u8>, FoliaError> {
         let mut writer = Writer::new(Cursor::new(Vec::new()));

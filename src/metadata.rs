@@ -158,7 +158,7 @@ impl DeclarationStore {
 
 }
 
-impl Document {
+impl<'a> Document<'a> {
     ///Returns the class store for the given declaration
     pub fn get_class_store(&self, dec_key: DecKey) -> Option<&ClassStore> {
         if let Some(declaration) = self.get_declaration(dec_key) {

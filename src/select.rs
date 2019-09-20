@@ -245,7 +245,7 @@ impl Default for TypeSelector {
 ///This implements a depth-first search.
 pub struct SelectIterator<'a> {
     ///The element store to draw elements from
-    pub document: &'a Document,
+    pub document: &'a Document<'a>,
     ///The selector to apply to test for matching data items
     pub selector: Selector,
     ///Apply the selector recursively (depth-first search) or not (plain linear search)
@@ -259,7 +259,7 @@ pub struct SelectIterator<'a> {
 impl<'a> SelectIterator<'a> {
     ///Creates a new ``SelectIterator``. This is usually not invoked directly but through a
     ///``selects()`` method (provided by the ``Select`` trait) which is implement by for instance a ``Document`` or an ``ElementStore``.
-    pub fn new(document: &'a Document, selector: Selector, key: ElementKey, recursive: bool) -> SelectIterator<'a> {
+    pub fn new(document: &'a Document<'a>, selector: Selector, key: ElementKey, recursive: bool) -> SelectIterator<'a> {
         SelectIterator {
             document: document,
             selector: selector,
@@ -350,7 +350,7 @@ pub trait Select<'a> {
 
 
 
-impl<'a> Select<'a> for Document {
+impl<'a> Select<'a> for Document<'a> {
     ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
     ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
     ///is enabled). This is the primary means of iterating over anything in the document.
@@ -381,11 +381,11 @@ impl<'a> SelectElementsIterator<'a> {
 
 ///The Item returned by SelectElementsIterator, this dereferences directly to ``&FoliaElement``
 pub struct SelectElementsItem<'a> {
-    pub element: &'a FoliaElement,
+    pub element: &'a FoliaElement<'a>,
 }
 
 impl<'a> Deref for SelectElementsItem<'a> {
-    type Target = FoliaElement;
+    type Target = FoliaElement<'a>;
 
     fn deref(&self) -> &Self::Target {
         self.element
@@ -422,7 +422,7 @@ pub trait SelectElements<'a> {
     fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
 }
 
-impl<'a> SelectElements<'a> for Document {
+impl<'a> SelectElements<'a> for Document<'a> {
     ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
     ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
     ///is enabled).

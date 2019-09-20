@@ -47,7 +47,7 @@ pub struct EncodedAttributes {
 ///is represented by ``elementtype``. An elements holds and owns attributes, encoded attributes (if
 ///it is encoded already),  data items (which may be text, comments or child elements (by key)), and a link
 ///to its parent (by key).
-pub struct FoliaElement {
+pub struct FoliaElement<'a> {
     pub elementtype: ElementType,
     pub attribs: Vec<Attribute>,
 
@@ -55,12 +55,13 @@ pub struct FoliaElement {
     pub(crate) data: Vec<DataType>,
     pub(crate) key: Option<ElementKey>,
     pub(crate) parent: Option<ElementKey>,
+    pub(crate) doc: Option<&'a Document<'a>>,
 
     //encoded attributes
     pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
-impl Storable<ElementKey> for FoliaElement {
+impl<'a> Storable<ElementKey> for FoliaElement<'a> {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
             Some(attrib.value())
@@ -85,20 +86,24 @@ impl Storable<ElementKey> for FoliaElement {
 
 }
 
-impl FoliaElement {
+impl<'a> FoliaElement<'a> {
+
+    pub fn doc(&self) -> &'a Document {
+        self.doc.expect("Unwrapping document for element")
+    }
 
     ///Decodes an element and returns a **copy**, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent), only set, class
     ///and processor.
-    pub fn decode(&self, document: &Document) -> Self {
+    pub fn decode(&self) -> Self {
         let mut decoded_attribs: Vec<Attribute> = self.attribs.iter().map(|a| a.clone()).collect();
-        if let Some(set) = self.set_decode(document) {
+        if let Some(set) = self.set_decode() {
             decoded_attribs.push(Attribute::Set(set.to_string()));
         }
-        if let Some(class) = self.class_decode(document) {
+        if let Some(class) = self.class_decode() {
             decoded_attribs.push(Attribute::Class(class.to_string()));
         }
-        if let Some(processor) = self.processor_decode(document) {
+        if let Some(processor) = self.processor_decode() {
             decoded_attribs.push(Attribute::Processor(processor.to_string()));
         }
         Self::new(self.elementtype).with_attribs(decoded_attribs)
@@ -216,35 +221,35 @@ impl FoliaElement {
     }
 
     ///Get the declaration from the declaration store, given an encoded element
-    pub fn declaration<'a>(&self, document: &'a Document) -> (Option<&'a Declaration>) {
+    pub fn declaration(&self) -> Option<&'a Declaration> {
         if let Some(declaration_key) = self.declaration_key() {
-           document.get_declaration(declaration_key)
+           self.doc().get_declaration(declaration_key)
         } else {
             None
         }
     }
 
     ///Get the processor from the provenance store, given an encoded element
-    pub fn processor<'a>(&self, document: &'a Document) -> (Option<&'a Processor>) {
+    pub fn processor(&self) -> (Option<&'a Processor>) {
         if let Some(processor_key) = self.processor_key() {
-            document.get_processor(processor_key)
+            self.doc().get_processor(processor_key)
         } else {
             None
         }
     }
 
     ///Get set as a str from an encoded element.
-    pub fn set_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
-        if let Some(declaration) = self.declaration(document) {
+    pub fn set_decode(&self) -> (Option<&'a str>) {
+        if let Some(declaration) = self.declaration() {
                 return declaration.set.as_ref().map(|s| &**s);
         }
         None
     }
 
     ///Get a class as a str from an encoded element
-    pub fn class_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
+    pub fn class_decode(&self) -> Option<&'a str> {
         if let Some(class_key) = self.class_key() {
-            if let Some(declaration) = self.declaration(document) {
+            if let Some(declaration) = self.declaration() {
                 if let Some(classes) = &declaration.classes {
                     if let Some(class) = classes.get(class_key) {
                         return Some(class.as_str());
@@ -255,8 +260,8 @@ impl FoliaElement {
         None
     }
 
-    pub fn processor_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
-        if let Some(processor) = self.processor(document) {
+    pub fn processor_decode(&self) -> (Option<&'a str>) {
+        if let Some(processor) = self.processor() {
             Some(processor.id.as_str())
         } else {
             None
@@ -365,13 +370,13 @@ impl FoliaElement {
 
 
     ///Simple constructor for an empty element (optionally with attributes)
-    pub fn new(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None }
+    pub fn new(elementtype: ElementType) -> FoliaElement<'a> {
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None, doc: None }
     }
 
     ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes (OBSOLETE?)
-    pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()) }
+    pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement<'a> {
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()), doc: None }
     }
 
 

@@ -25,13 +25,13 @@ use crate::serialiser::*;
 use crate::parser::*;
 use crate::specification::*;
 
-pub struct Document {
+pub struct Document<'a> {
     pub id: String,
     ///The FoLiA version of the document
     pub version: String,
     pub filename: Option<String>,
     ///The element store holds and owns all elements in a document
-    pub elementstore: ElementStore,
+    pub elementstore: ElementStore<'a>,
     ///The provenance store holds and owns all processors and a representation of the  provenance chain
     pub provenancestore: ProvenanceStore,
     ///The declaration store holds all annotation declarations
@@ -42,7 +42,7 @@ pub struct Document {
 
 
 
-impl Document {
+impl<'a> Document<'a> {
     ///Create a new FoLiA document from scratch
     pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
         let mut document = Self {
@@ -65,10 +65,10 @@ impl Document {
     }
 
     ///Load a FoliA document from file. Invokes the XML parser and loads it all into memory.
-    pub fn from_file(filename: &str) -> Result<Self, FoliaError> {
+    pub fn from_file(filename: &str) -> Result<Document<'a>, FoliaError> {
         let mut reader = Reader::from_file(Path::new(filename))?;
         reader.trim_text(true);
-        let mut doc = Self::parse(&mut reader)?;
+        let mut doc = Document::parse(&mut reader)?;
         //associate the filename with the document
         doc.filename = Some(filename.to_string());
         Ok(doc)
@@ -78,7 +78,7 @@ impl Document {
     pub fn from_str(data: &str) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_str(data);
         reader.trim_text(true);
-        Self::parse(&mut reader)
+        Document::parse(&mut reader)
     }
 
 
@@ -121,8 +121,8 @@ impl Document {
 
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
-    pub fn add_element(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        <Self as Store<FoliaElement,ElementKey>>::add(self, element)
+    pub fn add_element(&mut self, element: FoliaElement<'a>) -> Result<ElementKey, FoliaError> {
+        <Self as Store<FoliaElement<'a>,ElementKey>>::add(self, element)
     }
 
     ///Add a declaration. It is strongly recommended to use ``declare()`` instead
@@ -143,7 +143,7 @@ impl Document {
 
     ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: FoliaElement) -> Result<ElementKey, FoliaError> {
+    pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: FoliaElement<'a>) -> Result<ElementKey, FoliaError> {
         match self.add_element(element) {
             Ok(child_key) => {
                 self.attach_element(parent_key, child_key)?;
@@ -292,10 +292,10 @@ impl Document {
     pub fn get_element_by_id(&self, id: &str) -> Option<&FoliaElement> {
         <Self as Store<FoliaElement,ElementKey>>::get_by_id(self, id)
     }
-    pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut FoliaElement> {
+    pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut FoliaElement<'a>> {
         <Self as Store<FoliaElement,ElementKey>>::get_mut(self, key)
     }
-    pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut FoliaElement> {
+    pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut FoliaElement<'a>> {
         <Self as Store<FoliaElement,ElementKey>>::get_mut_by_id(self, id)
     }
     pub fn get_element_key_by_id(&self, id: &str) -> Option<ElementKey> {
@@ -340,23 +340,23 @@ impl Document {
 }
 
 
-impl Store<FoliaElement,ElementKey> for Document {
+impl<'a> Store<FoliaElement<'a>,ElementKey> for Document<'a> {
 
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement<'a>>>> {
         &mut self.elementstore.items
     }
     fn index_mut(&mut self) -> &mut HashMap<String,ElementKey> {
         &mut self.elementstore.index
     }
 
-    fn items(&self) -> &Vec<Option<Box<FoliaElement>>> {
+    fn items(&self) -> &Vec<Option<Box<FoliaElement<'a>>>> {
         &self.elementstore.items
     }
     fn index(&self) -> &HashMap<String,ElementKey> {
         &self.elementstore.index
     }
 
-    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement>>> {
+    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement<'a>>>> {
         self.elementstore.items.iter()
     }
 
@@ -364,7 +364,7 @@ impl Store<FoliaElement,ElementKey> for Document {
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store
     ///to the store).
-    fn encode(&mut self, mut element: FoliaElement) -> Result<FoliaElement, FoliaError> {
+    fn encode(&mut self, mut element: FoliaElement<'a>) -> Result<FoliaElement<'a>, FoliaError> {
         if element.is_encoded() {
             //already encoded, nothing to do
             return Ok(element);
@@ -414,7 +414,7 @@ impl Store<FoliaElement,ElementKey> for Document {
     }
 }
 
-impl Store<Declaration,DecKey> for Document {
+impl<'a> Store<Declaration,DecKey> for Document<'a> {
 
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Declaration>>> {
         &mut self.declarationstore.items
@@ -435,7 +435,7 @@ impl Store<Declaration,DecKey> for Document {
     }
 }
 
-impl Store<Processor,ProcKey> for Document {
+impl<'a> Store<Processor,ProcKey> for Document<'a> {
     fn items_mut(&mut self) -> &mut Vec<Option<Box<Processor>>> {
         &mut self.provenancestore.items
     }
