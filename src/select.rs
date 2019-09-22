@@ -107,10 +107,10 @@ impl Selector {
                 } else if let Some(element) = document.get_element(*key) {
                     let typematch: bool = match &self.typeselector {
                         TypeSelector::SomeElement(refelementtype) => {
-                            element.elementtype == *refelementtype
+                            element.elementtype() == *refelementtype
                         },
                         TypeSelector::SomeElementGroup(elementgroup) => {
-                            elementgroup.contains(element.elementtype)
+                            elementgroup.contains(element.elementtype())
                         },
                         TypeSelector::AnyElement => true,
                         TypeSelector::AnyType => true,
@@ -306,8 +306,8 @@ impl<'a> Iterator for SelectIterator<'a> {
             }
         }
         if let Some((key,cursor)) = self.stack.pop() {
-            if let Some(parent) = self.document.get_element(key) {
-                if let Some(item) = parent.get(cursor) {
+            if let Some(parent) = self.document.get_elementdata(key) {
+                if let Some(item) = parent.get_data_at(cursor) {
                     //increment the cursor and push back to the stack
                     self.stack.push((key, cursor+1));
                     let current_depth = self.stack.len();
@@ -381,14 +381,14 @@ impl<'a> SelectElementsIterator<'a> {
 
 ///The Item returned by SelectElementsIterator, this dereferences directly to ``&ElementData``
 pub struct SelectElementsItem<'a> {
-    pub element: &'a ElementData,
+    pub element: Element<'a>,
 }
 
 impl<'a> Deref for SelectElementsItem<'a> {
-    type Target = ElementData;
+    type Target = Element<'a>;
 
     fn deref(&self) -> &Self::Target {
-        self.element
+        &self.element
     }
 }
 

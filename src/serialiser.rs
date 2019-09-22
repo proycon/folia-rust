@@ -179,7 +179,7 @@ impl Document {
 
     fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
         //Start the root tag (and obtain data for its end)
-        let root_end = if let Some(element) = self.get_element(root_key) {
+        let root_end = if let Some(element) = self.get_elementdata(root_key) {
             let tagstring = element.elementtype.to_string();
             let tag = tagstring.as_bytes();
             let start = BytesStart::owned(tag.to_vec(), tag.len());
@@ -209,24 +209,26 @@ impl Document {
             match item.data {
                 DataType::Element(key) => {
                     if let Some(element) = self.get_element(*key) {
-                        let tagstring = element.elementtype.to_string();
+                        let tagstring = element.elementtype().to_string();
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());
                         for attrib in element.attribs().iter() {
-                            start.push_attribute((attrib.attribtype().into(), format!("{}",attrib) ));
+                            if !attrib.decodable() {
+                                start.push_attribute((attrib.attribtype().into(), format!("{}",attrib).as_str() ));
+                            }
                         }
                         if let Some(declaration_key) = element.declaration_key() {
                             //check if the declaration is the default, no need to serialise set then
                             if !dec_is_default.get(declaration_key as usize).expect("checking default") {
                                 //decode encoded attributes
-                                if let Some(set) = element.set(&self) {
+                                if let Some(set) = element.set() {
                                     start.push_attribute(("set", set) );
                                 }
                             }
-                            if let Some(class) = element.class(&self) {
+                            if let Some(class) = element.class() {
                                 start.push_attribute(("class", class) );
                             }
-                            if let Some(processor) = element.processor(&self) {
+                            if let Some(processor) = element.processor() {
                                 //check if this processor is the default one, if so we don't need
                                 //to serialise it
                                 let is_default: bool = if let Some(declaration) = self.get_declaration(declaration_key) {

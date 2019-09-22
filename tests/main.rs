@@ -89,13 +89,13 @@ fn test002_append() {
         Ok(mut doc) => {
             let root: ElementKey = 0;
             let sentence = doc.add_element_to(root,
-                                            FoliaElement::new(ElementType::Sentence)
+                                            ElementData::new(ElementType::Sentence)
                                                                 .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
             doc.add_element_to(sentence,
-                             FoliaElement::new(ElementType::Word)
+                             ElementData::new(ElementType::Word)
                                                  .with(DataType::text("hello"))).expect("Adding word 1");
             doc.add_element_to(sentence,
-                             FoliaElement::new(ElementType::Word)
+                             ElementData::new(ElementType::Word)
                                                  .with(DataType::text("world"))).expect("Adding word 2");
         },
         Err(err) => {
@@ -139,12 +139,9 @@ fn test005_decode() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
-                let set = word.set_decode(&doc);
-                assert_eq!(set.expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
-                let class = word.class_decode(&doc);
-                assert_eq!(class.expect("Unwrapping class"), "WORD");
-                let processor = word.processor_decode(&doc);
-                assert_eq!(processor.expect("Unwrapping class"), "p1");
+                assert_eq!(word.set().expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
+                assert_eq!(word.class().expect("Unwrapping class"), "WORD");
+                assert_eq!(word.processor().expect("Unwrapping class"), "p1");
             } else {
                 assert!(false, "Word not found");
             }
@@ -244,7 +241,7 @@ fn test008c_elementselector_set_class() {
             let mut count = 0;
             for item in selector {
                 count += 1;
-                assert_matches!(item.class_decode(&doc), Some("PUNCTUATION"));
+                assert_matches!(item.class(), Some("PUNCTUATION"));
             }
             assert_eq!(count, 2, "Checking whether we have the right amount of matches");
         }
@@ -279,7 +276,7 @@ fn test009_text() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                match word.text_encode(&doc, None, None, false, true) {
+                match word.text(None, None, false, true) {
                     Ok(text) => assert_eq!(text, "example"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
                 }

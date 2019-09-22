@@ -59,7 +59,7 @@ impl Document {
             BodyType::Speech => ElementData::new(ElementType::Speech),
         };
         body = document.encode(body)?;
-        assert!(body.is_encoded());
+        debug_assert!(!body.encodable());
         document.add(body)?;
         Ok(document)
     }
@@ -90,25 +90,6 @@ impl Document {
 
     ///Returns the filename associated with this document (i.e. the file from which it was loaded)
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
-
-
-    pub fn textelement_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&ElementData> {
-        let set: &str = if let Some(set) = set {
-            set
-        } else {
-            DEFAULT_TEXT_SET
-        };
-        let textclass: &str = if let Some(textclass) = textclass {
-            textclass
-        } else {
-            "current"
-        };
-        for element in self.select_elements(element_key, Selector::new_encode(&self, ElementType::TextContent, SelectorValue::Some(set), SelectorValue::Some(textclass)), false)  {
-            return Some(element.element);
-        }
-        None
-    }
-
 
 
 
@@ -349,20 +330,23 @@ impl Document {
         }
     }
 
-    pub(crate) fn get_element_by_id(&self, id: &str) -> Option<Element> {
+    pub fn get_element_by_id(&self, id: &str) -> Option<Element> {
         if let Some(elementdata) = self.get_elementdata_by_id(id) {
             Some(Element { document: Some(self), data: elementdata })
         } else {
             None
         }
     }
-    pub fn get_mut_element(&self, key: ElementKey) -> Option<MutElement> {
+
+    /*
+    pub fn get_mut_element(&mut self, key: ElementKey) -> Option<MutElement> {
         if let Some(elementdata) = self.get_mut_elementdata(key) {
             Some(MutElement { document: Some(self), data: elementdata })
         } else {
             None
         }
     }
+    */
 
 }
 
@@ -397,9 +381,9 @@ impl Store<ElementData,ElementKey> for Document {
             return Ok(element);
         }
 
-        let mut declaration_key: Option<DecKey>;
-        let mut class_key: Option<ClassKey>;
-        let mut processor_key: Option<ProcKey>;
+        let mut declaration_key: Option<DecKey> = None;
+        let mut class_key: Option<ClassKey> = None;
+        let mut processor_key: Option<ProcKey> = None;
 
         //encode the element for storage
         if let Some(annotationtype) = element.elementtype.annotationtype() {

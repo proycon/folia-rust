@@ -195,6 +195,10 @@ pub trait ReadElement {
     fn document(&self) -> Option<&Document>;
 
 
+    fn key(&self) -> Option<ElementKey> {
+        self.elementdata().key()
+    }
+
     fn attribs(&self) -> &Vec<Attribute> {
         &self.elementdata().attribs()
     }
@@ -203,10 +207,22 @@ pub trait ReadElement {
         self.elementdata().elementtype
     }
 
+    fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
+        self.elementdata().attrib(atype)
+    }
+
+    fn has_attrib(&self, atype: AttribType) -> bool {
+        self.elementdata().has_attrib(atype)
+    }
+
     ///Get the FoliA set
     fn set(&self) -> Option<&str> {
         if let Some(declaration) = self.get_declaration() {
-            declaration.set.map(|s| s.as_str())
+            if let Some(set) = &declaration.set {
+                Some(set.as_str())
+            } else {
+                None
+            }
         } else {
             None
         }
@@ -290,6 +306,16 @@ impl<'a> PartialEq for Element<'a> {
     }
 }
 impl<'a> Eq for Element<'a> { }
+
+impl<'a> fmt::Display for Element<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Ok(text) = self.text(None,None,false,false) {
+            write!(f, "{}", text)
+        } else {
+            Err(fmt::Error)
+        }
+    }
+}
 
 
 /*

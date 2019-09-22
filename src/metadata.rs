@@ -47,7 +47,7 @@ impl Declaration {
     }
 
     pub fn get_class(&self, class_key: ClassKey) -> Option<&str> {
-        if let Some(class_store) = self.classes {
+        if let Some(class_store) = &self.classes {
            class_store.get(class_key).map(|s| s.as_str())
         } else {
             None

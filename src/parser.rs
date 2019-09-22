@@ -329,7 +329,7 @@ impl Document {
                             break;
                         }
                         let key = stack.pop().unwrap();
-                        if let Some(elem) = self.get_element(key) {
+                        if let Some(elem) = self.get_elementdata(key) {
 
                             //verify we actually close the right thing (otherwise we have malformed XML)
                             let elementname = str::from_utf8(e.local_name()).expect("Decoding XML tag from utf-8");
@@ -351,7 +351,7 @@ impl Document {
                         if text.trim() != "" {
                             //eprintln!("TEXT: {}", text);
                             if let Some(parent_key) = stack.last() {
-                                self.get_mut_element(*parent_key).map( |parent| {
+                                self.get_mut_elementdata(*parent_key).map( |parent| {
                                     parent.push(DataType::Text(text));
                                 });
                             }
@@ -361,7 +361,7 @@ impl Document {
                         let text = reader.decode(&s)?;
                         if text.trim() != "" {
                             if let Some(parent_key) = stack.last() {
-                                self.get_mut_element(*parent_key).map( |parent| {
+                                self.get_mut_elementdata(*parent_key).map( |parent| {
                                     parent.push(DataType::Text(text.to_string()));
                                 });
                             }
@@ -371,7 +371,7 @@ impl Document {
                         let comment = reader.decode(&s)?;
                         if comment.trim() != "" {
                             if let Some(parent_key) = stack.last() {
-                                self.get_mut_element(*parent_key).map( |parent| {
+                                self.get_mut_elementdata(*parent_key).map( |parent| {
                                     parent.push(DataType::Comment(comment.to_string()));
                                 });
                             }
