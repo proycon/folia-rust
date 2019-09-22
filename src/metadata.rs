@@ -168,27 +168,27 @@ impl DeclarationStore {
 
 impl Document {
     ///Returns the class store for the given declaration
-    pub fn get_class_store(&self, dec_key: DecKey) -> Option<&ClassStore> {
+    pub fn get_class_store(&self, dec_key: DecKey) -> Result<Option<&ClassStore>,FoliaError> {
         if let Some(declaration) = self.get_declaration(dec_key) {
             if declaration.classes.is_some() {
-                Some(declaration.classes.as_ref().unwrap())
+                Ok(Some(declaration.classes.as_ref().unwrap()))
             } else {
-                None
+                Ok(None)
             }
         } else {
-            panic!("get_class_store: No such declaration");
+            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
         }
     }
 
     ///Returns the class store for the given declaration (mutably)
-    pub fn get_class_store_mut(&mut self, dec_key: DecKey) -> &mut ClassStore {
+    pub fn get_class_store_mut(&mut self, dec_key: DecKey) -> Result<&mut ClassStore,FoliaError> {
         if let Some(mut declaration) = self.get_mut_declaration(dec_key) {
             if declaration.classes.is_none() {
                 declaration.classes = Some(ClassStore::default());
             }
-            declaration.classes.as_mut().unwrap()
+            Ok(declaration.classes.as_mut().unwrap())
         } else {
-            panic!("get_class_store_mut: No such declaration");
+            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
         }
     }
 
@@ -197,7 +197,7 @@ impl Document {
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present
     pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
-        let class_store = self.get_class_store_mut(dec_key);
+        let class_store = self.get_class_store_mut(dec_key)?;
         if let Some(class_key) = class_store.id_to_key(class) {
             Ok(class_key)
         } else {
@@ -213,7 +213,8 @@ impl Document {
 
     ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
     pub fn encode_class(&self, dec_key: DecKey, class: &str) -> Result<ClassKey,FoliaError> {
-        if let Some(class_store) = self.get_class_store(dec_key) {
+        let class_store = self.get_class_store(dec_key)?;
+        if let Some(class_store) = class_store {
             if let Some(class_key) = class_store.id_to_key(class) {
                 Ok(class_key)
             } else {
@@ -222,11 +223,11 @@ impl Document {
                 if let Some(class_key) = class_key {
                     Ok(class_key)
                 } else {
-                    Err(FoliaError::EncodeError("Class does not exist".to_string()))
+                    Err(FoliaError::KeyError("[encode_class()] Class does not exist".to_string()))
                 }
             }
         } else {
-            Err(FoliaError::InternalError("Declaration not found".to_string()))
+            Err(FoliaError::KeyError("[encode_class()] Class does not exist (empty class store)".to_string()))
         }
     }
 

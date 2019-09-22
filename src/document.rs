@@ -47,6 +47,7 @@ pub struct Document {
 pub struct DocumentProperties {
     pub bodytype: BodyType,
     pub autodeclare: bool,
+    pub declare: Vec<(AnnotationType,Option<String>)>
 }
 
 impl Default for DocumentProperties {
@@ -54,6 +55,7 @@ impl Default for DocumentProperties {
         Self {
             bodytype: BodyType::Text,
             autodeclare: true,
+            declare: vec![(AnnotationType::TEXT, Some(DEFAULT_TEXT_SET.to_string()) )]
         }
     }
 }
@@ -78,7 +80,15 @@ impl Document {
         body = document.encode(body)?;
         debug_assert!(!body.encodable());
         document.add(body)?;
+        document.apply_properties(properties)?;
         Ok(document)
+    }
+
+    pub fn apply_properties(&mut self, properties: DocumentProperties) -> Result<(),FoliaError> {
+        for (annotationtype, set) in properties.declare.iter() {
+            self.declare(*annotationtype, &set, &None)?;
+        }
+        Ok(())
     }
 
     ///Load a FoliA document from file. Invokes the XML parser and loads it all into memory.

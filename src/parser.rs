@@ -290,6 +290,7 @@ impl Document {
 
         if let Some(body) = body {
             doc.add(body)?;
+            doc.apply_properties(properties);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
