@@ -19,8 +19,8 @@ pub trait Storable<Key> {
         None
     }
 
-    fn is_encoded(&self) -> bool {
-        true
+    fn encodable(&self) -> bool {
+        false
     }
 
     ///Get the key of the current item (if supported by the item)
@@ -29,7 +29,7 @@ pub trait Storable<Key> {
     }
 
     ///Set the key of the current item (if supported by the item)
-    fn set_key(&mut self, key: Key) {
+    fn assign_key(&mut self, key: Key) {
         //does nothing by default, override in implementations
     }
 
@@ -54,7 +54,7 @@ pub trait Store<T,Key> where T: Storable<Key>,
 
     ///Add a new item to the store (takes ownership)
     fn add(&mut self, mut item: T) -> Result<Key,FoliaError> {
-        if !item.is_encoded() {
+        if item.encodable() {
             item = self.encode(item)?;
         }
 
@@ -68,7 +68,7 @@ pub trait Store<T,Key> where T: Storable<Key>,
         //add the item anew
         let mut boxed = Box::new(item);
         if let Ok(key) = Key::try_from(self.items().len()) {
-            boxed.set_key(key); //set the key so the item knows it's own key (if supported)
+            boxed.assign_key(key); //set the key so the item knows it's own key (if supported)
             self.items_mut().push( Some(boxed) );
             if let Some(id) = id {
                 self.index_mut().insert(id,key);

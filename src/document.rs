@@ -356,7 +356,7 @@ impl Document {
             None
         }
     }
-    pub fn get_element(&self, key: ElementKey) -> Option<mut MutElement> {
+    pub fn get_mut_element(&self, key: ElementKey) -> Option<MutElement> {
         if let Some(elementdata) = self.get_mut_elementdata(key) {
             Some(MutElement { document: Some(self), data: elementdata })
         } else {
@@ -392,50 +392,51 @@ impl Store<ElementData,ElementKey> for Document {
     ///nor does it add the element itself to the store
     ///to the store).
     fn encode(&mut self, mut element: ElementData) -> Result<ElementData, FoliaError> {
-        if element.is_encoded() {
+        if !element.encodable() {
             //already encoded, nothing to do
             return Ok(element);
         }
 
-        let mut enc_attribs: EncodedAttributes = EncodedAttributes::default();
+        let mut declaration_key: Option<DecKey>;
+        let mut class_key: Option<ClassKey>;
+        let mut processor_key: Option<ProcKey>;
 
         //encode the element for storage
-        let set = element.attrib(AttribType::SET);
-
         if let Some(annotationtype) = element.elementtype.annotationtype() {
             //Declare the element (either declares anew or just resolves the to the right
             //declaration.
-            let deckey = self.declare(annotationtype, &set.map(|x| x.value().into_owned() ), &None)?;
-            enc_attribs.declaration = Some(deckey);
+            let deckey = self.declare(annotationtype, &element.set().unwrap().map(|s| s.to_string()),  &None)?;
+            declaration_key  = Some(deckey);
 
-            if let Some(class) = element.attrib(AttribType::CLASS) {
-                if let Attribute::Class(class) = class {
-                    if let Ok(class_key) = self.add_class(deckey, class) {
-                        enc_attribs.class = Some(class_key);
-                    }
+            if let Ok(Some(class)) = element.class() {
+                if let Ok(clskey) = self.add_class(deckey, &class.to_string()) {
+                    class_key = Some(clskey);
                 }
             }
 
             if let Some(declaration) = self.get_declaration(deckey) {
-                enc_attribs.processor = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
+                processor_key = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
             }
         }
 
-        if let Some(processor) = element.attrib(AttribType::PROCESSOR) {
-            let processor_id: &str  = &processor.value();
-
-            if let Some(processor_key) = <Self as Store<Processor,ProcKey>>::id_to_key(self, processor_id) {
-                enc_attribs.processor = Some(processor_key); //overrides the earlier-set default (if any)
+        if let Ok(Some(processor_id)) = element.processor() {
+            if let Some(prockey) = <Self as Store<Processor,ProcKey>>::id_to_key(self, processor_id) {
+                processor_key = Some(prockey); //overrides the earlier-set default (if any)
             }
         }
 
-        //remove encoded attributes
-        element.attribs.retain(|a| match a {
-            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => false,
-            _ => true
-        });
-
-        element.set_enc_attribs(Some(enc_attribs));
+        //remove encodable attributes
+        element.attribs.retain(|attrib| !attrib.encodable());
+        //add encoded attributes
+        if let Some(declaration_key) = declaration_key {
+            element.attribs.push(Attribute::DeclarationRef(declaration_key));
+        }
+        if let Some(class_key) = class_key {
+            element.attribs.push(Attribute::ClassRef(class_key));
+        }
+        if let Some(processor_key) = processor_key {
+            element.attribs.push(Attribute::ProcessorRef(processor_key));
+        }
 
         Ok(element)
     }

@@ -79,13 +79,13 @@ impl Storable<ElementKey> for ElementData {
         }
     }
 
-    fn is_encoded(&self) -> bool {
+    fn encodable(&self) -> bool {
         for attrib in self.attribs.iter() {
-            if let Attribute::Class(_) | Attribute::Set(_) | Attribute::Processor(_) = attrib {
-                    return false
+            if attrib.encodable() {
+                    return true
             }
         }
-        true
+        false
     }
 
     ///Returns the key of the current element
@@ -94,7 +94,7 @@ impl Storable<ElementKey> for ElementData {
     }
 
     ///Sets the key of the current element
-    fn set_key(&mut self, key: ElementKey) {
+    fn assign_key(&mut self, key: ElementKey) {
         self.key = Some(key);
     }
 
@@ -188,19 +188,23 @@ impl ElementData {
     }
 }
 
-//public API
+pub trait ReadElement {
+    //Main accessors that provide access to the underlying datastructure
+    //so we can rely on a generic implementation here
+    fn elementdata(&self) -> &ElementData;
+    fn document(&self) -> Option<&Document>;
 
-impl<'a> Element<'a> {
+
     fn attribs(&self) -> &Vec<Attribute> {
-        &self.data.attribs()
+        &self.elementdata().attribs()
     }
 
-    pub fn elementtype(&self) -> ElementType {
-        self.data.elementtype
+    fn elementtype(&self) -> ElementType {
+        self.elementdata().elementtype
     }
 
     ///Get the FoliA set
-    pub fn set(&self) -> Option<&str> {
+    fn set(&self) -> Option<&str> {
         if let Some(declaration) = self.get_declaration() {
             declaration.set.map(|s| s.as_str())
         } else {
@@ -209,7 +213,7 @@ impl<'a> Element<'a> {
     }
 
     ///Get the FoLiA class
-    pub fn class(&self) -> Option<&str> {
+    fn class(&self) -> Option<&str> {
         if let Some(class_key) =  self.class_key() {
             if let Some(declaration) = self.get_declaration() {
                 return declaration.get_class(class_key);
@@ -219,7 +223,7 @@ impl<'a> Element<'a> {
     }
 
     ///Get the processor ID
-    pub fn processor(&self) -> Option<&str> {
+    fn processor(&self) -> Option<&str> {
         if let Some(processor) = self.get_processor() {
             Some(processor.id.as_str())
         } else {
@@ -227,26 +231,26 @@ impl<'a> Element<'a> {
         }
     }
 
-    pub fn class_key(&self) -> Option<ClassKey> {
-        self.data.class_key().expect("Unwrapping class key result")
+    fn class_key(&self) -> Option<ClassKey> {
+        self.elementdata().class_key().expect("Unwrapping class key result")
     }
-    pub fn declaration_key(&self) -> Option<DecKey> {
-        self.data.declaration_key().expect("Unwrapping declaration key result")
+    fn declaration_key(&self) -> Option<DecKey> {
+        self.elementdata().declaration_key().expect("Unwrapping declaration key result")
     }
-    pub fn processor_key(&self) -> Option<ProcKey> {
-        self.data.processor_key().expect("Unwrapping Processor key result")
+    fn processor_key(&self) -> Option<ProcKey> {
+        self.elementdata().processor_key().expect("Unwrapping Processor key result")
     }
-    pub fn parent_key(&self) -> Option<ElementKey> {
-        self.data.parent_key()
+    fn parent_key(&self) -> Option<ElementKey> {
+        self.elementdata().parent_key()
     }
 
     ///Get the declaration instance
-    pub fn get_declaration(&self) -> Option<&'a Declaration> {
-        if self.document.is_none() {
+    fn get_declaration(&self) -> Option<&Declaration> {
+        if self.document().is_none() {
             None
         } else {
             if let Some(declaration_key) = self.declaration_key() {
-               self.document.unwrap().get_declaration(declaration_key)
+               self.document().unwrap().get_declaration(declaration_key)
             } else {
                None
             }
@@ -254,12 +258,12 @@ impl<'a> Element<'a> {
     }
 
     ///Get the processor instance
-    pub fn get_processor(&self) -> Option<&'a Processor> {
-        if self.document.is_none() {
+    fn get_processor(&self) -> Option<&Processor> {
+        if self.document().is_none() {
             None
         } else {
             if let Some(processor_key) = self.processor_key() {
-                self.document.unwrap().get_processor(processor_key)
+                self.document().unwrap().get_processor(processor_key)
             } else {
                 None
             }
@@ -267,12 +271,12 @@ impl<'a> Element<'a> {
     }
 
     ///Get the parent element
-    pub fn get_parent(&self) -> Option<Element> {
-        if self.document.is_none() {
+    fn get_parent(&self) -> Option<Element> {
+        if self.document().is_none() {
             None
         } else {
             if let Some(parent_key) =  self.parent_key() {
-                self.document.unwrap().get_element(parent_key)
+                self.document().unwrap().get_element(parent_key)
             } else {
                 None
             }
@@ -314,6 +318,15 @@ impl<'a> Into<ElementData> for Element<'a> {
     }
 }
 */
+
+impl<'a> ReadElement for Element<'a> {
+    fn elementdata(&self) -> &ElementData {
+        self.data
+    }
+    fn document(&self) -> Option<&Document> {
+        self.document
+    }
+}
 
 
 impl ElementData {

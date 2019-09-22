@@ -67,7 +67,7 @@ impl Storable<DecKey> for Declaration {
     }
 
     ///Sets the key of the current element
-    fn set_key(&mut self, key: DecKey) {
+    fn assign_key(&mut self, key: DecKey) {
         self.key = Some(key);
     }
 }
@@ -302,7 +302,7 @@ impl Storable<ProcKey> for Processor {
     }
 
     ///Sets the key of the current processor
-    fn set_key(&mut self, key: ProcKey) {
+    fn assign_key(&mut self, key: ProcKey) {
         self.key = Some(key);
     }
 
