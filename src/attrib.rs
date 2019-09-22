@@ -56,7 +56,9 @@ impl fmt::Display for AttribType {
 pub enum Attribute {
     Id(String),
     Set(String),
+    DeclarationRef(DecKey), //encoded form for (annotationtype,set)
     Class(String),
+    ClassRef(ClassKey),
     Annotator(String),
     AnnotatorType(String),
     Confidence(f64),
@@ -72,6 +74,7 @@ pub enum Attribute {
     Space(bool),
 
     Processor(String),
+    ProcessorRef(ProcKey), //encoded form
     Href(String),
     Format(String),
     Subset(String),

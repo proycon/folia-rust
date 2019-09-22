@@ -47,7 +47,7 @@ pub struct EncodedAttributes {
 ///is represented by ``elementtype``. An elements holds and owns attributes, encoded attributes (if
 ///it is encoded already),  data items (which may be text, comments or child elements (by key)), and a link
 ///to its parent (by key).
-pub struct FoliaElement {
+pub struct ElementData {
     pub elementtype: ElementType,
     pub attribs: Vec<Attribute>,
 
@@ -60,7 +60,24 @@ pub struct FoliaElement {
     pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
-impl Storable<ElementKey> for FoliaElement {
+#[derive(Clone,Copy)]
+///Interface to a FoLiA element
+pub struct Element<'a> {
+    pub(crate) document: Option<&'a Document>,
+    pub(crate) data: &'a ElementData
+}
+
+impl<'a> Element<'a> {
+
+    pub(crate) fn elementdata(&self) -> &'a ElementData {
+        self.data
+    }
+
+
+}
+
+
+impl Storable<ElementKey> for ElementData {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
             Some(attrib.value())
@@ -85,7 +102,7 @@ impl Storable<ElementKey> for FoliaElement {
 
 }
 
-impl FoliaElement {
+impl ElementData {
 
     ///Decodes an element and returns a **copy**, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent), only set, class
@@ -365,12 +382,12 @@ impl FoliaElement {
 
 
     ///Simple constructor for an empty element (optionally with attributes)
-    pub fn new(elementtype: ElementType) -> FoliaElement {
+    pub fn new(elementtype: ElementType) -> ElementData {
         Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None }
     }
 
     ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes (OBSOLETE?)
-    pub fn new_as_encoded(elementtype: ElementType) -> FoliaElement {
+    pub fn new_as_encoded(elementtype: ElementType) -> ElementData {
         Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()) }
     }
 

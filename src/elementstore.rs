@@ -12,7 +12,7 @@ use crate::specification::*;
 ///Holds and owns all elements, the index to them and their declarations. The store serves as an abstraction used by Documents
 #[derive(Default)]
 pub struct ElementStore {
-    pub(crate) items: Vec<Option<Box<FoliaElement>>>, //heap-allocated
+    pub(crate) items: Vec<Option<Box<ElementData>>>, //heap-allocated
     pub(crate) index: HashMap<String,ElementKey>,
 
     ///An ``ElementStore`` holds a copy of the FoLiA specification. Duplicating this for each

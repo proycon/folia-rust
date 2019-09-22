@@ -55,8 +55,8 @@ impl Document {
             metadata: Metadata::default(),
         };
         let mut body = match bodytype {
-            BodyType::Text => FoliaElement::new(ElementType::Text),
-            BodyType::Speech => FoliaElement::new(ElementType::Speech),
+            BodyType::Text => ElementData::new(ElementType::Text),
+            BodyType::Speech => ElementData::new(ElementType::Speech),
         };
         body = document.encode(body)?;
         assert!(body.is_encoded());
@@ -92,7 +92,7 @@ impl Document {
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
 
 
-    pub fn textelement_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&FoliaElement> {
+    pub fn textelement_encode(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>) -> Option<&ElementData> {
         let set: &str = if let Some(set) = set {
             set
         } else {
@@ -121,8 +121,8 @@ impl Document {
 
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
-    pub fn add_element(&mut self, element: FoliaElement) -> Result<ElementKey, FoliaError> {
-        <Self as Store<FoliaElement,ElementKey>>::add(self, element)
+    pub fn add_element(&mut self, element: ElementData) -> Result<ElementKey, FoliaError> {
+        <Self as Store<ElementData,ElementKey>>::add(self, element)
     }
 
     ///Add a declaration. It is strongly recommended to use ``declare()`` instead
@@ -143,7 +143,7 @@ impl Document {
 
     ///Adds an element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: FoliaElement) -> Result<ElementKey, FoliaError> {
+    pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: ElementData) -> Result<ElementKey, FoliaError> {
         match self.add_element(element) {
             Ok(child_key) => {
                 self.attach_element(parent_key, child_key)?;
@@ -285,21 +285,31 @@ impl Document {
         Ok(added_key)
     }
 
-    //************** Methods providing easy access to FromStore ****************
-    pub fn get_element(&self, key: ElementKey) -> Option<&FoliaElement> {
-        <Self as Store<FoliaElement,ElementKey>>::get(self, key)
+
+
+    //************** Methods providing easy access to Store ****************
+    pub fn get_element(&self, key: ElementKey) -> Option<Element> {
+        if let Some(elementdata) = <Self as Store<ElementData,ElementKey>>::get(self, key) {
+            Some(Element { document: Some(self), data: elementdata })
+        } else {
+            None
+        }
     }
-    pub fn get_element_by_id(&self, id: &str) -> Option<&FoliaElement> {
-        <Self as Store<FoliaElement,ElementKey>>::get_by_id(self, id)
+
+    pub(crate) fn get_elementdata(&self, key: ElementKey) -> Option<&ElementData> {
+        <Self as Store<ElementData,ElementKey>>::get(self, key)
     }
-    pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut FoliaElement> {
-        <Self as Store<FoliaElement,ElementKey>>::get_mut(self, key)
+    pub fn get_element_by_id(&self, id: &str) -> Option<&ElementData> {
+        <Self as Store<ElementData,ElementKey>>::get_by_id(self, id)
     }
-    pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut FoliaElement> {
-        <Self as Store<FoliaElement,ElementKey>>::get_mut_by_id(self, id)
+    pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut ElementData> {
+        <Self as Store<ElementData,ElementKey>>::get_mut(self, key)
+    }
+    pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut ElementData> {
+        <Self as Store<ElementData,ElementKey>>::get_mut_by_id(self, id)
     }
     pub fn get_element_key_by_id(&self, id: &str) -> Option<ElementKey> {
-        <Self as Store<FoliaElement,ElementKey>>::id_to_key(self, id)
+        <Self as Store<ElementData,ElementKey>>::id_to_key(self, id)
     }
     pub fn get_declaration(&self, key: DecKey) -> Option<&Declaration> {
         <Self as Store<Declaration,DecKey>>::get(self, key)
@@ -340,23 +350,23 @@ impl Document {
 }
 
 
-impl Store<FoliaElement,ElementKey> for Document {
+impl Store<ElementData,ElementKey> for Document {
 
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<FoliaElement>>> {
+    fn items_mut(&mut self) -> &mut Vec<Option<Box<ElementData>>> {
         &mut self.elementstore.items
     }
     fn index_mut(&mut self) -> &mut HashMap<String,ElementKey> {
         &mut self.elementstore.index
     }
 
-    fn items(&self) -> &Vec<Option<Box<FoliaElement>>> {
+    fn items(&self) -> &Vec<Option<Box<ElementData>>> {
         &self.elementstore.items
     }
     fn index(&self) -> &HashMap<String,ElementKey> {
         &self.elementstore.index
     }
 
-    fn iter(&self) -> std::slice::Iter<Option<Box<FoliaElement>>> {
+    fn iter(&self) -> std::slice::Iter<Option<Box<ElementData>>> {
         self.elementstore.items.iter()
     }
 
@@ -364,7 +374,7 @@ impl Store<FoliaElement,ElementKey> for Document {
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store
     ///to the store).
-    fn encode(&mut self, mut element: FoliaElement) -> Result<FoliaElement, FoliaError> {
+    fn encode(&mut self, mut element: ElementData) -> Result<ElementData, FoliaError> {
         if element.is_encoded() {
             //already encoded, nothing to do
             return Ok(element);

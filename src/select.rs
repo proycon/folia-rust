@@ -361,7 +361,7 @@ impl<'a> Select<'a> for Document {
 
 ///This is a higher-level iterator that iterates over elements only (i.e. not over text, comments,
 ///etc). It is implemented as a wrapper around ``SelectIterator`` and is identical in many regards. However, this iterator returns
-///``SelectElementsItem``, which dereferences directly to ``&FoliaElement``.
+///``SelectElementsItem``, which dereferences directly to ``&ElementData``.
 pub struct SelectElementsIterator<'a> {
     iterator: SelectIterator<'a>
 }
@@ -379,13 +379,13 @@ impl<'a> SelectElementsIterator<'a> {
 
 }
 
-///The Item returned by SelectElementsIterator, this dereferences directly to ``&FoliaElement``
+///The Item returned by SelectElementsIterator, this dereferences directly to ``&ElementData``
 pub struct SelectElementsItem<'a> {
-    pub element: &'a FoliaElement,
+    pub element: &'a ElementData,
 }
 
 impl<'a> Deref for SelectElementsItem<'a> {
-    type Target = FoliaElement;
+    type Target = ElementData;
 
     fn deref(&self) -> &Self::Target {
         self.element

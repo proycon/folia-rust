@@ -26,7 +26,7 @@ impl Document {
     ///Parses a FoLiA document given a reader
     pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
 
-        let mut body: Option<FoliaElement> = None;
+        let mut body: Option<ElementData> = None;
         let mut buf = Vec::new();
         let mut nsbuf = Vec::new();
 
@@ -257,14 +257,14 @@ impl Document {
                 (ref ns, Event::Start(ref e)) => {
                     match (*ns, e.local_name())  {
                         (Some(ns), b"text") if ns == NSFOLIA => {
-                            if let Ok(attribs)  =  FoliaElement::parse_attributes(&reader, e.attributes()) {
-                                body = Some(FoliaElement::new(ElementType::Text).with_attribs(attribs));
+                            if let Ok(attribs)  =  ElementData::parse_attributes(&reader, e.attributes()) {
+                                body = Some(ElementData::new(ElementType::Text).with_attribs(attribs));
                             }
                             break;
                         },
                         (Some(ns), b"speech") if ns == NSFOLIA => {
-                            if let Ok(attribs)  =  FoliaElement::parse_attributes(&reader, e.attributes()) {
-                                body = Some(FoliaElement::new(ElementType::Speech).with_attribs(attribs));
+                            if let Ok(attribs)  =  ElementData::parse_attributes(&reader, e.attributes()) {
+                                body = Some(ElementData::new(ElementType::Speech).with_attribs(attribs));
                             }
                             break;
                         },
@@ -306,7 +306,7 @@ impl Document {
                     (Some(ns), Event::Empty(ref e)) if ns == NSFOLIA => {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
-                        let elem = FoliaElement::parse(reader, e)?;
+                        let elem = ElementData::parse(reader, e)?;
                         let key = self.add(elem)?;
                         stack.push(key);
 
@@ -318,7 +318,7 @@ impl Document {
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
-                        let elem = FoliaElement::parse(reader, e)?;
+                        let elem = ElementData::parse(reader, e)?;
                         let key = self.add(elem)?;
                         stack.push(key);
                     },
@@ -449,7 +449,7 @@ impl Processor {
     }
 }
 
-impl FoliaElement {
+impl ElementData {
     fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
@@ -463,10 +463,10 @@ impl FoliaElement {
 
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
-    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<FoliaElement, FoliaError> {
-        let attributes: Vec<Attribute> = FoliaElement::parse_attributes(reader, event.attributes())?;
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<ElementData, FoliaError> {
+        let attributes: Vec<Attribute> = ElementData::parse_attributes(reader, event.attributes())?;
         let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
-        Ok(FoliaElement::new(elementtype).with_attribs(attributes))
+        Ok(ElementData::new(elementtype).with_attribs(attributes))
     }
 }
 

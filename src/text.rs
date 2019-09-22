@@ -10,7 +10,7 @@ use crate::select::*;
 use crate::document::*;
 
 
-impl FoliaElement {
+impl ElementData {
 
     ///Returns the text content of a given element
     pub fn text(&self, doc: &Document, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool, previousdelimiter: Option<String>) -> Result<String,FoliaError> {
@@ -50,7 +50,7 @@ impl FoliaElement {
             //Get text from children first
             let mut delimiter: String = String::new();
             let mut text: String = String::new();
-            let mut textcontent_element: Option<&FoliaElement> = None;
+            let mut textcontent_element: Option<&ElementData> = None;
             for element in self.data.iter() {
                 if let DataType::Element(element_key) = element {
                     if let Some(element) = doc.get_element(*element_key) {
