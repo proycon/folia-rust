@@ -86,7 +86,12 @@ impl Document {
 
     pub fn apply_properties(&mut self, properties: DocumentProperties) -> Result<(),FoliaError> {
         for (annotationtype, set) in properties.declare.iter() {
-            self.declare(*annotationtype, &set, &None)?;
+            let dec_key = self.declare(*annotationtype, &set, &None)?;
+            if set.is_some() {
+                if set.as_ref().unwrap() == DEFAULT_TEXT_SET {
+                     self.add_class(dec_key, &"current".to_string())?;
+                }
+            }
         }
         Ok(())
     }
