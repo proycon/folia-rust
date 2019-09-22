@@ -32,16 +32,6 @@ pub enum ValidationStrategy {
 }
 
 
-#[derive(Default,Clone)]
-///Encoded attributes represents attributes that are encoded, i.e. attributes that are mapped to a
-///numeric key rather than left as decoded strings. Encodes attributes are: Declarations (sets), classes and processors.
-pub struct EncodedAttributes {
-    //encoded (relation to other stores)
-    pub processor: Option<ProcKey>,
-    pub declaration: Option<DecKey>,
-    pub class: Option<ClassKey>
-}
-
 #[derive(Clone)]
 ///This is the structure that represents any instance of a FoLiA element. The type of the structure
 ///is represented by ``elementtype``. An elements holds and owns attributes, encoded attributes (if
@@ -55,9 +45,6 @@ pub struct ElementData {
     pub(crate) data: Vec<DataType>,
     pub(crate) key: Option<ElementKey>,
     pub(crate) parent: Option<ElementKey>,
-
-    //encoded attributes
-    pub(crate) enc_attribs: Option<EncodedAttributes>,
 }
 
 #[derive(Clone,Copy)]
@@ -65,6 +52,12 @@ pub struct ElementData {
 pub struct Element<'a> {
     pub(crate) document: Option<&'a Document>,
     pub(crate) data: &'a ElementData
+}
+
+///Mutable interface to a FoLiA element
+pub struct MutElement<'a> {
+    pub(crate) document: Option<&'a Document>,
+    pub(crate) data: &'a mut ElementData
 }
 
 impl<'a> Element<'a> {
@@ -80,14 +73,19 @@ impl<'a> Element<'a> {
 impl Storable<ElementKey> for ElementData {
     fn maybe_id(&self) -> Option<Cow<str>> {
         if let Some(attrib) = self.attrib(AttribType::ID) {
-            Some(attrib.value())
+            Some(Cow::Borrowed(attrib.as_str().expect("unwrapping ID result for element")))
         } else {
             None
         }
     }
 
     fn is_encoded(&self) -> bool {
-        self.enc_attribs.is_some()
+        for attrib in self.attribs.iter() {
+            if let Attribute::Class(_) | Attribute::Set(_) | Attribute::Processor(_) = attrib {
+                    return false
+            }
+        }
+        true
     }
 
     ///Returns the key of the current element
@@ -103,6 +101,198 @@ impl Storable<ElementKey> for ElementData {
 }
 
 impl ElementData {
+    pub fn attribs(&self) -> &Vec<Attribute> {
+        &self.attribs
+    }
+
+    ///Get the FoLiA class if the element is not encoded yet, returns an error otherwise
+    pub fn class(&self) -> Result<Option<&str>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::Class(s) = attrib {
+                return Ok(Some(s));
+            } else if attrib.decodable() {
+                return Err(FoliaError::EncodeError("Querying for a decoded attribute on attributes that are not decoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
+    ///Get the FoLiA set if the element is not encoded yet, returns an error otherwise
+    pub fn set(&self) -> Result<Option<&str>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::Set(s) = attrib {
+                return Ok(Some(s));
+            } else if attrib.decodable() {
+                return Err(FoliaError::EncodeError("Querying for a decoded attribute on attributes that are not decoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
+    ///Get the Processor ID if the element is not encoded yet, returns an error otherwise
+    pub fn processor(&self) -> Result<Option<&str>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::Processor(s) = attrib {
+                return Ok(Some(s));
+            } else if attrib.decodable() {
+                return Err(FoliaError::EncodeError("Querying for a decoded attribute on attributes that are not decoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
+    pub fn confidence(&self) -> Option<f64> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::Confidence(f) = attrib {
+                return Some(*f);
+            }
+        }
+        None
+    }
+
+
+    ///Get the FoLiA class key if the element is encoded, returns an error otherwise
+    pub fn class_key(&self) -> Result<Option<ClassKey>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::ClassRef(k) = attrib {
+                return Ok(Some(*k));
+            } else if attrib.encodable() {
+                return Err(FoliaError::EncodeError("Querying for an encoded attribute on attributes that are not encoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
+    ///Get the FoLiA set/declaration key if the element is encoded, returns an error otherwise
+    pub fn declaration_key(&self) -> Result<Option<DecKey>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::DeclarationRef(k) = attrib {
+                return Ok(Some(*k));
+            } else if attrib.encodable() {
+                return Err(FoliaError::EncodeError("Querying for an encoded attribute on attributes that are not encoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
+    ///Get the FoLiA processor key if the element is encoded, returns an error otherwise
+    pub fn processor_key(&self) -> Result<Option<ProcKey>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::ProcessorRef(k) = attrib {
+                return Ok(Some(*k));
+            } else if attrib.encodable() {
+                return Err(FoliaError::EncodeError("Querying for an encoded attribute on attributes that are not encoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+}
+
+//public API
+
+impl<'a> Element<'a> {
+    fn attribs(&self) -> &Vec<Attribute> {
+        &self.data.attribs()
+    }
+
+    pub fn elementtype(&self) -> ElementType {
+        self.data.elementtype
+    }
+
+    ///Get the FoliA set
+    pub fn set(&self) -> Option<&str> {
+        if let Some(declaration) = self.get_declaration() {
+            declaration.set.map(|s| s.as_str())
+        } else {
+            None
+        }
+    }
+
+    ///Get the FoLiA class
+    pub fn class(&self) -> Option<&str> {
+        if let Some(class_key) =  self.class_key() {
+            if let Some(declaration) = self.get_declaration() {
+                return declaration.get_class(class_key);
+            }
+        }
+        None
+    }
+
+    ///Get the processor ID
+    pub fn processor(&self) -> Option<&str> {
+        if let Some(processor) = self.get_processor() {
+            Some(processor.id.as_str())
+        } else {
+            None
+        }
+    }
+
+    pub fn class_key(&self) -> Option<ClassKey> {
+        self.data.class_key().expect("Unwrapping class key result")
+    }
+    pub fn declaration_key(&self) -> Option<DecKey> {
+        self.data.declaration_key().expect("Unwrapping declaration key result")
+    }
+    pub fn processor_key(&self) -> Option<ProcKey> {
+        self.data.processor_key().expect("Unwrapping Processor key result")
+    }
+    pub fn parent_key(&self) -> Option<ElementKey> {
+        self.data.parent_key()
+    }
+
+    ///Get the declaration instance
+    pub fn get_declaration(&self) -> Option<&'a Declaration> {
+        if self.document.is_none() {
+            None
+        } else {
+            if let Some(declaration_key) = self.declaration_key() {
+               self.document.unwrap().get_declaration(declaration_key)
+            } else {
+               None
+            }
+        }
+    }
+
+    ///Get the processor instance
+    pub fn get_processor(&self) -> Option<&'a Processor> {
+        if self.document.is_none() {
+            None
+        } else {
+            if let Some(processor_key) = self.processor_key() {
+                self.document.unwrap().get_processor(processor_key)
+            } else {
+                None
+            }
+        }
+    }
+
+    ///Get the parent element
+    pub fn get_parent(&self) -> Option<Element> {
+        if self.document.is_none() {
+            None
+        } else {
+            if let Some(parent_key) =  self.parent_key() {
+                self.document.unwrap().get_element(parent_key)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+impl<'a> PartialEq for Element<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        self.data.key().is_some() && self.data.key() == other.data.key()
+    }
+}
+impl<'a> Eq for Element<'a> { }
+
+
+/*
+impl<'a> Into<ElementData> for Element<'a> {
+    ///Decodes an element and returns a **copy** ElementData, therefore it should be used sparingly.
+    ///The copy is detached from any parents and does not hold child elements.
+    fn into(self) -> ElementData {
 
     ///Decodes an element and returns a **copy**, therefore it should be used sparingly.
     ///It does not decode relations between elements (data/children and parent), only set, class
@@ -121,6 +311,12 @@ impl ElementData {
         Self::new(self.elementtype).with_attribs(decoded_attribs)
     }
 
+    }
+}
+*/
+
+
+impl ElementData {
 
     ///Get Attribute
     pub fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
@@ -132,19 +328,6 @@ impl ElementData {
         None
     }
 
-
-    ///Get attribute value as a string
-    pub fn attrib_string(&self, atype: AttribType) -> Option<String> {
-        if let Some(attrib) = self.attrib(atype) {
-            if let Cow::Borrowed(s) = attrib.value() {
-                Some(s.to_owned())
-            }  else {
-                None
-            }
-        } else {
-            None
-        }
-    }
 
     ///Check if the attribute exists
     pub fn has_attrib(&self, atype: AttribType) -> bool {
@@ -180,10 +363,6 @@ impl ElementData {
     pub fn set_attribs(&mut self, attribs: Vec<Attribute>) {
         self.attribs = attribs;
     }
-    ///Sets all encoded attributes at once (takes ownership)
-    pub fn set_enc_attribs(&mut self, enc_attribs: Option<EncodedAttributes>) {
-        self.enc_attribs = enc_attribs;
-    }
 
     ///Sets all attributes at once (takes ownership)
     pub fn with_attribs(mut self, attribs: Vec<Attribute>) -> Self {
@@ -191,123 +370,7 @@ impl ElementData {
         self
     }
 
-    ///Sets all encoded attributes at once (takes ownership)
-    pub fn with_enc_attribs(mut self, enc_attribs: Option<EncodedAttributes>) -> Self {
-        self.set_enc_attribs(enc_attribs);
-        self
-    }
 
-    //attribute getters (shortcuts)
-
-    ///Unencoded class. This only works on decoded elements (returns None otherwise) and does no
-    ///decoding itself, use decode_set() if you need to decode
-    pub fn class_as_str(&self) -> Option<&str> {
-        if let Some(attrib) = self.attrib(AttribType::CLASS) {
-            if let Cow::Borrowed(s) = attrib.value() { //assumes value is always a borrowed one
-                return Some(s);
-            }
-        }
-        None
-    }
-
-    ///Unencoded set. This only works on decoded elements (returns None otherwise) and does no
-    ///decoding itself
-    pub fn set_as_str(&self) -> Option<&str> {
-        if let Some(attrib) = self.attrib(AttribType::SET) {
-            if let Cow::Borrowed(s) = attrib.value() { //assumes value is always a borrowed one
-                return Some(s);
-            }
-        }
-        None
-    }
-
-    ///Unencoded processor. This only works on decoded elements (returns None otherwise) and does
-    ///no decoding itself
-    pub fn processor_as_str(&self) -> Option<&str> {
-        if let Some(attrib) = self.attrib(AttribType::PROCESSOR) {
-            if let Cow::Borrowed(s) = attrib.value() { //assumes value is always a borrowed one
-                return Some(s);
-            }
-        }
-        None
-    }
-
-    ///Get the declaration from the declaration store, given an encoded element
-    pub fn declaration<'a>(&self, document: &'a Document) -> (Option<&'a Declaration>) {
-        if let Some(declaration_key) = self.declaration_key() {
-           document.get_declaration(declaration_key)
-        } else {
-            None
-        }
-    }
-
-    ///Get the processor from the provenance store, given an encoded element
-    pub fn processor<'a>(&self, document: &'a Document) -> (Option<&'a Processor>) {
-        if let Some(processor_key) = self.processor_key() {
-            document.get_processor(processor_key)
-        } else {
-            None
-        }
-    }
-
-    ///Get set as a str from an encoded element.
-    pub fn set_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
-        if let Some(declaration) = self.declaration(document) {
-                return declaration.set.as_ref().map(|s| &**s);
-        }
-        None
-    }
-
-    ///Get a class as a str from an encoded element
-    pub fn class_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
-        if let Some(class_key) = self.class_key() {
-            if let Some(declaration) = self.declaration(document) {
-                if let Some(classes) = &declaration.classes {
-                    if let Some(class) = classes.get(class_key) {
-                        return Some(class.as_str());
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    pub fn processor_decode<'a>(&self, document: &'a Document) -> (Option<&'a str>) {
-        if let Some(processor) = self.processor(document) {
-            Some(processor.id.as_str())
-        } else {
-            None
-        }
-    }
-
-
-    ///Get the set (encoded) aka the declaration key
-    pub fn declaration_key(&self) -> Option<DecKey> {
-        if let Some(enc_attribs) = &self.enc_attribs {
-            enc_attribs.declaration
-        } else {
-            None
-        }
-    }
-
-
-    ///Get the class (encoded) aka the class keyy
-    pub fn class_key(&self) -> Option<ClassKey> {
-        if let Some(enc_attribs) = &self.enc_attribs {
-            enc_attribs.class
-        } else {
-            None
-        }
-    }
-
-    ///Get the processor (encoded) aka the processor keyy
-    pub fn processor_key(&self) -> Option<ProcKey> {
-        if let Some(enc_attribs) = &self.enc_attribs {
-            enc_attribs.processor
-        } else {
-            None
-        }
-    }
 
 
     ///Low-level add function
@@ -321,43 +384,33 @@ impl ElementData {
         self
     }
 
-    ///Low-level add function
-    pub fn with_data(mut self, data: Vec<DataType>) -> Self {
+    ///Low-level add function, element children are expressed as keys (``DataType::Element(key)``)
+    pub fn with_children(mut self, data: Vec<DataType>) -> Self {
         for dt in data.into_iter() {
             self.data.push(dt);
         }
         self
     }
 
-
     ///Returns the key of the parent element of this element
-    pub fn get_parent(&self) -> Option<ElementKey> {
+    pub fn parent_key(&self) -> Option<ElementKey> {
         self.parent
     }
 
-    ///Returns the key of the processor associated with this element
-    pub fn get_processor(&self) -> Option<ProcKey> {
-        self.enc_attribs.as_ref().map(|enc_attribs| enc_attribs.processor).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
-    }
-
-    ///Returns the key of the declaration associated with this element
-    pub fn get_declaration(&self) -> Option<DecKey> {
-        self.enc_attribs.as_ref().map(|enc_attribs| enc_attribs.declaration).and_then(std::convert::identity) //and then flattens option (no flatten() in stable rust yet)
-    }
 
     ///Sets the key of the parent element of this element
-    pub fn set_parent(&mut self, parent: Option<ElementKey>) {
+    pub fn set_parent_key(&mut self, parent: Option<ElementKey>) {
         self.parent = parent;
     }
 
     ///Builder method (can be chained) that sets the key of the parent element of this element
-    pub fn with_parent(mut self, parent: Option<ElementKey>) -> Self {
-        self.set_parent(parent);
+    pub fn with_parent_key(mut self, parent: Option<ElementKey>) -> Self {
+        self.set_parent_key(parent);
         self
     }
 
     ///Low-level get function
-    pub fn get(&self, index: usize) -> Option<&DataType> {
+    pub fn get_data_at(&self, index: usize) -> Option<&DataType> {
         self.data.get(index)
     }
 
@@ -383,14 +436,8 @@ impl ElementData {
 
     ///Simple constructor for an empty element (optionally with attributes)
     pub fn new(elementtype: ElementType) -> ElementData {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None, enc_attribs: None }
+        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), key: None, parent: None }
     }
-
-    ///Create a new element and assumes it is already encoded (though empty), so the user shouldn't pass any unencoded attributes (OBSOLETE?)
-    pub fn new_as_encoded(elementtype: ElementType) -> ElementData {
-        Self { elementtype: elementtype, attribs: Vec::new(), data: Vec::new(), parent: None, key: None, enc_attribs: Some(EncodedAttributes::default()) }
-    }
-
 
 }
 

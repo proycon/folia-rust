@@ -13,6 +13,8 @@ use crate::document::*;
 
 ///This trait needs to be implemented on  items that are storable in a ``Store``. It is a very lax trait where storable elements *MAY BE* identifiable and *MAY BE* storing their own key (the default implementation does neither)
 pub trait Storable<Key> {
+    ///Returns the ID if any. Returns a Cow<str> because the result may be either owned (in case of
+    ///computed ID) or borrowed
     fn maybe_id(&self) -> Option<Cow<str>> {
         None
     }

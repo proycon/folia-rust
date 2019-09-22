@@ -212,22 +212,21 @@ impl Document {
                         let tagstring = element.elementtype.to_string();
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());
-                        for attrib in element.attribs.iter() {
-                            let value: &str = &attrib.value();
-                            start.push_attribute((attrib.attribtype().into(), value ));
+                        for attrib in element.attribs().iter() {
+                            start.push_attribute((attrib.attribtype().into(), format!("{}",attrib) ));
                         }
                         if let Some(declaration_key) = element.declaration_key() {
                             //check if the declaration is the default, no need to serialise set then
                             if !dec_is_default.get(declaration_key as usize).expect("checking default") {
                                 //decode encoded attributes
-                                if let Some(set) = element.set_decode(&self) {
+                                if let Some(set) = element.set(&self) {
                                     start.push_attribute(("set", set) );
                                 }
                             }
-                            if let Some(class) = element.class_decode(&self) {
+                            if let Some(class) = element.class(&self) {
                                 start.push_attribute(("class", class) );
                             }
-                            if let Some(processor) = element.processor_decode(&self) {
+                            if let Some(processor) = element.processor(&self) {
                                 //check if this processor is the default one, if so we don't need
                                 //to serialise it
                                 let is_default: bool = if let Some(declaration) = self.get_declaration(declaration_key) {

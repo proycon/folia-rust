@@ -83,24 +83,59 @@ pub enum Attribute {
 
 impl fmt::Display for Attribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}",  self.value() )
+        if let Ok(s) = self.as_str() {
+            write!(f, "{}",  s )
+        } else {
+            write!(f, "{}",  self.to_string().expect("Attribute can not be displayed without decoding") )
+        }
     }
 }
 
 
+
 impl Attribute {
 
-    pub fn value(&self) -> Cow<str> {
+    ///Can the attribute be decoded? Implies it is currently encoded (key instead of string)
+    pub fn decodable(&self) -> bool {
+        match self {
+            Attribute::DeclarationRef(_) | Attribute::ClassRef(_) | Attribute::ProcessorRef(_) => true,
+            _ => false,
+        }
+    }
+
+    ///Can the attribute be encoded? Implies it is currently decoded (string instead of key)
+    pub fn encodable(&self) -> bool {
+        match self {
+            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn as_str(&self) -> Result<&str,FoliaError> {
         match self {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::AnnotatorType(s) | Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
             Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s)
-                => Cow::Borrowed(&s),
-            Attribute::Confidence(f) => Cow::from(f.to_string()),
-            Attribute::Space(b) => { if *b { Cow::from("yes") } else { Cow::from("no") } }
+                => Ok(&s),
+            Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
+            _ =>  Err(FoliaError::TypeError("Attribute can't be cast as_str, use to_string() instead".to_string()))
         }
     }
+
+    pub fn to_string(&self) -> Result<String,FoliaError> {
+        match self {
+            Attribute::Confidence(f) => Ok(f.to_string()),
+            _ =>  {
+                if let Ok(s) = self.as_str() {
+                    Ok(s.to_string())
+                } else {
+                    Err(FoliaError::TypeError("Attribute can't be cast to_string() without decoding".to_string()))
+                }
+            }
+        }
+    }
+
 
     pub fn sametype(&self, other: &Attribute) -> bool {
         self.attribtype() == other.attribtype()
@@ -110,7 +145,9 @@ impl Attribute {
         match self {
             Attribute::Id(_) => AttribType::ID,
             Attribute::Set(_) => AttribType::SET,
+            Attribute::DeclarationRef(_) => AttribType::SET,
             Attribute::Class(_) => AttribType::CLASS,
+            Attribute::ClassRef(_) => AttribType::CLASS,
             Attribute::Annotator(_) => AttribType::ANNOTATOR,
             Attribute::AnnotatorType(_) => AttribType::ANNOTATORTYPE,
             Attribute::Confidence(_) => AttribType::CONFIDENCE,
@@ -125,6 +162,7 @@ impl Attribute {
             Attribute::Idref(_) => AttribType::IDREF,
             Attribute::Space(_) => AttribType::SPACE,
             Attribute::Processor(_) => AttribType::PROCESSOR,
+            Attribute::ProcessorRef(_) => AttribType::PROCESSOR,
             Attribute::Href(_) => AttribType::HREF,
             Attribute::Format(_) => AttribType::FORMAT,
             Attribute::Subset(_) => AttribType::SUBSET,

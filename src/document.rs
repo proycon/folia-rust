@@ -117,7 +117,7 @@ impl Document {
         self.elementstore.specification.get(elementtype)
     }
 
-    //************** Methods providing easy access to IntoStore ********************
+    //************** Methods providing easy write adccess into the underlying Stores ********************
 
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
@@ -141,7 +141,7 @@ impl Document {
 
     //************** Higher-order methods for adding things ********************
 
-    ///Adds an element as a child of another, this is a higher-level function that/
+    ///Adds a new element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
     pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: ElementData) -> Result<ElementKey, FoliaError> {
         match self.add_element(element) {
@@ -165,8 +165,8 @@ impl Document {
 
         let oldparent_key = if let Some(child) = self.get_mut(child_key) {
             //add the new parent and return the old parent
-            let tmp = child.get_parent();
-            child.set_parent(Some(parent_key));
+            let tmp = child.parent_key();
+            child.set_parent_key(Some(parent_key));
             tmp
         } else {
             //child does not exist
@@ -192,8 +192,8 @@ impl Document {
     pub fn detach_element(&mut self, child_key: ElementKey) -> Result<(),FoliaError> {
         let oldparent_key = if let Some(child) = self.get_mut(child_key) {
             //add the new parent and return the old parent
-            let tmp = child.get_parent();
-            child.set_parent(None);
+            let tmp = child.parent_key();
+            child.set_parent_key(None);
             tmp
         } else {
             //child does not exist
@@ -288,26 +288,20 @@ impl Document {
 
 
     //************** Methods providing easy access to Store ****************
-    pub fn get_element(&self, key: ElementKey) -> Option<Element> {
-        if let Some(elementdata) = <Self as Store<ElementData,ElementKey>>::get(self, key) {
-            Some(Element { document: Some(self), data: elementdata })
-        } else {
-            None
-        }
-    }
 
     pub(crate) fn get_elementdata(&self, key: ElementKey) -> Option<&ElementData> {
         <Self as Store<ElementData,ElementKey>>::get(self, key)
     }
-    pub fn get_element_by_id(&self, id: &str) -> Option<&ElementData> {
+    pub(crate) fn get_elementdata_by_id(&self, id: &str) -> Option<&ElementData> {
         <Self as Store<ElementData,ElementKey>>::get_by_id(self, id)
     }
-    pub fn get_mut_element(&mut self, key: ElementKey) -> Option<&mut ElementData> {
+    pub(crate) fn get_mut_elementdata(&mut self, key: ElementKey) -> Option<&mut ElementData> {
         <Self as Store<ElementData,ElementKey>>::get_mut(self, key)
     }
-    pub fn get_mut_element_by_id(&mut self, id: &str) -> Option<&mut ElementData> {
+    pub(crate) fn get_mut_elementdata_by_id(&mut self, id: &str) -> Option<&mut ElementData> {
         <Self as Store<ElementData,ElementKey>>::get_mut_by_id(self, id)
     }
+
     pub fn get_element_key_by_id(&self, id: &str) -> Option<ElementKey> {
         <Self as Store<ElementData,ElementKey>>::id_to_key(self, id)
     }
@@ -345,7 +339,30 @@ impl Document {
         <Self as Store<Processor,ProcKey>>::get_mut_by_id(self, id)
     }
 
+    //************** Higher level element retrieval methods ****************
+    //
+    pub fn get_element(&self, key: ElementKey) -> Option<Element> {
+        if let Some(elementdata) = self.get_elementdata(key) {
+            Some(Element { document: Some(self), data: elementdata })
+        } else {
+            None
+        }
+    }
 
+    pub(crate) fn get_element_by_id(&self, id: &str) -> Option<Element> {
+        if let Some(elementdata) = self.get_elementdata_by_id(id) {
+            Some(Element { document: Some(self), data: elementdata })
+        } else {
+            None
+        }
+    }
+    pub fn get_element(&self, key: ElementKey) -> Option<mut MutElement> {
+        if let Some(elementdata) = self.get_mut_elementdata(key) {
+            Some(MutElement { document: Some(self), data: elementdata })
+        } else {
+            None
+        }
+    }
 
 }
 
