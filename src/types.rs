@@ -683,6 +683,7 @@ impl DataType {
 }
 
 
+#[derive(Clone,Copy)]
 pub enum BodyType {
     Text,
     Speech

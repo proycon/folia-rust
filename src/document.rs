@@ -38,13 +38,29 @@ pub struct Document {
     pub declarationstore: DeclarationStore,
     ///Metadata consists of a simple key/value store (or a reference to external metadata)
     pub metadata: Metadata,
+
+    pub autodeclare: bool,
 }
 
 
+#[derive(Clone)]
+pub struct DocumentProperties {
+    pub bodytype: BodyType,
+    pub autodeclare: bool,
+}
+
+impl Default for DocumentProperties {
+    fn default() -> Self {
+        Self {
+            bodytype: BodyType::Text,
+            autodeclare: true,
+        }
+    }
+}
 
 impl Document {
     ///Create a new FoLiA document from scratch
-    pub fn new(id: &str, bodytype: BodyType) -> Result<Self, FoliaError> {
+    pub fn new(id: &str, properties: DocumentProperties) -> Result<Self, FoliaError> {
         let mut document = Self {
             id: id.to_string(),
             filename: None,
@@ -53,8 +69,9 @@ impl Document {
             provenancestore:  ProvenanceStore::default(),
             declarationstore: DeclarationStore::default(),
             metadata: Metadata::default(),
+            autodeclare: properties.autodeclare,
         };
-        let mut body = match bodytype {
+        let mut body = match properties.bodytype {
             BodyType::Text => ElementData::new(ElementType::Text),
             BodyType::Speech => ElementData::new(ElementType::Speech),
         };
@@ -65,20 +82,20 @@ impl Document {
     }
 
     ///Load a FoliA document from file. Invokes the XML parser and loads it all into memory.
-    pub fn from_file(filename: &str) -> Result<Self, FoliaError> {
+    pub fn from_file(filename: &str, properties: DocumentProperties) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_file(Path::new(filename))?;
         reader.trim_text(true);
-        let mut doc = Self::parse(&mut reader)?;
+        let mut doc = Self::parse(&mut reader, properties)?;
         //associate the filename with the document
         doc.filename = Some(filename.to_string());
         Ok(doc)
     }
 
     ///Load a FoliA document from XML string representation, loading it all into memory.
-    pub fn from_str(data: &str) -> Result<Self, FoliaError> {
+    pub fn from_str(data: &str, properties: DocumentProperties) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_str(data);
         reader.trim_text(true);
-        Self::parse(&mut reader)
+        Self::parse(&mut reader, properties)
     }
 
 

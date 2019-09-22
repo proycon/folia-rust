@@ -71,7 +71,7 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
 
 #[test]
 fn test001_instantiate() {
-    match Document::new("example", BodyType::Text) {
+    match Document::new("example", DocumentProperties::default()) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example");
         },
@@ -85,7 +85,7 @@ fn test001_instantiate() {
 
 #[test]
 fn test002_append() {
-    match Document::new("example", BodyType::Text) {
+    match Document::new("example", DocumentProperties::default()) {
         Ok(mut doc) => {
             let root: ElementKey = 0;
             let sentence = doc.add_element_to(root,
@@ -106,7 +106,7 @@ fn test002_append() {
 
 #[test]
 fn test003_parse() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8"), DocumentProperties::default()) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example", "ID check");
             assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain (count only)");
@@ -120,7 +120,7 @@ fn test003_parse() {
 
 #[test]
 fn test004_get_word_from_index() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
                 assert!(true);
@@ -136,7 +136,7 @@ fn test004_get_word_from_index() {
 
 #[test]
 fn test005_decode() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
                 assert_eq!(word.set().expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
@@ -154,7 +154,7 @@ fn test005_decode() {
 
 #[test]
 fn test006_serialise() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             match doc.xml(0) {
                 Ok(xml) => {
@@ -173,7 +173,7 @@ fn test006_serialise() {
 
 #[test]
 fn test007_metadata() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             assert_eq!(doc.metadata.metadatatype.unwrap(), "native");
             assert_eq!(doc.metadata.src, None);
@@ -188,7 +188,7 @@ fn test007_metadata() {
 
 #[test]
 fn test008a_selector_any() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let selector = doc.select(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
             assert_matches!(selector.selector.setselector, SetSelector::AnySet);
@@ -209,7 +209,7 @@ fn test008a_selector_any() {
 
 #[test]
 fn test008b_selector_set_class() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
             let selector = doc.select(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
@@ -231,7 +231,7 @@ fn test008b_selector_set_class() {
 
 #[test]
 fn test008c_elementselector_set_class() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
             let selector = doc.select_elements(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
@@ -253,7 +253,7 @@ fn test008c_elementselector_set_class() {
 
 #[test]
 fn test008d_selector_elementgroup() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let selector = doc.select(0, Selector::new(TypeSelector::SomeElementGroup(ElementGroup::Structure), SetSelector::AnySet, ClassSelector::AnyClass), true);
             assert_matches!(selector.selector().typeselector, TypeSelector::SomeElementGroup(_));
@@ -273,7 +273,7 @@ fn test008d_selector_elementgroup() {
 
 #[test]
 fn test009_text() {
-    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example")) {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
                 match word.text(None, None, false, true) {

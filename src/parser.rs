@@ -20,11 +20,11 @@ use crate::store::*;
 use crate::elementstore::*;
 use crate::metadata::*;
 use crate::select::*;
-use crate::document::Document;
+use crate::document::*;
 
 impl Document {
     ///Parses a FoLiA document given a reader
-    pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>) -> Result<Self, FoliaError> {
+    pub(crate) fn parse<R: BufRead>(reader: &mut Reader<R>, properties: DocumentProperties) -> Result<Self, FoliaError> {
 
         let mut body: Option<ElementData> = None;
         let mut buf = Vec::new();
@@ -37,7 +37,8 @@ impl Document {
                             elementstore: ElementStore::default(),
                             provenancestore: ProvenanceStore::default(),
                             declarationstore: DeclarationStore::default(),
-                            metadata: Metadata::default()
+                            metadata: Metadata::default(),
+                            autodeclare: properties.autodeclare,
         };
 
         //parse root
