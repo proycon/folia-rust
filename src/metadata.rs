@@ -19,13 +19,14 @@ pub struct Declaration {
     pub set: Option<String>,
     pub alias: Option<String>,
     pub processors: Vec<ProcKey>,
-    pub classes: Option<ClassStore>
+    pub classes: Option<ClassStore>,
+    pub features: Option<HashMap<SubsetKey,ClassStore>>
 }
 
 impl Declaration {
     ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()``.
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None, key: None }
+        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None, key: None, features: None }
     }
 
     ///Returns the key of default processor, if any
@@ -51,6 +52,53 @@ impl Declaration {
            class_store.get(class_key).map(|s| s.as_str())
         } else {
             None
+        }
+    }
+
+    pub fn get_feature(&self, subset_key: SubsetKey, class_key: ClassKey) -> Option<&str> {
+        if let Some(features) = &self.features {
+            if let Some(class_store) = features.get(&subset_key) {
+               return class_store.get(class_key).map(|s| s.as_str());
+            }
+        }
+        None
+    }
+
+    ///Encode a class, adding it to the class store if needed, returning the existing one if
+    ///already present. For an immutable variant, see ``get_class_key()``
+    pub fn add_class(&mut self, class: &Class) -> Result<ClassKey,FoliaError> {
+        if self.classes.is_none() {
+            self.classes = Some(ClassStore::default());
+        }
+        if let Some(class_key) = self.classes.as_ref().unwrap().id_to_key(class) {
+            Ok(class_key)
+        } else {
+            let class_key = self.classes.as_ref().unwrap().get_key(class);
+            if let Some(class_key) = class_key {
+                Ok(class_key)
+            } else {
+                self.classes.as_mut().unwrap().add(class.to_owned())
+            }
+        }
+    }
+
+
+    ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
+    pub fn get_class_key(&self, class: &str) -> Result<ClassKey,FoliaError> {
+        if let Some(class_store) = &self.classes {
+            if let Some(class_key) = class_store.id_to_key(class) {
+                Ok(class_key)
+            } else {
+                let class = class.to_string();
+                let class_key = class_store.get_key(&class);
+                if let Some(class_key) = class_key {
+                    Ok(class_key)
+                } else {
+                    Err(FoliaError::KeyError("[encode_class()] Class does not exist".to_string()))
+                }
+            }
+        } else {
+            Err(FoliaError::KeyError("[encode_class()] Class does not exist (empty class store)".to_string()))
         }
     }
 }
@@ -167,67 +215,24 @@ impl DeclarationStore {
 }
 
 impl Document {
-    ///Returns the class store for the given declaration
-    pub fn get_class_store(&self, dec_key: DecKey) -> Result<Option<&ClassStore>,FoliaError> {
-        if let Some(declaration) = self.get_declaration(dec_key) {
-            if declaration.classes.is_some() {
-                Ok(Some(declaration.classes.as_ref().unwrap()))
-            } else {
-                Ok(None)
-            }
-        } else {
-            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
-        }
-    }
-
-    ///Returns the class store for the given declaration (mutably)
-    pub fn get_class_store_mut(&mut self, dec_key: DecKey) -> Result<&mut ClassStore,FoliaError> {
-        if let Some(mut declaration) = self.get_mut_declaration(dec_key) {
-            if declaration.classes.is_none() {
-                declaration.classes = Some(ClassStore::default());
-            }
-            Ok(declaration.classes.as_mut().unwrap())
-        } else {
-            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
-        }
-    }
-
-
 
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present
     pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
-        let class_store = self.get_class_store_mut(dec_key)?;
-        if let Some(class_key) = class_store.id_to_key(class) {
-            Ok(class_key)
+        if let Some(declaration) = self.get_mut_declaration(dec_key) {
+            declaration.add_class(class)
         } else {
-            let class_key = class_store.get_key(class);
-            if let Some(class_key) = class_key {
-                Ok(class_key)
-            } else {
-                class_store.add(class.to_owned())
-            }
+            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
         }
     }
 
 
     ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
-    pub fn encode_class(&self, dec_key: DecKey, class: &str) -> Result<ClassKey,FoliaError> {
-        let class_store = self.get_class_store(dec_key)?;
-        if let Some(class_store) = class_store {
-            if let Some(class_key) = class_store.id_to_key(class) {
-                Ok(class_key)
-            } else {
-                let class = class.to_string();
-                let class_key = class_store.get_key(&class);
-                if let Some(class_key) = class_key {
-                    Ok(class_key)
-                } else {
-                    Err(FoliaError::KeyError("[encode_class()] Class does not exist".to_string()))
-                }
-            }
+    pub fn get_class_key(&self, dec_key: DecKey, class: &str) -> Result<ClassKey,FoliaError> {
+        if let Some(declaration) = self.get_declaration(dec_key) {
+            declaration.get_class_key(class)
         } else {
-            Err(FoliaError::KeyError("[encode_class()] Class does not exist (empty class store)".to_string()))
+            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
         }
     }
 

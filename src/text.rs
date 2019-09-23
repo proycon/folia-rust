@@ -139,7 +139,7 @@ impl<'a> Element<'a> {
             "current"
         };
         if let Some(dec_key) = doc.get_declaration_key_by_id(Declaration::index_id(AnnotationType::TEXT, &Some(set)).as_str()) {
-            let class_key = doc.encode_class(dec_key, textclass)?;
+            let class_key = doc.get_class_key(dec_key, textclass)?;
             self.text_by_key(dec_key, class_key,strict,retaintokenisation, None)
         } else {
             Err(FoliaError::EncodeError(format!("No declaration for the specified text set ({})", set)))

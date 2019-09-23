@@ -14,6 +14,8 @@ pub type ProcKey = u16;
 ///Internal Declaration ID Type (used for FoLiA sets)
 pub type DecKey = u16;
 
+pub type SubsetKey = u16;
+
 ///Class ID Type (used for FoLiA sets)
 pub type ClassKey = u32;
 
