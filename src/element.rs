@@ -101,6 +101,11 @@ impl Storable<ElementKey> for ElementData {
 }
 
 impl ElementData {
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
+
     pub fn attribs(&self) -> &Vec<Attribute> {
         &self.attribs
     }
@@ -251,6 +256,19 @@ pub trait ReadElement {
         } else {
             None
         }
+    }
+
+    ///Get the FoliA subset (only apply to elements of type ``ElementType::Feature`` aka
+    ///``<feat>``)
+    fn subset(&self) -> Option<&str> {
+        if let Some(declaration) = self.get_declaration() {
+            if let Some(subset_key) = self.subset_key() {
+                if let Some(subset) = &declaration.get_subset(subset_key) {
+                    return Some(subset);
+                }
+            }
+        }
+        None
     }
 
     ///Get the FoLiA class

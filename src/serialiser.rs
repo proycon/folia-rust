@@ -225,6 +225,9 @@ impl Document {
                                     start.push_attribute(("set", set) );
                                 }
                             }
+                            if let Some(subset) = element.subset() {
+                                start.push_attribute(("subset", subset) );
+                            }
                             if let Some(class) = element.class() {
                                 start.push_attribute(("class", class) );
                             }
@@ -246,9 +249,13 @@ impl Document {
                                 }
                             }
                         }
-                        writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
-                        let end = BytesEnd::owned(tag.to_vec());
-                        stack.push(end);
+                        if element.data.is_empty() {
+                            writer.write_event(Event::Empty(start)).map_err(to_serialisation_error)?;
+                        } else {
+                            writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
+                            let end = BytesEnd::owned(tag.to_vec());
+                            stack.push(end);
+                        }
                     }
                 },
                 DataType::Text(text) => {
