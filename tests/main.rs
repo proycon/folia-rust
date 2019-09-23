@@ -194,12 +194,10 @@ fn test007_metadata() {
 }
 
 #[test]
-fn test008a_selector_any() {
+fn test008a_selector_type() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select_data(Selector::new_encode(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
-            assert_matches!(selector.selector().setselector, SetSelector::AnySet);
-            assert_matches!(selector.selector().classselector, ClassSelector::AnyClass);
+            let selector = doc.select_data(Selector::new().element(Cmp::Is(ElementType::Word)), true);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -219,9 +217,13 @@ fn test008b_selector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
-            let selector = doc.select_data(Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
-            assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
-            assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
+            let selector = doc.select_data(
+                    Selector::from_query(&doc,
+                        &Query::select()
+                        .element(Cmp::Is(ElementType::Word))
+                        .set(Cmp::Is(set.to_string()))
+                        .class(Cmp::Is("PUNCTUATION".to_string())))
+            , true);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -241,9 +243,13 @@ fn test008c_elementselector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
-            let selector = doc.select(Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
-            assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
-            assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
+            let selector = doc.select(
+                    Selector::from_query(&doc,
+                        &Query::select()
+                        .element(Cmp::Is(ElementType::Word))
+                        .set(Cmp::Is(set.to_string()))
+                        .class(Cmp::Is("PUNCTUATION".to_string())))
+            , true);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -262,8 +268,13 @@ fn test008c_elementselector_set_class() {
 fn test008d_selector_elementgroup() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select_data(Selector::new(TypeSelector::SomeElementGroup(ElementGroup::Structure), SetSelector::AnySet, ClassSelector::AnyClass), true);
-            assert_matches!(selector.selector().typeselector, TypeSelector::SomeElementGroup(_));
+            let selector = doc.select_data(
+                    Selector::from_query(&doc,
+                        &Query::select()
+                        .elementgroup(Cmp::Is(ElementGroup::Structure))
+                        .set(Cmp::Any)
+                        .class(Cmp::Any))
+            , true);
             assert!(selector.selector.matchable());
             let mut count = 0;
             for item in selector {

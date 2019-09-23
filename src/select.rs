@@ -9,71 +9,110 @@ use crate::attrib::*;
 use crate::metadata::*;
 use crate::store::*;
 use crate::elementstore::*;
-
-
+use crate::query::*;
 
 ///The selector defines matching criteria for a SelectIterator
-#[derive(Debug,Clone,Default)]
+///It is constructed from a ``Query`` given a document, i.e. it is the encoded
+///form of a query.
+#[derive(Default,Clone)]
 pub struct Selector {
-    pub typeselector: TypeSelector,
-    pub setselector: SetSelector,
-    pub classselector: ClassSelector,
+    pub action: Action,
+    pub datatypes: Vec<DataTypeSelector>,
+    pub elementtype: Cmp<ElementType>,
+    pub elementgroup: Cmp<ElementGroup>,
+    pub set: Cmp<DecKey>,
+    pub class: Cmp<ClassKey>,
+    pub processor: Cmp<ProcKey>,
+    pub confidence: Cmp<f64>,
     pub next: Option<Box<Selector>>
 }
 
 
+
+
 impl Selector {
-
-    ///Creates a new selector given its subcomponents, a type selector, a set selector, and a class
-    ///selector. Note that set and class refer to encoded values here. Use ``new_encode()``, if you want
-    ///to create a selector with decoded values (strings), which will take care of encoding them
-    ///for you.
-    pub fn new(typeselector: TypeSelector, setselector: SetSelector, classselector: ClassSelector) -> Self {
-        Selector { typeselector: typeselector, setselector: setselector, classselector: classselector, next: None }
-    }
-
-
-    ///Creates a new selector given its subcomponents, a type selector, a set selector, and a class
-    ///selector. This variant actively encodes the set and class you specify.
-    pub fn new_encode(document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
-        Selector::default().encode(document, elementtype, set, class)
-    }
-
-
-    ///Encodes a selector
-    pub fn encode(mut self, document: &Document, elementtype: ElementType, set: SelectorValue, class: SelectorValue) -> Self {
-        self.typeselector = TypeSelector::SomeElement(elementtype);
-        if let Some(annotationtype) = elementtype.annotationtype() {
-            self.setselector = match set {
-                SelectorValue::Some(set) => {
-                    let id = Declaration::index_id(annotationtype, &Some(set));
-                    //add a set filter,
-                    if let Some(dec_key) = document.get_declaration_key_by_id(id.as_str()) {
-                        SetSelector::SomeSet(dec_key)
-                    } else {
-                        SetSelector::Unmatchable
-                    }
-                },
-                SelectorValue::Any => SetSelector::AnySet,
-                SelectorValue::None => SetSelector::NoSet,
-            };
-            self.classselector = match class {
-                SelectorValue::Some(class) => {
-                    //add a class filter
-                    let mut result = ClassSelector::Unmatchable;
-                    if let SetSelector::SomeSet(dec_key) = self.setselector {
-                        if let Some(declaration) = document.get_declaration(dec_key) {
-                            if let Some(class_key) = declaration.class_key(class) {
-                                  result = ClassSelector::SomeClass(class_key);
-                            }
+    ///Builds a new selector given a query and a document (effectively encoding the query into a
+    ///selector for the specified document)
+    pub fn from_query(document: &Document, query: &Query) -> Self {
+        let mut selector = Selector::default();
+        selector.elementtype = query.elementtype.clone();
+        selector.elementgroup = query.elementgroup.clone();
+        selector.datatypes = vec![DataTypeSelector::Elements];
+        selector.set = match &query.set {
+            Cmp::Is(set) => {
+                //encode the set from the query, given the document, if this fails then the set is
+                //unmatchable
+                let mut result: Cmp<DecKey> = Cmp::Unmatchable; //will try to falsify this
+                if let Cmp::Is(elementtype) = query.elementtype {
+                    if let Some(annotationtype) = elementtype.annotationtype() {
+                        if let Some(deckey) = document.get_declaration_key_by_id(&Declaration::index_id(annotationtype,&Some(set.as_str()))) {
+                            result = Cmp::Is(deckey);
                         }
                     }
-                    result
-                },
-                SelectorValue::Any =>  ClassSelector::AnyClass,
-                SelectorValue::None => ClassSelector::NoClass,
-            }
-        }
+                }
+                result
+            },
+            Cmp::Any => Cmp::Any,
+            Cmp::Some => Cmp::Some,
+            Cmp::None => Cmp::None,
+            Cmp::Unmatchable => Cmp::Unmatchable,
+        };
+        selector.class = match &query.class {
+            Cmp::Is(class) => {
+                let mut result: Cmp<ClassKey> = Cmp::Unmatchable; //will try to falsify this
+                if let Cmp::Is(deckey) = selector.set {
+                    if let Some(declaration) = document.get_declaration(deckey) {
+                        if let Some(class_key) = declaration.class_key(class.as_str()) {
+                            result = Cmp::Is(class_key);
+                        }
+                    }
+                }
+                result
+            },
+            Cmp::Any => Cmp::Any,
+            Cmp::Some => Cmp::Some,
+            Cmp::None => Cmp::None,
+            Cmp::Unmatchable => Cmp::Unmatchable,
+        };
+        selector.processor = match &query.processor {
+            Cmp::Is(processor_id) => {
+                let mut result: Cmp<ProcKey> = Cmp::Unmatchable; //will try to falsify this
+                if let Some(processor_key) = document.get_processor_key_by_id(processor_id.as_str()) {
+                    result = Cmp::Is(processor_key);
+                }
+                result
+            },
+            Cmp::Any => Cmp::Any,
+            Cmp::Some => Cmp::Some,
+            Cmp::None => Cmp::None,
+            Cmp::Unmatchable => Cmp::Unmatchable,
+        };
+        selector
+    }
+
+    pub fn with_text(mut self) -> Self {
+        self.datatypes.push(DataTypeSelector::Text);
+        self
+    }
+    pub fn with_comments(mut self) -> Self {
+        self.datatypes.push(DataTypeSelector::Comments);
+        self
+    }
+
+    pub fn element(mut self, value: Cmp<ElementType>) -> Self {
+        self.elementtype = value;
+        self
+    }
+
+    pub fn new() -> Self {
+        Selector::default()
+    }
+    pub fn all_data() -> Self {
+        Selector::default().with_text().with_comments()
+    }
+
+    pub fn elementgroup(mut self, value: Cmp<ElementGroup>) -> Self {
+        self.elementgroup = value;
         self
     }
 
@@ -89,9 +128,9 @@ impl Selector {
     ///made to sets or classes that don't exist in the document, then it is unmatchable and there
     ///is no sense in actually performing any matching.
     pub fn matchable(&self) -> bool {
-        self.typeselector != TypeSelector::Unmatchable &&
-        self.setselector != SetSelector::Unmatchable &&
-        self.classselector != ClassSelector::Unmatchable
+        self.set != Cmp::Unmatchable &&
+        self.class != Cmp::Unmatchable &&
+        self.processor != Cmp::Unmatchable
     }
 
     ///Tests if the selector matches against the specified data item, given an element store.
@@ -100,74 +139,26 @@ impl Selector {
         //we attempt to falsify the match
         let matches = match item {
             DataType::Element(key) => {
-                if let TypeSelector::Text | TypeSelector::Comment  = self.typeselector {
+                if !self.datatypes.contains(&DataTypeSelector::Elements) {
                     false
                 } else if let Some(element) = document.get_element(*key) {
-                    let typematch: bool = match &self.typeselector {
-                        TypeSelector::SomeElement(refelementtype) => {
-                            element.elementtype() == *refelementtype
-                        },
-                        TypeSelector::SomeElementGroup(elementgroup) => {
-                            elementgroup.contains(element.elementtype())
-                        },
-                        TypeSelector::AnyElement => true,
-                        TypeSelector::AnyType => true,
-                        TypeSelector::Unmatchable => false,
-                        TypeSelector::Comment => false,
-                        TypeSelector::Text => false,
+                    let mut matches = match self.elementgroup {
+                        Cmp::Is(elementgroup) => elementgroup.contains(element.elementtype()),
+                        Cmp::Any | Cmp::Some => true,
+                        Cmp::None | Cmp::Unmatchable => false,
                     };
-                    if typematch {
-                        let setmatch: bool = match &self.setselector {
-                             SetSelector::SomeSet(refset) => {
-                                 if let Some(set) = element.declaration_key() {
-                                     set == *refset
-                                 } else {
-                                     false
-                                 }
-                             },
-                             SetSelector::NoSet => element.declaration_key().is_none(),
-                             SetSelector::AnySet => true,
-                             SetSelector::Unmatchable => false,
-                        };
-                        if setmatch {
-                            let classmatch: bool = match &self.classselector {
-                                ClassSelector::SomeClass(refclass) => {
-                                    if let Some(class) = element.class_key() {
-                                        class == *refclass
-                                    } else {
-                                        false
-                                    }
-                                },
-                                ClassSelector::NoClass => element.class_key().is_none(),
-                                ClassSelector::AnyClass => true,
-                                ClassSelector::Unmatchable => false,
-                            };
-                            classmatch
-                        } else {
-                            false
-                        }
-                    } else {
-                        false
-                    }
+                    matches &&
+                    self.elementtype.matches(Some(&element.elementtype())) &&
+                    self.set.matches(element.declaration_key().as_ref()) &&
+                    self.class.matches(element.class_key().as_ref()) &&
+                    self.processor.matches(element.processor_key().as_ref())
                 } else {
                     //element does not exist, can never match
                     false
                 }
             },
-            DataType::Text(_) => {
-                if let TypeSelector::AnyType | TypeSelector::Text  = self.typeselector {
-                    true
-                } else {
-                    false
-                }
-            },
-            DataType::Comment(_) => {
-                if let TypeSelector::AnyType | TypeSelector::Comment  = self.typeselector {
-                    true
-                } else {
-                    false
-                }
-            }
+            DataType::Text(_) => self.datatypes.contains(&DataTypeSelector::Text),
+            DataType::Comment(_) => self.datatypes.contains(&DataTypeSelector::Comments)
         };
         if let Some(next) = &self.next {
             matches || next.matches(document, item)
@@ -178,66 +169,15 @@ impl Selector {
 }
 
 
-///Represents a selector value prior to encoding; such as a particular FoLiA set or FoLiA class as
-///a string. This SelectorValue can then be passed when creating selectors with ``with()`` or ``new_with()``, which
-///will take care of encoding the set/class.
-#[derive(Debug,Clone)]
-pub enum SelectorValue<'a> {
-    Some(&'a str),
-    Any,
-    None,
-}
-
-impl<'a> Default for SelectorValue<'a> {
-    fn default() -> Self {
-        SelectorValue::Any
-    }
-}
-
-///Specifies what set to select (where the set is already encoded as a key)
-#[derive(Debug,Clone,PartialEq)]
-pub enum SetSelector {
-    SomeSet(DecKey),
-    AnySet,
-    NoSet,
-    Unmatchable,
-}
-
-impl Default for SetSelector {
-    fn default() -> Self { SetSelector::AnySet }
-}
-
-
-
-///Specifies what class to select (where the class is already encoded as a key)
-#[derive(Debug,Clone,PartialEq)]
-pub enum ClassSelector {
-    SomeClass(ClassKey),
-    AnyClass,
-    NoClass,
-    Unmatchable,
-}
-
-impl Default for ClassSelector {
-    fn default() -> Self { ClassSelector::AnyClass }
-}
-
 
 
 #[derive(Debug,Clone,PartialEq)]
-pub enum TypeSelector {
-    SomeElementGroup(ElementGroup),
-    SomeElement(ElementType),
-    AnyElement,
-    AnyType,
+pub enum DataTypeSelector {
+    Elements,
     Text,
-    Comment,
-    Unmatchable,
+    Comments,
 }
 
-impl Default for TypeSelector {
-    fn default() -> Self { TypeSelector::AnyType }
-}
 
 ///Iterator over data items (elements, text, comments, i.e. a ``DataType``).
 ///This implements a depth-first search.
