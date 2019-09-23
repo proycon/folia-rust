@@ -310,7 +310,6 @@ impl Document {
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = ElementData::parse(reader, e)?;
                         let key = self.add(elem)?;
-                        stack.push(key);
 
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_key) = stack.last() {
@@ -455,7 +454,7 @@ impl ElementData {
     fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         for attrib in attribiter {
-            match Attribute::parse(&reader, &attrib.unwrap()) {
+            match Attribute::parse(&reader, &attrib.expect("Parsing XML attribute")) {
                 Ok(attrib) => { attributes.push(attrib); },
                 Err(e) => { return Err(e); }
             }
@@ -467,14 +466,14 @@ impl ElementData {
     ///appended by the main parser in Document::parse_body()
     pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<ElementData, FoliaError> {
         let attributes: Vec<Attribute> = ElementData::parse_attributes(reader, event.attributes())?;
-        let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).unwrap())?;
+        let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).expect("utf-8 decoding"))?;
         Ok(ElementData::new(elementtype).with_attribs(attributes))
     }
 }
 
 impl Declaration {
     pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart, tag: &[u8]) -> Result<Declaration, FoliaError> {
-        let declaration_type = get_declaration_type(str::from_utf8(tag).unwrap())?;
+        let declaration_type = get_declaration_type(str::from_utf8(tag).expect("utf-8 decoding"))?;
         let mut set: Option<String> = None;
         let mut alias: Option<String> = None;
         for attrib in event.attributes() {

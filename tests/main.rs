@@ -20,9 +20,13 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
           <paragraph-annotation>
              <annotator processor="p1" />
           </paragraph-annotation>
+          <pos-annotation set="adhoc">
+             <annotator processor="p2" />
+          </pos-annotation>
       </annotations>
       <provenance>
          <processor xml:id="p1" name="proycon" type="manual" />
+         <processor xml:id="p2" name="proycon" type="manual" />
       </provenance>
       <meta id="language">eng</meta>
   </metadata>
@@ -51,6 +55,9 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
          </w>
          <w xml:id="example.p.1.s.2.w.4" class="WORD">
             <t>example</t>
+            <pos class="noun">
+                <feat subset="number" class="singular" />
+            </pos>
          </w>
          <w xml:id="example.p.1.s.2.w.5" class="WORD">
             <t>&amp;</t>
@@ -109,7 +116,7 @@ fn test003_parse() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8"), DocumentProperties::default()) {
         Ok(doc) => {
             assert_eq!(doc.id(), "example", "ID check");
-            assert_eq!(doc.provenancestore.chain.len(), 1, "Sanity check of provenance chain (count only)");
+            assert_eq!(doc.provenancestore.chain.len(), 2, "Sanity check of provenance chain (count only)");
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
