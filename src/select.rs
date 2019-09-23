@@ -342,18 +342,42 @@ impl<'a> Iterator for SelectIterator<'a> {
 
 ///This trait is for collections for which a ``SelectIterator`` can be created to iterate over data
 ///items contained in it.
-pub trait Select<'a> {
-    fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a>;
+pub trait SelectData<'a> {
+    fn select_data_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a>;
+    fn select_data(&'a self, selector: Selector, recursive: bool) -> SelectIterator<'a>;
 }
 
 
 
-impl<'a> Select<'a> for Document {
+impl<'a> SelectData<'a> for Document {
     ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
     ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
     ///is enabled). This is the primary means of iterating over anything in the document.
-    fn select(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+    fn select_data_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
         SelectIterator::new(&self, selector, key, recursive)
+    }
+
+    ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
+    ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
+    ///is enabled). This is the primary means of iterating over anything in the document.
+    fn select_data(&'a self, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+        SelectIterator::new(&self, selector, 0, recursive)
+    }
+}
+
+impl<'a> SelectData<'a> for Element<'a> {
+    ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
+    ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
+    ///is enabled). This is the primary means of iterating over anything in the document.
+    fn select_data_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+        SelectIterator::new(self.document().expect("Obtaining document for element (will fail on orphans!)"), selector, key, recursive)
+    }
+
+    ///Returns a ``SelectIterator`` that can be used to iterate over data items under the element
+    ///specified by ``key``. The ``SelectIterator`` implements a depth-first-search (if recursion
+    ///is enabled). This is the primary means of iterating over anything in the document.
+    fn select_data(&'a self, selector: Selector, recursive: bool) -> SelectIterator<'a> {
+        SelectIterator::new(self.document().expect("Obtaining document for element (will fail on orphans!)"), selector, self.key().expect("Obtaining key for element (will fail on oprhans)"), recursive)
     }
 }
 
@@ -417,14 +441,38 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
 ///This trait is for collections for which a ``SelectElementsIterator`` can be created to iterate over data
 ///items contained in it.
 pub trait SelectElements<'a> {
-    fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
+    fn select_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
+    fn select(&'a self, selector: Selector, recursive: bool) -> SelectElementsIterator<'a>;
 }
 
 impl<'a> SelectElements<'a> for Document {
     ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
     ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
     ///is enabled).
-    fn select_elements(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
+    fn select(&'a self, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
+        SelectElementsIterator::new(&self, selector, 0, recursive)
+    }
+
+    ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
+    ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
+    ///is enabled).
+    fn select_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
         SelectElementsIterator::new(&self, selector, key, recursive)
+    }
+}
+
+impl<'a> SelectElements<'a> for Element<'a> {
+    ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
+    ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
+    ///is enabled).
+    fn select(&'a self, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
+        SelectElementsIterator::new(self.document().expect("Obtaining document for element (will fail on orphans!)"), selector, self.key().expect("Obtaining key for element (will fail on orphans)"), recursive)
+    }
+
+    ///Returns a ``SelectElementsIterator`` that can be used to iterate over elements under the element
+    ///specified by ``key``. The ``SelectElementsIterator`` implements a depth-first-search (if recursion
+    ///is enabled).
+    fn select_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
+        SelectElementsIterator::new(self.document().expect("Obtaining document for element (will fail on orphans!)"), selector, key, recursive)
     }
 }

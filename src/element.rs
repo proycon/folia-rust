@@ -344,6 +344,10 @@ pub trait ReadElement {
             }
         }
     }
+
+    fn get_annotation(&self, annotationtype: AnnotationType) -> Option<Element> {
+        unimplemented!() //TODO
+    }
 }
 
 impl<'a> PartialEq for Element<'a> {

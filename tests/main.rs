@@ -197,10 +197,10 @@ fn test007_metadata() {
 fn test008a_selector_any() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
-            assert_matches!(selector.selector.setselector, SetSelector::AnySet);
-            assert_matches!(selector.selector.classselector, ClassSelector::AnyClass);
-            assert!(selector.selector.matchable());
+            let selector = doc.select_data(Selector::new_encode(&doc, ElementType::Word, SelectorValue::Any, SelectorValue::Any), true);
+            assert_matches!(selector.selector().setselector, SetSelector::AnySet);
+            assert_matches!(selector.selector().classselector, ClassSelector::AnyClass);
+            assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
                 count += 1;
@@ -219,10 +219,10 @@ fn test008b_selector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
-            let selector = doc.select(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            let selector = doc.select_data(Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
             assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
             assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
-            assert!(selector.selector.matchable());
+            assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
                 count += 1;
@@ -241,7 +241,7 @@ fn test008c_elementselector_set_class() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             let set = "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl";
-            let selector = doc.select_elements(0, Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
+            let selector = doc.select(Selector::new_encode(&doc, ElementType::Word, SelectorValue::Some(set), SelectorValue::Some("PUNCTUATION")), true);
             assert_matches!(selector.selector().setselector, SetSelector::SomeSet(_));
             assert_matches!(selector.selector().classselector, ClassSelector::SomeClass(_));
             assert!(selector.selector().matchable());
@@ -262,7 +262,7 @@ fn test008c_elementselector_set_class() {
 fn test008d_selector_elementgroup() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select(0, Selector::new(TypeSelector::SomeElementGroup(ElementGroup::Structure), SetSelector::AnySet, ClassSelector::AnyClass), true);
+            let selector = doc.select_data(Selector::new(TypeSelector::SomeElementGroup(ElementGroup::Structure), SetSelector::AnySet, ClassSelector::AnyClass), true);
             assert_matches!(selector.selector().typeselector, TypeSelector::SomeElementGroup(_));
             assert!(selector.selector.matchable());
             let mut count = 0;
@@ -286,6 +286,23 @@ fn test009_text() {
                 match word.text(None, None, false, true) {
                     Ok(text) => assert_eq!(text, "example"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
+                }
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test010_feature() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS) {
                 }
             } else {
                 assert!(false, "word not found");
