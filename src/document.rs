@@ -443,7 +443,7 @@ impl Store<ElementData,ElementKey> for Document {
                         //get the declaration key from the parent context:
                         let parent = self.get_elementdata(parent_key).ok_or( FoliaError::InternalError("Context for feature does not exist!".to_string()))?;
 
-                        let deckey = self.declare(element.elementtype.annotationtype().expect("Unwrapping annotation type of parent"), &element.set().unwrap().map(|s| s.to_string()),  &None)?;
+                        let deckey = self.declare(parent.elementtype.annotationtype().expect(format!("Unwrapping annotation type of parent {}", element.elementtype).as_str() ), &element.set().unwrap().map(|s| s.to_string()),  &None)?;
                         declaration_key  = Some(deckey);
 
                         if let Some(declaration) = self.get_mut_declaration(deckey) {
