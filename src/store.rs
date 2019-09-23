@@ -35,6 +35,7 @@ pub trait Storable<Key> {
 
 }
 
+
 ///Holds and owns all items, the index to them and their declarations. The store serves as an abstraction used by Documents
 pub trait Store<T,Key> where T: Storable<Key>,
                            Key: TryFrom<usize> + Copy + Debug,
@@ -48,14 +49,14 @@ pub trait Store<T,Key> where T: Storable<Key>,
     fn iter(&self) -> std::slice::Iter<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,Key>;
 
-    fn encode(&mut self, mut item: T) -> Result<T,FoliaError> {
+    fn encode(&mut self, mut item: T, context: Option<Key>) -> Result<T,FoliaError> {
        Ok(item) //we assume the item does not need to be decoded by default
     }
 
     ///Add a new item to the store (takes ownership)
-    fn add(&mut self, mut item: T) -> Result<Key,FoliaError> {
+    fn add(&mut self, mut item: T, context: Option<Key>) -> Result<Key,FoliaError> {
         if item.encodable() {
-            item = self.encode(item)?;
+            item = self.encode(item, context)?;
         }
 
         if let Some(key) = self.get_key(&item) {
@@ -141,3 +142,63 @@ pub trait Store<T,Key> where T: Storable<Key>,
     }
 }
 
+
+pub trait StringStore<Key> where Key: TryFrom<usize> + Copy + Debug,
+                              usize: std::convert::TryFrom<Key>,
+                              <usize as std::convert::TryFrom<Key>>::Error : std::fmt::Debug {
+
+    fn items_mut(&mut self) -> &mut Vec<Option<String>>;
+    fn index_mut(&mut self) -> &mut HashMap<String,Key>;
+
+    fn items(&self) -> &Vec<Option<String>>;
+    fn iter(&self) -> std::slice::Iter<Option<String>>;
+    fn index(&self) -> &HashMap<String,Key>;
+
+    ///Add a new item to the store (takes ownership)
+    fn add(&mut self, item: Cow<str>) -> Result<Key,FoliaError> {
+        if let Some(key) = self.get_key(&item) {
+            return Ok(key);
+        }
+
+        if let Ok(key) = Key::try_from(self.items().len()) {
+            self.items_mut().push( Some(item.clone().to_owned().to_string()) );
+            self.index_mut().insert( item.to_owned().to_string() ,key);
+            Ok(key)
+        } else {
+            Err(FoliaError::InternalError(format!("Store.add(). Index out of bounds (e.g. integer overflow)")))
+        }
+    }
+
+    ///Checks if an item is already in the store and returns the key if so
+    fn get_key(&self, item: &str) -> Option<Key> {
+        self.index().get(item).map(|k| k.to_owned())
+    }
+
+    fn is_empty(&self) -> bool {
+        self.items().is_empty()
+    }
+
+    ///Returns the number of items in the store (including items that were removed)
+    fn len(&self) -> usize {
+        self.items().len()
+    }
+
+    ///Retrieves an element from the store
+    fn get(&self, key: Key) -> Option<&str> {
+        if let Some(item) = self.items().get(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
+            item.as_ref().map(|item| item.as_ref())
+        } else {
+            None
+        }
+    }
+
+    ///Retrieves an element from the store
+    fn get_mut(&mut self, key: Key) -> Option<&mut String> {
+        if let Some(item) = self.items_mut().get_mut(usize::try_from(key).expect("conversion to usize")) { //-> Option<&Option<Box<T>>>
+            item.as_mut()
+        } else {
+            None
+        }
+    }
+
+}

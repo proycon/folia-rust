@@ -289,7 +289,7 @@ impl Document {
 
 
         if let Some(body) = body {
-            doc.add(body)?;
+            doc.add(body,None)?;
             doc.apply_properties(properties);
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
@@ -309,7 +309,7 @@ impl Document {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = ElementData::parse(reader, e)?;
-                        let key = self.add(elem)?;
+                        let key = self.add(elem,None)?;
 
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_key) = stack.last() {
@@ -320,7 +320,7 @@ impl Document {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
                         let elem = ElementData::parse(reader, e)?;
-                        let key = self.add(elem)?;
+                        let key = self.add(elem,None)?;
                         stack.push(key);
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {

@@ -20,6 +20,7 @@ pub type SubsetKey = u16;
 pub type ClassKey = u32;
 
 pub type Class = String;
+pub type Subset = String;
 
 //foliaspec:elementtype
 #[repr(u8)]

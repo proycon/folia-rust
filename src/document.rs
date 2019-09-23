@@ -77,9 +77,9 @@ impl Document {
             BodyType::Text => ElementData::new(ElementType::Text),
             BodyType::Speech => ElementData::new(ElementType::Speech),
         };
-        body = document.encode(body)?;
+        body = document.encode(body, None)?;
         debug_assert!(!body.encodable());
-        document.add(body)?;
+        document.add(body, None)?;
         document.apply_properties(properties)?;
         Ok(document)
     }
@@ -135,21 +135,21 @@ impl Document {
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
     pub fn add_element(&mut self, element: ElementData) -> Result<ElementKey, FoliaError> {
-        <Self as Store<ElementData,ElementKey>>::add(self, element)
+        <Self as Store<ElementData,ElementKey>>::add(self, element, None)
     }
 
     ///Add a declaration. It is strongly recommended to use ``declare()`` instead
     ///because this one adds a declaration without any checks.
     ///Returns the key.
     pub fn add_declaration(&mut self, declaration: Declaration) -> Result<DecKey, FoliaError> {
-        <Self as Store<Declaration,DecKey>>::add(self, declaration)
+        <Self as Store<Declaration,DecKey>>::add(self, declaration, None)
     }
 
     ///Add an processor the document (but the processor will be an orphan and not in the processor
     ///chain!). You may want to use ``add_processor()`` instead to add to the provenance chain or
     ///``add_subprocessor()`` to add a processor as a subprocessor.
     pub fn add_provenance(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        <Self as Store<Processor,ProcKey>>::add(self, processor)
+        <Self as Store<Processor,ProcKey>>::add(self, processor, None)
     }
 
     //************** Higher-order methods for adding things ********************
@@ -157,7 +157,7 @@ impl Document {
     ///Adds a new element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
     pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: ElementData) -> Result<ElementKey, FoliaError> {
-        match self.add_element(element) {
+        match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
             Ok(child_key) => {
                 self.attach_element(parent_key, child_key)?;
                 Ok(child_key)
@@ -227,7 +227,7 @@ impl Document {
     ///Add an element to the provenance chain
     ///Returns the key
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
-        let child_key = self.add(processor);
+        let child_key = self.add(processor, None);
         if let Ok(child_key) = child_key {
             self.provenancestore.chain.push(child_key);
         }
@@ -237,7 +237,7 @@ impl Document {
     ///Add a processor as a subprocessor
     ///Returns the key
     pub fn add_subprocessor(&mut self, parent_key: ProcKey, processor: Processor) -> Result<ProcKey, FoliaError> {
-        let child_key = self.add(processor);
+        let child_key = self.add(processor, None);
         if let Ok(child_key) = child_key {
             self.attach_processor(parent_key, child_key)?;
         }
@@ -407,7 +407,7 @@ impl Store<ElementData,ElementKey> for Document {
     ///It does not handle relations between elements (data/children and parent)
     ///nor does it add the element itself to the store
     ///to the store).
-    fn encode(&mut self, mut element: ElementData) -> Result<ElementData, FoliaError> {
+    fn encode(&mut self, mut element: ElementData, context: Option<ElementKey>) -> Result<ElementData, FoliaError> {
         if !element.encodable() {
             //already encoded, nothing to do
             return Ok(element);
@@ -416,6 +416,7 @@ impl Store<ElementData,ElementKey> for Document {
         let mut declaration_key: Option<DecKey> = None;
         let mut class_key: Option<ClassKey> = None;
         let mut processor_key: Option<ProcKey> = None;
+        let mut subset_key: Option<SubsetKey> = None;
 
         //encode the element for storage
         if let Some(annotationtype) = element.elementtype.annotationtype() {
@@ -425,13 +426,46 @@ impl Store<ElementData,ElementKey> for Document {
             declaration_key  = Some(deckey);
 
             if let Ok(Some(class)) = element.class() {
-                if let Ok(clskey) = self.add_class(deckey, &class.to_string()) {
-                    class_key = Some(clskey);
+                if let Some(declaration) = self.get_mut_declaration(deckey) {
+                    if let Ok(clskey) = declaration.add_class(Cow::Borrowed(class)) {
+                        class_key = Some(clskey);
+                    }
                 }
             }
 
             if let Some(declaration) = self.get_declaration(deckey) {
                 processor_key = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
+            }
+        } else {
+            match element.elementtype {
+                ElementType::Feature => {
+                    if let Some(parent_key) = context {
+                        //get the declaration key from the parent context:
+                        let parent = self.get_elementdata(parent_key).ok_or( FoliaError::InternalError("Context for feature does not exist!".to_string()))?;
+
+                        let deckey = self.declare(element.elementtype.annotationtype().expect("Unwrapping annotation type of parent"), &element.set().unwrap().map(|s| s.to_string()),  &None)?;
+                        declaration_key  = Some(deckey);
+
+                        if let Some(declaration) = self.get_mut_declaration(deckey) {
+                            if let Ok(Some(class)) = element.class() {
+                                if let Ok(clskey) = declaration.add_subclass(Cow::Borrowed(class)) {
+                                    class_key = Some(clskey);
+                                }
+                            }
+                            if let Ok(Some(subset)) = element.subset() {
+                                if let Ok(subsetkey) = declaration.add_subset(Cow::Borrowed(subset)) {
+                                    subset_key = Some(subsetkey);
+                                }
+                            }
+                        }
+
+
+                    } else {
+                        return Err(FoliaError::InternalError("No context provided for feature".to_string()));
+                    }
+                }
+                _ => {
+                }
             }
         }
 
@@ -452,6 +486,9 @@ impl Store<ElementData,ElementKey> for Document {
         }
         if let Some(processor_key) = processor_key {
             element.attribs.push(Attribute::ProcessorRef(processor_key));
+        }
+        if let Some(subset_key) = subset_key {
+            element.attribs.push(Attribute::SubsetRef(subset_key));
         }
 
         Ok(element)

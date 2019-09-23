@@ -78,6 +78,7 @@ pub enum Attribute {
     Href(String),
     Format(String),
     Subset(String),
+    SubsetRef(SubsetKey), //encoded form
 
 }
 
@@ -98,7 +99,7 @@ impl Attribute {
     ///Can the attribute be decoded? Implies it is currently encoded (key instead of string)
     pub fn decodable(&self) -> bool {
         match self {
-            Attribute::DeclarationRef(_) | Attribute::ClassRef(_) | Attribute::ProcessorRef(_) => true,
+            Attribute::DeclarationRef(_) | Attribute::ClassRef(_) | Attribute::ProcessorRef(_) | Attribute::SubsetRef(_) => true,
             _ => false,
         }
     }
@@ -106,7 +107,7 @@ impl Attribute {
     ///Can the attribute be encoded? Implies it is currently decoded (string instead of key)
     pub fn encodable(&self) -> bool {
         match self {
-            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) => true,
+            Attribute::Set(_) | Attribute::Class(_) | Attribute::Processor(_) | Attribute::Subset(_) => true,
             _ => false,
         }
     }
@@ -166,6 +167,7 @@ impl Attribute {
             Attribute::Href(_) => AttribType::HREF,
             Attribute::Format(_) => AttribType::FORMAT,
             Attribute::Subset(_) => AttribType::SUBSET,
+            Attribute::SubsetRef(_) => AttribType::SUBSET,
         }
     }
 

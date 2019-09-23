@@ -129,6 +129,19 @@ impl ElementData {
         Ok(None)
     }
 
+    ///Get the FoLiA subset if the element is not encoded yet, returns an error otherwise (only
+    ///applies to elements with elementtype ``ElementType::Feature``
+    pub fn subset(&self) -> Result<Option<&str>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::Subset(s) = attrib {
+                return Ok(Some(s));
+            } else if attrib.decodable() {
+                return Err(FoliaError::EncodeError("Querying for a decoded attribute on attributes that are not decoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
     ///Get the Processor ID if the element is not encoded yet, returns an error otherwise
     pub fn processor(&self) -> Result<Option<&str>,FoliaError> {
         for attrib in self.attribs().iter() {
@@ -179,6 +192,18 @@ impl ElementData {
     pub fn processor_key(&self) -> Result<Option<ProcKey>,FoliaError> {
         for attrib in self.attribs().iter() {
             if let Attribute::ProcessorRef(k) = attrib {
+                return Ok(Some(*k));
+            } else if attrib.encodable() {
+                return Err(FoliaError::EncodeError("Querying for an encoded attribute on attributes that are not encoded yet".to_string()));
+            }
+        }
+        Ok(None)
+    }
+
+    ///Get the FoLiA subset key if the element is encoded, returns an error otherwise
+    pub fn subset_key(&self) -> Result<Option<SubsetKey>,FoliaError> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::SubsetRef(k) = attrib {
                 return Ok(Some(*k));
             } else if attrib.encodable() {
                 return Err(FoliaError::EncodeError("Querying for an encoded attribute on attributes that are not encoded yet".to_string()));
@@ -249,6 +274,9 @@ pub trait ReadElement {
 
     fn class_key(&self) -> Option<ClassKey> {
         self.elementdata().class_key().expect("Unwrapping class key result")
+    }
+    fn subset_key(&self) -> Option<SubsetKey> {
+        self.elementdata().subset_key().expect("Unwrapping subset key result")
     }
     fn declaration_key(&self) -> Option<DecKey> {
         self.elementdata().declaration_key().expect("Unwrapping declaration key result")

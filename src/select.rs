@@ -63,10 +63,8 @@ impl Selector {
                     let mut result = ClassSelector::Unmatchable;
                     if let SetSelector::SomeSet(dec_key) = self.setselector {
                         if let Some(declaration) = document.get_declaration(dec_key) {
-                            if let Some(classes) = &declaration.classes {
-                                if let Some(class_key) = classes.id_to_key(class) {
-                                      result = ClassSelector::SomeClass(class_key);
-                                }
+                            if let Some(class_key) = declaration.class_key(class) {
+                                  result = ClassSelector::SomeClass(class_key);
                             }
                         }
                     }

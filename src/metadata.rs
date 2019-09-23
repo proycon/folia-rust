@@ -20,13 +20,14 @@ pub struct Declaration {
     pub alias: Option<String>,
     pub processors: Vec<ProcKey>,
     pub classes: Option<ClassStore>,
-    pub features: Option<HashMap<SubsetKey,ClassStore>>
+    pub subsets: Option<SubsetStore>,
+    pub subclasses: Option<ClassStore> //aggregates classes from all subsets
 }
 
 impl Declaration {
     ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()``.
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None, key: None, features: None }
+        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None, key: None, subclasses: None, subsets: None }
     }
 
     ///Returns the key of default processor, if any
@@ -49,57 +50,98 @@ impl Declaration {
 
     pub fn get_class(&self, class_key: ClassKey) -> Option<&str> {
         if let Some(class_store) = &self.classes {
-           class_store.get(class_key).map(|s| s.as_str())
+            class_store.get(class_key)
         } else {
             None
         }
     }
 
-    pub fn get_feature(&self, subset_key: SubsetKey, class_key: ClassKey) -> Option<&str> {
-        if let Some(features) = &self.features {
-            if let Some(class_store) = features.get(&subset_key) {
-               return class_store.get(class_key).map(|s| s.as_str());
-            }
+    pub fn get_subset(&self, subset_key: SubsetKey) -> Option<&str> {
+        if let Some(subset_store) = &self.subsets {
+            subset_store.get(subset_key)
+        } else {
+            None
         }
-        None
     }
+
+    ///get a feature by key
+    pub fn get_subclass(&self, subclass_key: ClassKey) -> Option<&str> {
+        if let Some(subclasses) = &self.subclasses {
+            subclasses.get(subclass_key)
+        } else {
+            None
+        }
+    }
+
 
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present. For an immutable variant, see ``get_class_key()``
-    pub fn add_class(&mut self, class: &Class) -> Result<ClassKey,FoliaError> {
+    pub fn add_class(&mut self, class: Cow<str>) -> Result<ClassKey,FoliaError> {
         if self.classes.is_none() {
             self.classes = Some(ClassStore::default());
         }
-        if let Some(class_key) = self.classes.as_ref().unwrap().id_to_key(class) {
+        if let Some(class_key) = self.classes.as_ref().unwrap().get_key(&class) {
             Ok(class_key)
         } else {
-            let class_key = self.classes.as_ref().unwrap().get_key(class);
-            if let Some(class_key) = class_key {
-                Ok(class_key)
-            } else {
-                self.classes.as_mut().unwrap().add(class.to_owned())
-            }
+            self.classes.as_mut().unwrap().add(class)
+        }
+    }
+
+    ///Encode a subset, adding it to the subset store if needed, returning the existing one if
+    ///already present. For an immutable variant, see ``get_subset_key()``
+    pub fn add_subset(&mut self, subset: Cow<str>) -> Result<SubsetKey,FoliaError> {
+        if self.subsets.is_none() {
+            self.subsets = Some(SubsetStore::default());
+        }
+        if let Some(subset_key) = self.subsets.as_ref().unwrap().get_key(&subset) {
+            Ok(subset_key)
+        } else {
+            self.subsets.as_mut().unwrap().add(subset)
+        }
+    }
+
+    ///Encode a subclass, adding it to the subclass store if needed, returning the existing one if
+    ///already present. For an immutable variant, see ``get_subclass_key()``
+    pub fn add_subclass(&mut self, subclass: Cow<str>) -> Result<ClassKey,FoliaError> {
+        if self.subclasses.is_none() {
+            self.subclasses = Some(ClassStore::default());
+        }
+        if let Some(subclass_key) = self.subclasses.as_ref().unwrap().get_key(&subclass) {
+            Ok(subclass_key)
+        } else {
+            self.subclasses.as_mut().unwrap().add(subclass)
         }
     }
 
 
     ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
-    pub fn get_class_key(&self, class: &str) -> Result<ClassKey,FoliaError> {
+    pub fn class_key(&self, class: &str) -> Option<ClassKey> {
         if let Some(class_store) = &self.classes {
-            if let Some(class_key) = class_store.id_to_key(class) {
-                Ok(class_key)
-            } else {
-                let class = class.to_string();
-                let class_key = class_store.get_key(&class);
-                if let Some(class_key) = class_key {
-                    Ok(class_key)
-                } else {
-                    Err(FoliaError::KeyError("[encode_class()] Class does not exist".to_string()))
-                }
+            if let Some(class_key) = class_store.get_key(class) {
+                return Some(class_key);
             }
-        } else {
-            Err(FoliaError::KeyError("[encode_class()] Class does not exist (empty class store)".to_string()))
         }
+        None
+    }
+
+    ///Encode a subset, assumes it already exists. If not, use ``add_subset()`` instead.
+    pub fn subset_key(&self, subset: &str) -> Option<SubsetKey> {
+        if let Some(subset_store) = &self.subsets {
+            if let Some(subset_key) = subset_store.get_key(subset) {
+                return Some(subset_key);
+            }
+        }
+        None
+    }
+
+    ///Encode a subclass, assumes it already exists. If not, use ``add_subclass()`` instead.
+    pub fn subclass_key(&self, subclass: &str) -> Option<ClassKey> {
+        if let Some(subclass_store) = &self.subclasses {
+            if let Some(subclass_key) = subclass_store.get_key(subclass) {
+                return Some(subclass_key);
+            }
+        }
+        None
     }
 }
 
@@ -131,31 +173,61 @@ impl Storable<ClassKey> for Class {
 ///annotation type). There are multiple class stores, which are owned by their respective ``Declaration`` (for a given set and
 ///annotation type).
 pub struct ClassStore {
-    items: Vec<Option<Box<Class>>>, //heap-allocated
-    index: HashMap<Class,ClassKey>
+    items: Vec<Option<String>>, //heap-allocated
+    index: HashMap<String,ClassKey>
 }
 
 
-impl Store<Class,ClassKey> for ClassStore {
+impl StringStore<ClassKey> for ClassStore {
 
-    fn items_mut(&mut self) -> &mut Vec<Option<Box<Class>>> {
+    fn items_mut(&mut self) -> &mut Vec<Option<String>> {
         &mut self.items
     }
-    fn index_mut(&mut self) -> &mut HashMap<Class,ClassKey> {
+    fn index_mut(&mut self) -> &mut HashMap<String,ClassKey> {
         &mut self.index
     }
 
-    fn items(&self) -> &Vec<Option<Box<Class>>> {
+    fn items(&self) -> &Vec<Option<String>> {
         &self.items
     }
-    fn index(&self) -> &HashMap<Class,ClassKey> {
+    fn index(&self) -> &HashMap<String,ClassKey> {
         &self.index
     }
-    fn iter(&self) -> std::slice::Iter<Option<Box<Class>>> {
+    fn iter(&self) -> std::slice::Iter<Option<String>> {
         self.items.iter()
     }
 }
 
+
+#[derive(Default,Clone)]
+///The declaration store holds all classes that occur (e.g. in a document for a given set and
+///annotation type). There are multiple class stores, which are owned by their respective ``Declaration`` (for a given set and
+///annotation type).
+pub struct SubsetStore {
+    items: Vec<Option<String>>, //heap-allocated
+    index: HashMap<String,SubsetKey>
+}
+
+
+impl StringStore<SubsetKey> for SubsetStore {
+
+    fn items_mut(&mut self) -> &mut Vec<Option<String>> {
+        &mut self.items
+    }
+    fn index_mut(&mut self) -> &mut HashMap<String,SubsetKey> {
+        &mut self.index
+    }
+
+    fn items(&self) -> &Vec<Option<String>> {
+        &self.items
+    }
+    fn index(&self) -> &HashMap<String,SubsetKey> {
+        &self.index
+    }
+    fn iter(&self) -> std::slice::Iter<Option<String>> {
+        self.items.iter()
+    }
+}
 
 #[derive(Default)]
 ///The declaration store holds all declarations (e.g. for a document)
@@ -218,21 +290,21 @@ impl Document {
 
     ///Encode a class, adding it to the class store if needed, returning the existing one if
     ///already present
-    pub fn add_class(&mut self, dec_key: DecKey, class: &Class) -> Result<ClassKey,FoliaError> {
+    pub fn add_class(&mut self, dec_key: DecKey, class: &String) -> Result<ClassKey,FoliaError> {
         if let Some(declaration) = self.get_mut_declaration(dec_key) {
-            declaration.add_class(class)
+            declaration.add_class(Cow::Borrowed(class.as_str()))
         } else {
-            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
+            Err(FoliaError::KeyError(format!("[add_class()] No such declaration ({})", dec_key)))
         }
     }
 
 
     ///Encode a class, assumes it already exists. If not, use ``add_class()`` instead.
-    pub fn get_class_key(&self, dec_key: DecKey, class: &str) -> Result<ClassKey,FoliaError> {
+    pub fn class_key(&self, dec_key: DecKey, class: &str) -> Result<ClassKey,FoliaError> {
         if let Some(declaration) = self.get_declaration(dec_key) {
-            declaration.get_class_key(class)
+            declaration.class_key(class).ok_or(FoliaError::KeyError(format!("[class_key()] No such class ({}) for the given declaration", class)))
         } else {
-            Err(FoliaError::KeyError(format!("[get_class_store()] No such declaration ({})", dec_key)))
+            Err(FoliaError::KeyError(format!("[class_key()] No such declaration ({})", dec_key)))
         }
     }
 
