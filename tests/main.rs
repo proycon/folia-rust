@@ -290,12 +290,50 @@ fn test008d_selector_elementgroup() {
 }
 
 #[test]
-fn test009_text() {
+fn test009a_text() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
                 match word.text(None, None, false, true) {
                     Ok(text) => assert_eq!(text, "example"),
+                    Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
+                }
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test009b_text_composed_retaintokenisation() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(sentence) = doc.get_element_by_id("example.p.1.s.1") {
+                match sentence.text(None, None, false, true) {
+                    Ok(text) => assert_eq!(text, "Hello world !"),
+                    Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
+                }
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test009c_text_composed_detokenise() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(sentence) = doc.get_element_by_id("example.p.1.s.1") {
+                match sentence.text(None, None, false, true) {
+                    Ok(text) => assert_eq!(text, "Hello world!"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
                 }
             } else {
