@@ -219,7 +219,7 @@ impl Document {
                         }
                         if let Some(declaration_key) = element.declaration_key() {
                             //check if the declaration is the default, no need to serialise set then
-                            if !dec_is_default.get(declaration_key as usize).expect("checking default") {
+                            if !dec_is_default.get(declaration_key as usize).expect("checking default")  && element.elementtype() != ElementType::Feature {
                                 //decode encoded attributes
                                 if let Some(set) = element.set() {
                                     start.push_attribute(("set", set) );
