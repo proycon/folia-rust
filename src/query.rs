@@ -33,6 +33,8 @@ pub struct Query {
     pub class: Cmp<String>,
     pub processor: Cmp<String>,
     pub subset: Cmp<String>,
+    pub annotator: Cmp<String>,
+    pub annotatortype: Cmp<ProcessorType>,
     pub confidence: Cmp<f64>
 }
 
@@ -101,6 +103,16 @@ impl Query {
 
     pub fn processor(mut self, value: Cmp<String>) -> Self {
         self.processor = value;
+        self
+    }
+
+    pub fn annotator(mut self, value: Cmp<String>) -> Self {
+        self.annotator = value;
+        self
+    }
+
+    pub fn annotatortype(mut self, value: Cmp<ProcessorType>) -> Self {
+        self.annotatortype = value;
         self
     }
 

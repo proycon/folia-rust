@@ -26,6 +26,8 @@ pub struct Selector {
     pub processor: Cmp<ProcKey>,
     pub subset: Cmp<SubsetKey>,
     pub confidence: Cmp<f64>,
+    pub annotator: Cmp<String>,
+    pub annotatortype: Cmp<ProcessorType>,
     pub next: Option<Box<Selector>>
 }
 
@@ -215,12 +217,15 @@ impl Selector {
                         Cmp::Any | Cmp::Some => true,
                         Cmp::None | Cmp::Unmatchable => false,
                     };
+                    //we do explicit checks against Cmp::Any prior to calling matches() to speed things up
                     matches &&
-                    self.elementtype.matches(Some(&element.elementtype())) &&
-                    self.set.matches(element.declaration_key().as_ref()) &&
-                    self.subset.matches(element.subset_key().as_ref()) &&
-                    self.class.matches(element.class_key().as_ref()) &&
-                    self.processor.matches(element.processor_key().as_ref())
+                    (self.elementtype == Cmp::Any || self.elementtype.matches(Some(&element.elementtype()))) &&
+                    (self.set == Cmp::Any || self.set.matches(element.declaration_key().as_ref())) &&
+                    (self.subset == Cmp::Any || self.subset.matches(element.subset_key().as_ref())) &&
+                    (self.class == Cmp::Any || self.class.matches(element.class_key().as_ref())) &&
+                    (self.processor == Cmp::Any || self.processor.matches(element.processor_key().as_ref())) &&
+                    (self.annotator == Cmp::Any || self.annotator.matches(element.annotator().map(|s| s.to_string()).as_ref())) &&
+                    (self.annotatortype == Cmp::Any || self.annotatortype.matches(element.annotatortype().as_ref()))
                 } else {
                     //element does not exist, can never match
                     false
