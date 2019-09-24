@@ -36,6 +36,7 @@ pub use query::*;
 pub use select::*;
 pub use specification::*;
 pub use text::*;
+pub use metadata::*;
 
 
 

@@ -157,7 +157,9 @@ fn test005_decode() {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
                 assert_eq!(word.set().expect("Unwrapping set"), "https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl");
                 assert_eq!(word.class().expect("Unwrapping class"), "WORD");
-                assert_eq!(word.processor().expect("Unwrapping class"), "p1");
+                assert_eq!(word.processor().expect("Unwrapping processor"), "p1");
+                assert_eq!(word.annotator().expect("Unwrapping annotator"), "proycon");
+                assert_eq!(word.annotatortype().expect("Unwrapping annotator"), ProcessorType::Manual);
             } else {
                 assert!(false, "Word not found");
             }
