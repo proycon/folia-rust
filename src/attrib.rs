@@ -12,6 +12,7 @@ use quick_xml::events::Event;
 use crate::error::*;
 use crate::common::*;
 use crate::types::*;
+use crate::metadata::*;
 use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
@@ -60,7 +61,7 @@ pub enum Attribute {
     Class(String),
     ClassRef(ClassKey),
     Annotator(String),
-    AnnotatorType(String),
+    AnnotatorType(ProcessorType),
     Confidence(f64),
     N(String),
     DateTime(String),
@@ -115,10 +116,11 @@ impl Attribute {
     pub fn as_str(&self) -> Result<&str,FoliaError> {
         match self {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
-            Attribute::AnnotatorType(s) | Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
+            Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
             Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s)
                 => Ok(&s),
+            Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
             _ =>  Err(FoliaError::TypeError("Attribute can't be cast as_str, use to_string() instead".to_string()))
         }
@@ -204,7 +206,13 @@ impl Attribute {
                     Ok(Attribute::Annotator(value))
                 },
                 b"annotatortype" => {
-                    Ok(Attribute::AnnotatorType(value))
+                    match value.as_str() {
+                        "auto" => Ok(Attribute::AnnotatorType(ProcessorType::Auto)),
+                        "manual" => Ok(Attribute::AnnotatorType(ProcessorType::Manual)),
+                        "generator" => Ok(Attribute::AnnotatorType(ProcessorType::Generator)),
+                        "datasource" => Ok(Attribute::AnnotatorType(ProcessorType::DataSource)),
+                        other => Err(FoliaError::ParseError(format!("Invalid value for annotatortype: {}", other)))
+                    }
                 },
                 b"subset" => {
                     Ok(Attribute::Subset(value))

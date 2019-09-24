@@ -297,6 +297,36 @@ pub trait ReadElement {
         }
     }
 
+    ///Get the annotator (i.e. the processor name) associated with this element
+    fn annotator(&self) -> Option<&str> {
+        if let Some(processor) = self.get_processor() {
+            Some(processor.name.as_str())
+        } else {
+            //fall back to old annotator
+            for attrib in self.attribs() {
+                if let Attribute::Annotator(annotator) = attrib {
+                    return Some(annotator);
+                }
+            }
+            None
+        }
+    }
+
+    ///Get the annotator (i.e. the processor name) associated with this element
+    fn annotatortype(&self) -> Option<ProcessorType> {
+        if let Some(processor) = self.get_processor() {
+            Some(processor.processortype)
+        } else {
+            //fall back to old annotator
+            for attrib in self.attribs() {
+                if let Attribute::AnnotatorType(annotatortype) = attrib {
+                    return Some(*annotatortype);
+                }
+            }
+            None
+        }
+    }
+
     fn class_key(&self) -> Option<ClassKey> {
         self.elementdata().class_key().expect("Unwrapping class key result")
     }
