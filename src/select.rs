@@ -432,4 +432,6 @@ impl<'a> SelectElements<'a> for Element<'a> {
     fn select_by_key(&'a self, key: ElementKey, selector: Selector, recursive: bool) -> SelectElementsIterator<'a> {
         SelectElementsIterator::new(self.document().expect("Obtaining document for element (will fail on orphans!)"), selector, key, recursive)
     }
+
 }
+

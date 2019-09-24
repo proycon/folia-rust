@@ -18,6 +18,7 @@ use crate::attrib::*;
 use crate::elementstore::*;
 use crate::store::*;
 use crate::metadata::*;
+use crate::query::*;
 use crate::select::*;
 use crate::text::*;
 use crate::document::{Document};
@@ -345,9 +346,6 @@ pub trait ReadElement {
         }
     }
 
-    fn get_annotation(&self, annotationtype: AnnotationType) -> Option<Element> {
-        unimplemented!() //TODO
-    }
 }
 
 impl<'a> PartialEq for Element<'a> {
@@ -401,6 +399,25 @@ impl<'a> ReadElement for Element<'a> {
     }
     fn document(&self) -> Option<&Document> {
         self.document
+    }
+}
+
+impl<'a> Element<'a> {
+    ///High-level function to get a particular annotation by annotation type and set. This function
+    ///returns only one annotation and returns None if it does not exists.
+    pub fn get_annotation(&self, annotationtype: AnnotationType, set: Cmp<String>) -> Option<Element> {
+        if self.document.is_none() { //saves us from a panic in the deeper call
+            None
+        } else {
+            self.get_annotations(annotationtype,set).next().map(|e| e.element)
+        }
+    }
+
+    ///High-level function to get a particular annotation by annotation type and set, returns an
+    ///iterator.
+    pub fn get_annotations(&self, annotationtype: AnnotationType, set: Cmp<String>) -> SelectElementsIterator {
+        let elementtype = annotationtype.elementtype();
+        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(elementtype)).set(set)), false)
     }
 }
 

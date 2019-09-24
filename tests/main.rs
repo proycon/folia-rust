@@ -309,11 +309,14 @@ fn test009_text() {
 }
 
 #[test]
-fn test010_feature() {
+fn test010_get_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(pos) = word.get_annotation(AnnotationType::POS) {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any) {
+                    assert_matches!(pos.class(),Some("noun"));
+                } else {
+                    assert!(false, "annotation not found");
                 }
             } else {
                 assert!(false, "word not found");
