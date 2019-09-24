@@ -20,6 +20,7 @@ pub struct Selector {
     pub datatypes: Vec<DataTypeSelector>, //if left empty, matches anything
     pub elementtype: Cmp<ElementType>,
     pub elementgroup: Cmp<ElementGroup>,
+    pub contexttype: Cmp<ElementType>, //only used for features
     pub set: Cmp<DecKey>,
     pub class: Cmp<ClassKey>,
     pub processor: Cmp<ProcKey>,
@@ -38,13 +39,20 @@ impl Selector {
         let mut selector = Selector::default();
         selector.elementtype = query.elementtype.clone();
         selector.elementgroup = query.elementgroup.clone();
+        selector.contexttype = query.contexttype.clone();
         selector.datatypes = vec![DataTypeSelector::Elements];
+        //if we have subsets, we use contexttype instead of elementtype (because elementtype will
+        //always be ElementType::feature)
+        let elementtype_source: &Cmp<ElementType> = match &query.subset {
+            Cmp::Some | Cmp::Is(_) =>  &query.contexttype,
+            _ => &query.elementtype,
+        };
         selector.set = match &query.set {
             Cmp::Is(set) => {
                 //encode the set from the query, given the document, if this fails then the set is
                 //unmatchable
                 let mut result: Cmp<DecKey> = Cmp::Unmatchable; //will try to falsify this
-                if let Cmp::Is(elementtype) = query.elementtype {
+                if let Cmp::Is(elementtype) = elementtype_source {
                     if let Some(annotationtype) = elementtype.annotationtype() {
                         if let Some(deckey) = document.get_declaration_key_by_id(&Declaration::index_id(annotationtype,&Some(set.as_str()))) {
                             result = Cmp::Is(deckey);
@@ -58,7 +66,7 @@ impl Selector {
             Cmp::None => {
                 //even though set is None, we obtain the associated declaration
                 let mut result: Cmp<DecKey> = Cmp::Unmatchable; //will try to falsify this
-                if let Cmp::Is(elementtype) = query.elementtype {
+                if let Cmp::Is(elementtype) = elementtype_source {
                     if let Some(annotationtype) = elementtype.annotationtype() {
                         if let Some(deckey) = document.get_declaration_key_by_id(&Declaration::index_id(annotationtype,&None)) {
                             result = Cmp::Is(deckey);
@@ -69,6 +77,7 @@ impl Selector {
             },
             Cmp::Unmatchable => Cmp::Unmatchable,
         };
+        //println!("{:?} -> {:?}",query.set,selector.set); //DEBUG
         selector.subset = match &query.subset {
             Cmp::Is(subset) => {
                 let mut result: Cmp<SubsetKey> = Cmp::Unmatchable; //will try to falsify this
@@ -79,7 +88,7 @@ impl Selector {
                         }
                     }
                 } else {
-                    return Err(FoliaError::QueryError(format!("Selector::from_query() can't match on a subset without matching on a set too. Add a .set() call. (selector.set={:?})",selector.set) ));
+                    return Err(FoliaError::QueryError(format!("Selector::from_query() can't match on a subset without a contexttype and a set, Add a .contextype() and .set() call. (selector.contexttype={:?}, selector.set={:?})",selector.contexttype, selector.set) ));
                 }
                 result
             },

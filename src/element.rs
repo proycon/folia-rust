@@ -428,11 +428,18 @@ impl<'a> Element<'a> {
 
     ///High-level function to get a particular feature by annotation type and set, returns an
     pub fn get_features(&self, subset: Cmp<String>) -> SelectElementsIterator {
-        let set: Cmp<String> = match self.set() {
-            Some(set) => Cmp::Is(set.to_string()),
-            None => Cmp::None
-        };
-        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_features()"), &Query::select().element(Cmp::Is(ElementType::Feature)).set(set).subset(subset)).expect("Compiling query for get_features()"), false)
+        self.select(
+                Selector::from_query(self.document().expect("Unwrapping document on element for get_features()"),
+                    &Query::select()
+                           .element(Cmp::Is(ElementType::Feature))
+                           .contexttype(Cmp::Is(self.elementtype()))
+                           .set(match self.set() {
+                               Some(set) => Cmp::Is(set.to_string()),
+                               None => Cmp::None,
+                            })
+                           .subset(subset)
+                ).expect("Compiling query for get_features()")
+        , false)
     }
 
 

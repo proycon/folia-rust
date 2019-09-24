@@ -28,6 +28,7 @@ pub struct Query {
     pub action: Action,
     pub elementtype: Cmp<ElementType>,
     pub elementgroup: Cmp<ElementGroup>,
+    pub contexttype: Cmp<ElementType>, //needed for features
     pub set: Cmp<String>,
     pub class: Cmp<String>,
     pub processor: Cmp<String>,
@@ -75,6 +76,11 @@ impl<T>  Cmp<T> where T: PartialEq, T: Debug {
 impl Query {
     pub fn element(mut self, value: Cmp<ElementType>) -> Self {
         self.elementtype = value;
+        self
+    }
+
+    pub fn contexttype(mut self, value: Cmp<ElementType>) -> Self {
+        self.contexttype = value;
         self
     }
 

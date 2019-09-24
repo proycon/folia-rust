@@ -7,11 +7,11 @@ At the moment, it is  still pre-alpha, under heavy development, and not function
 * [x] Full in memory representation
     * [x] Memory saving
 * [ ] Streaming parser / partial representation
-* [ ] Features with subsets
+* [x] Features with subsets
 * [ ] Editing/Mutability
+    * (low-level implementation ready, higher level API needed)
 
 * [x] Select mechanism
-
 
 * [x] Structure annotation
 * [x] Inline annotation
