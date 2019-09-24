@@ -29,6 +29,7 @@ pub struct Query {
     pub set: Cmp<String>,
     pub class: Cmp<String>,
     pub processor: Cmp<String>,
+    pub subset: Cmp<String>,
     pub confidence: Cmp<f64>
 }
 
@@ -94,6 +95,12 @@ impl Query {
         self.processor = value;
         self
     }
+
+    pub fn subset(mut self, value: Cmp<String>) -> Self {
+        self.set = value;
+        self
+    }
+
 
     pub fn confidence(mut self, value: Cmp<f64>) -> Self {
         self.confidence = value;

@@ -23,6 +23,7 @@ pub struct Selector {
     pub set: Cmp<DecKey>,
     pub class: Cmp<ClassKey>,
     pub processor: Cmp<ProcKey>,
+    pub subset: Cmp<SubsetKey>,
     pub confidence: Cmp<f64>,
     pub next: Option<Box<Selector>>
 }
@@ -57,13 +58,44 @@ impl Selector {
             Cmp::None => Cmp::None,
             Cmp::Unmatchable => Cmp::Unmatchable,
         };
+        selector.subset = match &query.subset {
+            Cmp::Is(subset) => {
+                let mut result: Cmp<SubsetKey> = Cmp::Unmatchable; //will try to falsify this
+                if let Cmp::Is(deckey) = selector.set {
+                    if let Some(declaration) = document.get_declaration(deckey) {
+                        if let Some(subset_key) = declaration.subset_key(subset.as_str()) {
+                            result = Cmp::Is(subset_key);
+                        }
+                    }
+                }
+                result
+            },
+            Cmp::Any => Cmp::Any,
+            Cmp::Some => Cmp::Some,
+            Cmp::None => Cmp::None,
+            Cmp::Unmatchable => Cmp::Unmatchable,
+        };
         selector.class = match &query.class {
             Cmp::Is(class) => {
                 let mut result: Cmp<ClassKey> = Cmp::Unmatchable; //will try to falsify this
+                if let Cmp::Is(subset) = selector.subset {
+
+                }
                 if let Cmp::Is(deckey) = selector.set {
                     if let Some(declaration) = document.get_declaration(deckey) {
-                        if let Some(class_key) = declaration.class_key(class.as_str()) {
-                            result = Cmp::Is(class_key);
+                        match selector.subset {
+                            Cmp::Is(_) | Cmp::Some =>  {
+                                //we have a subset, so we assume the class is a subclass and encode it as such
+                                if let Some(class_key) = declaration.subclass_key(class.as_str()) {
+                                    result = Cmp::Is(class_key);
+                                }
+                            },
+                            _ =>  {
+                                //normal class
+                                if let Some(class_key) = declaration.class_key(class.as_str()) {
+                                    result = Cmp::Is(class_key);
+                                }
+                            }
                         }
                     }
                 }

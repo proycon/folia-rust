@@ -404,9 +404,9 @@ impl<'a> ReadElement for Element<'a> {
 
 impl<'a> Element<'a> {
     ///High-level function to get a particular annotation by annotation type and set. This function
-    ///returns only one annotation and returns None if it does not exists.
+    ///returns only one annotation (the first one if there are multiple) and returns None if it does not exists.
     pub fn get_annotation(&self, annotationtype: AnnotationType, set: Cmp<String>) -> Option<Element> {
-        if self.document.is_none() { //saves us from a panic in the deeper call
+        if self.document.is_none() { //saves us from a panic in the deeper callV
             None
         } else {
             self.get_annotations(annotationtype,set).next().map(|e| e.element)
@@ -418,6 +418,24 @@ impl<'a> Element<'a> {
     pub fn get_annotations(&self, annotationtype: AnnotationType, set: Cmp<String>) -> SelectElementsIterator {
         let elementtype = annotationtype.elementtype();
         self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(elementtype)).set(set)), false)
+    }
+
+    ///High-level function to get a particular feature by annotation type and set, returns an
+    pub fn get_features(&self, subset: Cmp<String>) -> SelectElementsIterator {
+        let set: Cmp<String> = match self.set() {
+            Some(set) => Cmp::Is(set.to_string()),
+            None => Cmp::None
+        };
+        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(ElementType::Feature)).set(set).subset(subset)), false)
+    }
+
+
+    pub fn get_feature(&self, subset: Cmp<String>) -> Option<Element> {
+        if self.document.is_none() { //saves us from a panic in the deeper call
+            None
+        } else {
+            self.get_features(subset).next().map(|e| e.element)
+        }
     }
 }
 

@@ -328,3 +328,27 @@ fn test010_get_annotation() {
     }
 }
 
+#[test]
+fn test011_features() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any) {
+                    if let Some(feature) = pos.get_feature(Cmp::Is("number".to_string())) {
+                        assert_matches!(feature.class(), Some("singular"));
+                    } else {
+                        assert!(false, "feature not found");
+                    }
+                } else {
+                    assert!(false, "annotation not found");
+                }
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
