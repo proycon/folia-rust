@@ -23,6 +23,9 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
           <pos-annotation set="adhoc">
              <annotator processor="p2" />
           </pos-annotation>
+          <chunking-annotation set="shallowsyntaxset">
+             <annotator processor="p2" />
+          </chunking-annotation>
       </annotations>
       <provenance>
          <processor xml:id="p1" name="proycon" type="manual" />
@@ -71,6 +74,12 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
          <w xml:id="example.p.1.s.2.w.8" class="PUNCTUATION">
             <t>.</t>
          </w>
+         <chunking>
+            <chunk class="np">
+                <wref id="example.p.1.s.2.w.3" />
+                <wref id="example.p.1.s.2.w.4" />
+            </chunk>
+         </chunking>
       </s>
     </p>
   </text>

@@ -239,7 +239,7 @@ impl Attribute {
                 b"metadata" => {
                     Ok(Attribute::Metadata(value))
                 },
-                b"idref" => {
+                b"id" => {
                     Ok(Attribute::Idref(value))
                 },
                 b"confidence" => {
