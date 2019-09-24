@@ -17,7 +17,7 @@ use crate::query::*;
 #[derive(Default,Clone)]
 pub struct Selector {
     pub action: Action,
-    pub datatypes: Vec<DataTypeSelector>,
+    pub datatypes: Vec<DataTypeSelector>, //if left empty, matches anything
     pub elementtype: Cmp<ElementType>,
     pub elementgroup: Cmp<ElementGroup>,
     pub set: Cmp<DecKey>,
@@ -90,27 +90,44 @@ impl Selector {
         selector
     }
 
+    ///Sets the selector to also yield Folia Elements (you usually don't need this as it's the
+    ///default or already implied in Selector construction)
+    pub fn with_elements(mut self) -> Self {
+        self.datatypes.push(DataTypeSelector::Elements);
+        self
+    }
+
+    ///Sets the selector to also yield XML text
     pub fn with_text(mut self) -> Self {
         self.datatypes.push(DataTypeSelector::Text);
         self
     }
+
+    ///Sets the selector to also yield XML comments
     pub fn with_comments(mut self) -> Self {
         self.datatypes.push(DataTypeSelector::Comments);
         self
     }
 
+    ///Constrains the selector by element type
     pub fn element(mut self, value: Cmp<ElementType>) -> Self {
         self.elementtype = value;
         self
     }
 
-    pub fn new() -> Self {
-        Selector::default()
-    }
-    pub fn all_data() -> Self {
-        Selector::default().with_text().with_comments()
+    ///Creates a selector on elements
+    pub fn elements() -> Self {
+        let mut selector = Selector::default();
+        selector.datatypes = vec![DataTypeSelector::Elements];
+        selector
     }
 
+    ///Creates a selector on all data (alias for Selector::default())
+    pub fn all_data() -> Self {
+        Selector::default()
+    }
+
+    ///Constrains the selector by element group
     pub fn elementgroup(mut self, value: Cmp<ElementGroup>) -> Self {
         self.elementgroup = value;
         self
@@ -139,7 +156,7 @@ impl Selector {
         //we attempt to falsify the match
         let matches = match item {
             DataType::Element(key) => {
-                if !self.datatypes.contains(&DataTypeSelector::Elements) {
+                if !self.datatypes.is_empty() && !self.datatypes.contains(&DataTypeSelector::Elements) {
                     false
                 } else if let Some(element) = document.get_element(*key) {
                     let mut matches = match self.elementgroup {

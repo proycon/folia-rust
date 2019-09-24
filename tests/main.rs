@@ -197,7 +197,7 @@ fn test007_metadata() {
 fn test008a_selector_type() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select_data(Selector::new().element(Cmp::Is(ElementType::Word)), true);
+            let selector = doc.select_data(Selector::elements().element(Cmp::Is(ElementType::Word)), true);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
