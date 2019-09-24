@@ -129,7 +129,7 @@ fn test003_parse() {
 fn test004_get_word_from_index() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8"), DocumentProperties::default()) {
         Ok(doc) => {
-            if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
+            if let Some(_word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
                 assert!(true);
             } else {
                 assert!(false, "unable to get word");
@@ -222,7 +222,7 @@ fn test008b_selector_set_class() {
                         &Query::select()
                         .element(Cmp::Is(ElementType::Word))
                         .set(Cmp::Is(set.to_string()))
-                        .class(Cmp::Is("PUNCTUATION".to_string())))
+                        .class(Cmp::Is("PUNCTUATION".to_string()))).expect("Compiling query")
             , true);
             assert!(selector.selector().matchable());
             let mut count = 0;
@@ -248,7 +248,7 @@ fn test008c_elementselector_set_class() {
                         &Query::select()
                         .element(Cmp::Is(ElementType::Word))
                         .set(Cmp::Is(set.to_string()))
-                        .class(Cmp::Is("PUNCTUATION".to_string())))
+                        .class(Cmp::Is("PUNCTUATION".to_string()))).expect("Compiling query")
             , true);
             assert!(selector.selector().matchable());
             let mut count = 0;
@@ -273,7 +273,7 @@ fn test008d_selector_elementgroup() {
                         &Query::select()
                         .elementgroup(Cmp::Is(ElementGroup::Structure))
                         .set(Cmp::Any)
-                        .class(Cmp::Any))
+                        .class(Cmp::Any)).expect("Compiling query")
             , true);
             assert!(selector.selector.matchable());
             let mut count = 0;
@@ -335,6 +335,8 @@ fn test011_features() {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
                 if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any) {
                     if let Some(feature) = pos.get_feature(Cmp::Is("number".to_string())) {
+                        assert_matches!(feature.elementtype(), ElementType::Feature);
+                        assert_matches!(feature.subset(), Some("number"));
                         assert_matches!(feature.class(), Some("singular"));
                     } else {
                         assert!(false, "feature not found");

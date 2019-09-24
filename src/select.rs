@@ -34,7 +34,7 @@ pub struct Selector {
 impl Selector {
     ///Builds a new selector given a query and a document (effectively encoding the query into a
     ///selector for the specified document)
-    pub fn from_query(document: &Document, query: &Query) -> Self {
+    pub fn from_query(document: &Document, query: &Query) -> Result<Self,FoliaError> {
         let mut selector = Selector::default();
         selector.elementtype = query.elementtype.clone();
         selector.elementgroup = query.elementgroup.clone();
@@ -55,7 +55,18 @@ impl Selector {
             },
             Cmp::Any => Cmp::Any,
             Cmp::Some => Cmp::Some,
-            Cmp::None => Cmp::None,
+            Cmp::None => {
+                //even though set is None, we obtain the associated declaration
+                let mut result: Cmp<DecKey> = Cmp::Unmatchable; //will try to falsify this
+                if let Cmp::Is(elementtype) = query.elementtype {
+                    if let Some(annotationtype) = elementtype.annotationtype() {
+                        if let Some(deckey) = document.get_declaration_key_by_id(&Declaration::index_id(annotationtype,&None)) {
+                            result = Cmp::Is(deckey);
+                        }
+                    }
+                }
+                result
+            },
             Cmp::Unmatchable => Cmp::Unmatchable,
         };
         selector.subset = match &query.subset {
@@ -67,6 +78,8 @@ impl Selector {
                             result = Cmp::Is(subset_key);
                         }
                     }
+                } else {
+                    return Err(FoliaError::QueryError(format!("Selector::from_query() can't match on a subset without matching on a set too. Add a .set() call. (selector.set={:?})",selector.set) ));
                 }
                 result
             },
@@ -78,9 +91,6 @@ impl Selector {
         selector.class = match &query.class {
             Cmp::Is(class) => {
                 let mut result: Cmp<ClassKey> = Cmp::Unmatchable; //will try to falsify this
-                if let Cmp::Is(subset) = selector.subset {
-
-                }
                 if let Cmp::Is(deckey) = selector.set {
                     if let Some(declaration) = document.get_declaration(deckey) {
                         match selector.subset {
@@ -119,7 +129,7 @@ impl Selector {
             Cmp::None => Cmp::None,
             Cmp::Unmatchable => Cmp::Unmatchable,
         };
-        selector
+        Ok(selector)
     }
 
     ///Sets the selector to also yield Folia Elements (you usually don't need this as it's the
@@ -199,6 +209,7 @@ impl Selector {
                     matches &&
                     self.elementtype.matches(Some(&element.elementtype())) &&
                     self.set.matches(element.declaration_key().as_ref()) &&
+                    self.subset.matches(element.subset_key().as_ref()) &&
                     self.class.matches(element.class_key().as_ref()) &&
                     self.processor.matches(element.processor_key().as_ref())
                 } else {

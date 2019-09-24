@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::common::*;
 use crate::types::*;
 use crate::error::*;
@@ -33,8 +35,8 @@ pub struct Query {
     pub confidence: Cmp<f64>
 }
 
-#[derive(Clone,PartialEq)]
-pub enum Cmp<T> {
+#[derive(Clone,PartialEq,Debug)]
+pub enum Cmp<T> where T: Debug {
     ///Any includes None, unlike Some
     Any,
     Is(T),
@@ -45,13 +47,13 @@ pub enum Cmp<T> {
     Unmatchable,
 }
 
-impl<T> Default for Cmp<T> {
+impl<T> Default for Cmp<T> where T: Debug {
     fn default() -> Cmp<T> {
         Cmp::Any
     }
 }
 
-impl<T>  Cmp<T> where T: PartialEq {
+impl<T>  Cmp<T> where T: PartialEq, T: Debug {
     pub fn matches(&self, other: Option<&T>) -> bool {
         match self {
             Cmp::Any => true,
@@ -97,7 +99,7 @@ impl Query {
     }
 
     pub fn subset(mut self, value: Cmp<String>) -> Self {
-        self.set = value;
+        self.subset = value;
         self
     }
 

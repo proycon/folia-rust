@@ -276,7 +276,13 @@ pub trait ReadElement {
     fn class(&self) -> Option<&str> {
         if let Some(class_key) =  self.class_key() {
             if let Some(declaration) = self.get_declaration() {
-                return declaration.get_class(class_key);
+                if self.subset_key().is_some() { //we have a subset (this happens on ElementType::Feature only)
+                    //class is a subclass
+                    return declaration.get_subclass(class_key);
+                } else {
+                    //class is a normal class
+                    return declaration.get_class(class_key);
+                }
             }
         }
         None
@@ -417,7 +423,7 @@ impl<'a> Element<'a> {
     ///iterator.
     pub fn get_annotations(&self, annotationtype: AnnotationType, set: Cmp<String>) -> SelectElementsIterator {
         let elementtype = annotationtype.elementtype();
-        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(elementtype)).set(set)), false)
+        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(elementtype)).set(set)).expect("Compiling query for get_annotations()"), false)
     }
 
     ///High-level function to get a particular feature by annotation type and set, returns an
@@ -426,7 +432,7 @@ impl<'a> Element<'a> {
             Some(set) => Cmp::Is(set.to_string()),
             None => Cmp::None
         };
-        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(ElementType::Feature)).set(set).subset(subset)), false)
+        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_features()"), &Query::select().element(Cmp::Is(ElementType::Feature)).set(set).subset(subset)).expect("Compiling query for get_features()"), false)
     }
 
 
