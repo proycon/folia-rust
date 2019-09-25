@@ -40,7 +40,7 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
             <t>Hello</t>
          </w>
          <w xml:id="example.p.1.s.1.w.2" class="WORD" space="no">
-            <t>World</t>
+            <t>world</t>
          </w>
          <w xml:id="example.p.1.s.1.w.3" class="PUNCTUATION">
             <t>!</t>
@@ -324,6 +324,7 @@ fn test009a_text() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
+                assert_matches!(word.get_textdelimiter(true), Ok(" "));
                 match word.text(None, None, false, true) {
                     Ok(text) => assert_eq!(text, "example"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))

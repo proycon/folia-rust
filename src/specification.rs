@@ -127,7 +127,7 @@ impl Properties {
                 properties.annotationtype = Some(AnnotationType::ALTERNATIVE);
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::MorphologyLayer), AcceptedData::AcceptElementType(ElementType::PhonologyLayer)];
                 properties.required_data = &[];
-                properties.required_attribs = [];
+                properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
@@ -153,7 +153,7 @@ impl Properties {
                 properties.annotationtype = Some(AnnotationType::ALTERNATIVE);
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
-                properties.required_attribs = [];
+                properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
@@ -464,7 +464,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = [];
+                properties.optional_attribs = &[];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -848,10 +848,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "external";
                 properties.annotationtype = None;
-                properties.accepted_data = [];
+                properties.accepted_data = &[];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::SRC ];
-                properties.optional_attribs = [];
+                properties.optional_attribs = &[];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1446,7 +1446,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = [];
+                properties.optional_attribs = &[];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1548,7 +1548,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = [];
+                properties.optional_attribs = &[];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1622,7 +1622,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "ph";
                 properties.annotationtype = Some(AnnotationType::PHON);
-                properties.accepted_data = [];
+                properties.accepted_data = &[];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA ];
@@ -1831,7 +1831,7 @@ impl Properties {
                 properties.annotationtype = Some(AnnotationType::RELATION);
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
-                properties.required_attribs = [];
+                properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
@@ -2063,7 +2063,7 @@ impl Properties {
                 properties.annotationtype = Some(AnnotationType::SPANRELATION);
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
-                properties.required_attribs = [];
+                properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
