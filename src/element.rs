@@ -10,6 +10,11 @@ use std::convert::Into;
 use std::clone::Clone;
 
 use quick_xml::Reader;
+use std::io::Write;
+use std::io::BufWriter;
+use std::io::Cursor;
+use quick_xml::{Reader,Writer};
+use quick_xml::events::{Event,BytesStart,BytesEnd,BytesText};
 
 use crate::common::*;
 use crate::types::*;
@@ -379,6 +384,19 @@ pub trait ReadElement {
             } else {
                 None
             }
+        }
+    }
+
+    ///Serialise this element (and everything under it to XML)
+    fn xml(&self) -> Result<&str, FoliaError> {
+        if let Some(doc) = self.document() {
+            let mut writer = Writer::new(Cursor::new(Vec::new()));
+            doc.xml_elements(&mut writer, self.key().unwrap());
+            let result = writer.into_inner().into_inner();
+            let result = from_utf8(&result).expect("encoding utf-8");
+            Ok(result)
+        } else {
+            Err(FoliaError::SerialisationError("Unable to serialise orphaned elements".to_string()))
         }
     }
 

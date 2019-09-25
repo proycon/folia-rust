@@ -177,7 +177,7 @@ impl Document {
         Ok(())
     }
 
-    fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
+    pub(crate) fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
         //Start the root tag (and obtain data for its end)
         let root_end = if let Some(element) = self.get_elementdata(root_key) {
             let tagstring = element.elementtype.to_string();
