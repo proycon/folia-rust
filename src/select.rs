@@ -177,7 +177,7 @@ impl Selector {
 
     ///Creates a selector on all data (alias for Selector::default())
     pub fn all_data() -> Self {
-        Selector::default()
+        Selector::default().with_elements().with_text().with_comments()
     }
 
     ///Constrains the selector by element group
@@ -323,7 +323,7 @@ impl<'a> Iterator for SelectIterator<'a> {
             }
         }
         if self.inclusive && self.iteration == 1 {
-            if let Some((key,cursor)) = self.stack.last() {
+            if let Some((key,_)) = self.stack.last() {
                 if let Some(element) = self.document.get_elementdata(*key) {
                     let parent_key = if let Some(parent_key) = element.parent_key() {
                         parent_key
