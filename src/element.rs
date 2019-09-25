@@ -386,6 +386,20 @@ pub trait ReadElement {
         }
     }
 
+    ///Get the index of this element relative to the parent
+    fn get_index(&self) -> Option<usize> {
+        if let Some(parent) = self.get_parent() {
+            for (i, data) in parent.elementdata().data.iter().enumerate() {
+                if let DataType::Element(refkey) = data {
+                    if *refkey == self.key().expect("unwrapping key") {
+                        return Some(i);
+                    }
+                }
+            }
+        }
+        None
+    }
+
     ///Serialise this element (and everything under it) to XML
     fn xml(&self) -> Result<String, FoliaError> {
         if let Some(doc) = self.document() {

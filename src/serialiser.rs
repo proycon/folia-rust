@@ -179,6 +179,7 @@ impl Document {
 
     pub(crate) fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
         //Start the root tag (and obtain data for its end)
+        /*
         let root_end = if let Some(element) = self.get_elementdata(root_key) {
             let tagstring = element.elementtype.to_string();
             let tag = tagstring.as_bytes();
@@ -189,7 +190,7 @@ impl Document {
             return Err(FoliaError::SerialisationError(format!("Specified root element not found: {}", root_key)));
         };
         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
-
+        */
 
         //caches declarations that are defaults
         let dec_is_default: Vec<bool> = self.declarationstore.default_mask();
@@ -197,7 +198,7 @@ impl Document {
         //Select children
         let mut stack = vec![];
         let mut previous_depth = 0;
-        for item in self.select_data_by_key(root_key,Selector::all_data(),true) {
+        for item in self.select_data_by_key(root_key,Selector::all_data(),true, true) {
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
@@ -276,8 +277,8 @@ impl Document {
         }
 
         //Write root end tag
-        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
-        writer.write_event(Event::End(root_end)).map_err(to_serialisation_error)?;
+        //writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
+        //writer.write_event(Event::End(root_end)).map_err(to_serialisation_error)?;
         Ok(())
     }
 }
