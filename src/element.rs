@@ -9,7 +9,6 @@ use std::iter::ExactSizeIterator;
 use std::convert::Into;
 use std::clone::Clone;
 
-use quick_xml::Reader;
 use std::io::Write;
 use std::io::BufWriter;
 use std::io::Cursor;
@@ -387,14 +386,14 @@ pub trait ReadElement {
         }
     }
 
-    ///Serialise this element (and everything under it to XML)
-    fn xml(&self) -> Result<&str, FoliaError> {
+    ///Serialise this element (and everything under it) to XML
+    fn xml(&self) -> Result<String, FoliaError> {
         if let Some(doc) = self.document() {
             let mut writer = Writer::new(Cursor::new(Vec::new()));
             doc.xml_elements(&mut writer, self.key().unwrap());
             let result = writer.into_inner().into_inner();
             let result = from_utf8(&result).expect("encoding utf-8");
-            Ok(result)
+            Ok(result.to_string())
         } else {
             Err(FoliaError::SerialisationError("Unable to serialise orphaned elements".to_string()))
         }
