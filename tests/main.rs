@@ -363,7 +363,7 @@ fn test009c_text_composed_detokenise() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(sentence) = doc.get_element_by_id("example.p.1.s.1") {
-                match sentence.text(None, None, false, true) {
+                match sentence.text(None, None, false, false) {
                     Ok(text) => assert_eq!(text, "Hello world!"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
                 }
