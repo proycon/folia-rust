@@ -551,3 +551,24 @@ impl<'a> Iterator for AncestorIterator<'a> {
         None
     }
 }
+
+impl<'a> AncestorIterator<'a> {
+    pub fn new(document: &'a Document, selector: Selector, key: ElementKey) -> AncestorIterator<'a> {
+        AncestorIterator {
+            document: document,
+            selector: selector,
+            key: key,
+            iteration: 0,
+        }
+    }
+}
+
+pub trait SelectAncestors<'a> {
+    fn ancestors(&'a self, selector: Selector) -> AncestorIterator<'a>;
+}
+
+impl<'a> SelectAncestors<'a> for Element<'a> {
+    fn ancestors(&'a self, selector: Selector) -> AncestorIterator<'a> {
+        AncestorIterator::new(self.document().expect("Getting document from element"), selector, 0)
+    }
+}
