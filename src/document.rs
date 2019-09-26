@@ -21,6 +21,7 @@ use crate::store::*;
 use crate::elementstore::*;
 use crate::metadata::*;
 use crate::select::*;
+use crate::query::*;
 use crate::serialiser::*;
 use crate::parser::*;
 use crate::specification::*;
@@ -218,11 +219,17 @@ impl Document {
                         }
                     }
                     if let Some(idref) = idref {
-                        if let Some(target_element) = self.get_mut_elementdata_by_id(&idref) {
-                            //find the span_key (a parent of the wref)
-                            let span_key = 0; //TODO! Implement!
-                            //and add
-                            target_element.data.push(DataType::SpanReference(span_key));
+                        let mut span_key: Option<ElementKey> = None;
+                        for ancestor in self.ancestors_by_key(element_key, Selector::elements().elementgroup(Cmp::Is(ElementGroup::Span))) {
+                            span_key = Some(ancestor.element.key().expect("unwrapping ancestor key"));
+                            break;
+                        }
+                        if let Some(span_key) = span_key {
+                            if let Some(target_element) = self.get_mut_elementdata_by_id(&idref) {
+                                target_element.data.push(DataType::SpanReference(span_key));
+                            } else {
+                                return Err(FoliaError::InternalError("Wref span parent not found!".to_string()));
+                            }
                         }
                     }
                 },

@@ -569,6 +569,12 @@ pub trait SelectAncestors<'a> {
 
 impl<'a> SelectAncestors<'a> for Element<'a> {
     fn ancestors(&'a self, selector: Selector) -> AncestorIterator<'a> {
-        AncestorIterator::new(self.document().expect("Getting document from element"), selector, 0)
+        AncestorIterator::new(self.document().expect("Getting document from element"), selector, self.key().expect("Unwrapping acenstor key"))
+    }
+}
+
+impl Document {
+   pub fn ancestors_by_key<'a>(&'a self, key: ElementKey, selector: Selector) -> AncestorIterator<'a> {
+        AncestorIterator::new(self, selector, key)
     }
 }
