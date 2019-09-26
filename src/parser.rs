@@ -153,7 +153,6 @@ impl Document {
                         },
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
                             parseprovenance = true;
-                            eprintln!("Parsing provenance");
                         },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             for attrib in e.attributes() {
@@ -172,7 +171,6 @@ impl Document {
                             text = None;
                         },
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
-                            eprintln!("Parsing processor");
                             let processor = Processor::parse(&reader, &e)?;
                             if processor_stack.is_empty() {
                                 let processor_key = doc.add_processor(processor)?;

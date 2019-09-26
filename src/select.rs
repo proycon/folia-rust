@@ -208,7 +208,7 @@ impl Selector {
     pub fn matches(&self, document: &Document, item: &DataType) -> bool {
         //we attempt to falsify the match
         let matches = match item {
-            DataType::Element(key) => {
+            DataType::Element(key) | DataType::SpanReference(key) => {
                 if !self.datatypes.is_empty() && !self.datatypes.contains(&DataTypeSelector::Elements) {
                     false
                 } else if let Some(element) = document.get_element(*key) {
@@ -477,6 +477,7 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
 
 }
 
+
 ///This trait is for collections for which a ``SelectElementsIterator`` can be created to iterate over data
 ///items contained in it.
 pub trait SelectElements<'a> {
@@ -517,3 +518,36 @@ impl<'a> SelectElements<'a> for Element<'a> {
 
 }
 
+
+pub struct AncestorIterator<'a> {
+    ///The element store to draw elements from
+    pub document: &'a Document,
+    ///The selector to apply to test for matching data items
+    pub selector: Selector,
+
+    pub(crate) key: ElementKey,
+
+    pub(crate) iteration: usize,
+}
+
+
+impl<'a> Iterator for AncestorIterator<'a> {
+    type Item = SelectElementsItem<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(element) = self.document.get_elementdata(self.key) {
+            if let Some(parent_key) = element.parent {
+                self.key = parent_key;
+                if self.selector.matches(&self.document, &DataType::Element(parent_key)) {
+                    return Some(SelectElementsItem {
+                        element: self.document.get_element(parent_key).expect("Parent no longer exists")
+                    });
+                } else {
+                    //recurse
+                    return self.next();
+                }
+            }
+        }
+        None
+    }
+}

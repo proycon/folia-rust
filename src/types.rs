@@ -674,6 +674,8 @@ pub enum DataType {
     ///A reference to an element
     Element(ElementKey),
     Comment(String),
+    ///A reference to a span element (the reverse of wref, not expressed explicitly in the XML)
+    SpanReference(ElementKey),
 }
 
 impl DataType {

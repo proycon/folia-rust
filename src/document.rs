@@ -160,6 +160,7 @@ impl Document {
         match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
             Ok(child_key) => {
                 self.attach_element(parent_key, child_key)?;
+                self.post_add(child_key)?;
                 Ok(child_key)
             },
             Err(err) => {
@@ -199,6 +200,38 @@ impl Document {
             }
         }
         Ok(())
+    }
+
+    ///Performs postprocessing after adding an element
+    pub(crate) fn post_add(&mut self, element_key: ElementKey) -> Result<(),FoliaError> {
+        if let Some(element) = self.get_elementdata(element_key) {
+            match element.elementtype {
+                ElementType::WordReference => {
+                    //We have a wref element, add SpanReference backpointers in the element
+                    //that is being pointed at
+
+                    //Find the element that is being pointed at by ID
+                    let mut idref: Option<String> = None;
+                    for attrib in element.attribs.iter() {
+                        if let Attribute::Idref(id) = attrib {
+                            idref = Some(id.clone())
+                        }
+                    }
+                    if let Some(idref) = idref {
+                        if let Some(target_element) = self.get_mut_elementdata_by_id(&idref) {
+                            //find the span_key (a parent of the wref)
+                            let span_key = 0; //TODO! Implement!
+                            //and add
+                            target_element.data.push(DataType::SpanReference(span_key));
+                        }
+                    }
+                },
+                _ => {}
+            };
+            Ok(())
+        } else {
+            Err(FoliaError::KeyError("Element not found".to_string()))
+        }
     }
 
     ///Removes the child from the parent, orphaning it, does NOT remove the element entirely

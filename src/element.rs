@@ -221,6 +221,16 @@ impl ElementData {
         }
         Ok(None)
     }
+
+    ///Get the ID reference if this element is a wref
+    pub fn idref(&self) -> Option<&str> {
+        for attrib in self.attribs().iter() {
+            if let Attribute::Idref(id) = attrib {
+                return Some(id);
+            }
+        }
+        None
+    }
 }
 
 pub trait ReadElement {
@@ -413,7 +423,20 @@ pub trait ReadElement {
         }
     }
 
+    ///Resolve the reference (assuming this element provides a reference)
+    fn resolve(&self) -> Option<Element> {
+        if let Some(doc) = self.document() {
+            for attrib in self.attribs().iter() {
+                if let Attribute::Idref(id) = attrib {
+                    return doc.get_element_by_id(id);
+                }
+            }
+        }
+        None
+    }
+
 }
+
 
 impl<'a> PartialEq for Element<'a> {
     fn eq(&self, other: &Self) -> bool {
@@ -511,6 +534,7 @@ impl<'a> Element<'a> {
             self.get_features(subset).next().map(|e| e.element)
         }
     }
+
 }
 
 
