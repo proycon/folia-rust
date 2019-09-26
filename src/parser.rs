@@ -91,7 +91,6 @@ impl Document {
                 (ref ns, Event::Empty(ref e)) => {
                     match (*ns, e.local_name())  {
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
-                            eprintln!("Parsing processor");
                             let processor = Processor::parse(&reader, &e)?;
                             if processor_stack.is_empty() {
                                 doc.add_processor(processor)?;

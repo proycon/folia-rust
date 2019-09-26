@@ -378,12 +378,32 @@ fn test009c_text_composed_detokenise() {
 }
 
 #[test]
-fn test010_get_annotation() {
+fn test010a_get_inline_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
                 if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any) {
                     assert_matches!(pos.class(),Some("noun"));
+                } else {
+                    assert!(false, "annotation not found");
+                }
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test010b_get_span_annotation() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
+                if let Some(chunk) = word.get_annotation(AnnotationType::CHUNKING, Cmp::Any) {
+                    assert_matches!(chunk.class(),Some("np"));
                 } else {
                     assert!(false, "annotation not found");
                 }

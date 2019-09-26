@@ -212,7 +212,7 @@ impl Selector {
                 if !self.datatypes.is_empty() && !self.datatypes.contains(&DataTypeSelector::Elements) {
                     false
                 } else if let Some(element) = document.get_element(*key) {
-                    let mut matches = match self.elementgroup {
+                    let matches = match self.elementgroup {
                         Cmp::Is(elementgroup) => elementgroup.contains(element.elementtype()),
                         Cmp::Any | Cmp::Some => true,
                         Cmp::None | Cmp::Unmatchable => false,
