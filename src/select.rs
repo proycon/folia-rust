@@ -461,7 +461,7 @@ impl<'a> Iterator for SelectElementsIterator<'a> {
         let selectitem = self.iterator.next();
         if let Some(selectitem) = selectitem {
             match *selectitem {
-                DataType::Element(key) => {
+                DataType::Element(key) | DataType::SpanReference(key) => {
                     let element = self.iterator.document.get_element(key).expect("Getting key from elementstore for SelectElementsIterator");
                     Some(Self::Item { element: element })
                 },
