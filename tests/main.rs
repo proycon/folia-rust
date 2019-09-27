@@ -402,7 +402,7 @@ fn test010a_get_inline_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any) {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,false) {
                     assert_matches!(pos.class(),Some("noun"));
                 } else {
                     assert!(false, "annotation not found");
@@ -442,7 +442,7 @@ fn test010c_get_span_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(chunk) = word.get_annotation(AnnotationType::CHUNKING, Cmp::Any) {
+                if let Some(chunk) = word.get_annotation(AnnotationType::CHUNKING, Cmp::Any,false) {
                     assert_matches!(chunk.class(),Some("np"));
                 } else {
                     assert!(false, "annotation not found");
@@ -458,11 +458,33 @@ fn test010c_get_span_annotation() {
 }
 
 #[test]
+fn test010d_get_span_annotation() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(sentence) = doc.get_element_by_id("example.p.1.s.2") {
+                let mut count = 0;
+                for span in sentence.get_annotations(AnnotationType::CHUNKING, Cmp::Any, true) {
+                    count += 1;
+                    assert_eq!(span.elementtype(), ElementType::Chunk);
+                }
+                assert_eq!(count,1, "testing whether we got the right amount of spans back");
+            } else {
+                assert!(false, "sentence not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+
+#[test]
 fn test011_features() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any) {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,false) {
                     if let Some(feature) = pos.get_feature(Cmp::Is("number".to_string())) {
                         assert_matches!(feature.elementtype(), ElementType::Feature);
                         assert_matches!(feature.subset(), Some("number"));

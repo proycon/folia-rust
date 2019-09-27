@@ -508,19 +508,19 @@ impl<'a> ReadElement for Element<'a> {
 impl<'a> Element<'a> {
     ///High-level function to get a particular annotation by annotation type and set. This function
     ///returns only one annotation (the first one if there are multiple) and returns None if it does not exists.
-    pub fn get_annotation(&self, annotationtype: AnnotationType, set: Cmp<String>) -> Option<Element> {
+    pub fn get_annotation(&self, annotationtype: AnnotationType, set: Cmp<String>, recursive: bool) -> Option<Element> {
         if self.document.is_none() { //saves us from a panic in the deeper callV
             None
         } else {
-            self.get_annotations(annotationtype,set).next().map(|e| e.element)
+            self.get_annotations(annotationtype,set, recursive).next().map(|e| e.element)
         }
     }
 
     ///High-level function to get a particular annotation by annotation type and set, returns an
     ///iterator.
-    pub fn get_annotations(&self, annotationtype: AnnotationType, set: Cmp<String>) -> SelectElementsIterator {
+    pub fn get_annotations(&self, annotationtype: AnnotationType, set: Cmp<String>, recursive: bool) -> SelectElementsIterator {
         let elementtype = annotationtype.elementtype();
-        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(elementtype)).set(set)).expect("Compiling query for get_annotations()"), false)
+        self.select(Selector::from_query(self.document().expect("Unwrapping document on element for get_annotations()"), &Query::select().element(Cmp::Is(elementtype)).set(set)).expect("Compiling query for get_annotations()"), recursive)
     }
 
     ///High-level function to get a particular feature by annotation type and set, returns an
