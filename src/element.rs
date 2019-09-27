@@ -524,6 +524,7 @@ impl<'a> Element<'a> {
     }
 
     ///High-level function to get a particular feature by annotation type and set, returns an
+    ///iterator.
     pub fn get_features(&self, subset: Cmp<String>) -> SelectElementsIterator {
         self.select(
                 Selector::from_query(self.document().expect("Unwrapping document on element for get_features()"),

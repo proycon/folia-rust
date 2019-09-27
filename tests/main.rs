@@ -75,7 +75,7 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
             <t>.</t>
          </w>
          <chunking>
-            <chunk class="np">
+            <chunk xml:id="example.p.1.s.2.chunk.1" class="np">
                 <wref id="example.p.1.s.2.w.3" />
                 <wref id="example.p.1.s.2.w.4" />
             </chunk>
@@ -369,6 +369,26 @@ fn test009c_text_composed_detokenise() {
                 }
             } else {
                 assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test009c_text_on_span() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(chunk) = doc.get_element_by_id("example.p.1.s.2.chunk.1") {
+                assert_matches!(chunk.class(),Some("np"));
+                match chunk.text(None,None,false,false) {
+                    Ok(text) => assert_eq!(text, "an example"),
+                    Err(err) => assert!(false, format!("Obtaining text on span failed with error: {}",err))
+                }
+            } else {
+                assert!(false, "annotation not found");
             }
         },
         Err(err) => {

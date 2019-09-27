@@ -268,6 +268,9 @@ pub struct SelectIterator<'a> {
     ///The current stack, containing the element and cursor within that element
     pub(crate) stack: Vec<(ElementKey,usize)>,
     pub(crate) iteration: usize,
+
+    pub(crate) returned: Vec<bool>,
+    pub(crate) returned_offset: usize //element 0 for returned corresponds to ElementKey returned_offset
 }
 
 impl<'a> SelectIterator<'a> {
@@ -281,6 +284,8 @@ impl<'a> SelectIterator<'a> {
             stack: vec![(key,0)],
             iteration: 0,
             inclusive: inclusive,
+            returned: vec![],
+            returned_offset: 0,
         }
     }
 
@@ -338,7 +343,6 @@ impl<'a> Iterator for SelectIterator<'a> {
                         self.document.get_elementdata(parent_key).expect("unwrapping parent key").get_data_at(index).expect("unwrapping child key")
                     };
                     if self.selector.matches(self.document, item) {
-
                         return Some(SelectItem { data: item, parent_key: parent_key, cursor: 0, depth: 0});
                     }
                 }
@@ -360,16 +364,50 @@ impl<'a> Iterator for SelectIterator<'a> {
 
                     //return the current one
                     if self.selector.matches(self.document, item) {
-                        Some(SelectItem { data: item, parent_key: key, cursor: cursor, depth: current_depth})
-                    } else {
-                        self.next() //recurse
+                        let returnitem: bool = if let DataType::SpanReference(key) = item {
+                            //we only return the item if we have not already done so earlier,
+                            //preventing duplicates
+                            let key: usize = *key as usize;
+                            if self.returned.is_empty() && self.returned_offset == 0 {
+                                self.returned_offset = key;
+                            }
+                            if key < self.returned_offset {
+                                //we need to prepend to the returned vector, changing the
+                                //returned_offset
+                                let l = self.returned_offset - key;
+                                let mut tmp: Vec<bool>  = Vec::with_capacity(self.returned.len() + l);
+                                tmp.push(true); //mark the current key as returned
+                                for i in 1..l {
+                                    tmp.push(false);
+                                }
+                                tmp.extend(&self.returned);
+                                self.returned = tmp;
+                                self.returned_offset = key;
+                                true
+                            } else if key - self.returned_offset >= self.returned.len() {
+                                while key - self.returned_offset >= self.returned.len() {
+                                    self.returned.push(false);
+                                }
+                                self.returned[key - self.returned_offset] = true;
+                                true
+                            } else {
+                                let already_returned = self.returned[key - self.returned_offset];
+                                if already_returned {
+                                    false
+                                } else {
+                                    self.returned[key - self.returned_offset] = true; //mark as returned
+                                    true
+                                }
+                            }
+                        } else {
+                            true //<- returnitem
+                        };
+                        if returnitem {
+                            return Some(SelectItem { data: item, parent_key: key, cursor: cursor, depth: current_depth});
+                        }
                     }
-                } else {
-                    //child does not exist (cursor out of bounds), no panic, this indicates we are done
-                    //with this element and move back up the hierarchy (stack stays popped )
-
-                    self.next() //recurse
                 }
+                self.next() //recurse
             } else {
                 unreachable!("selector tried to get an element which no longer exists")
             }
