@@ -227,7 +227,7 @@ fn test007_metadata() {
 fn test008a_selector_type() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select_data(Selector::elements().element(Cmp::Is(ElementType::Word)), true);
+            let selector = doc.select_data(Selector::elements().element(Cmp::Is(ElementType::Word)), Recursion::Always);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -253,7 +253,7 @@ fn test008b_selector_set_class() {
                         .element(Cmp::Is(ElementType::Word))
                         .set(Cmp::Is(set.to_string()))
                         .class(Cmp::Is("PUNCTUATION".to_string()))).expect("Compiling query")
-            , true);
+            , Recursion::Always);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -279,7 +279,7 @@ fn test008c_elementselector_set_class() {
                         .element(Cmp::Is(ElementType::Word))
                         .set(Cmp::Is(set.to_string()))
                         .class(Cmp::Is("PUNCTUATION".to_string()))).expect("Compiling query")
-            , true);
+            , Recursion::Always);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -304,7 +304,7 @@ fn test008d_selector_elementgroup() {
                         .elementgroup(Cmp::Is(ElementGroup::Structure))
                         .set(Cmp::Any)
                         .class(Cmp::Any)).expect("Compiling query")
-            , true);
+            , Recursion::Always);
             assert!(selector.selector.matchable());
             let mut count = 0;
             for item in selector {
@@ -402,7 +402,7 @@ fn test010a_get_inline_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,false) {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,Recursion::No) {
                     assert_matches!(pos.class(),Some("noun"));
                 } else {
                     assert!(false, "annotation not found");
@@ -442,7 +442,7 @@ fn test010c_get_span_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(chunk) = word.get_annotation(AnnotationType::CHUNKING, Cmp::Any,false) {
+                if let Some(chunk) = word.get_annotation(AnnotationType::CHUNKING, Cmp::Any,Recursion::No) {
                     assert_matches!(chunk.class(),Some("np"));
                 } else {
                     assert!(false, "annotation not found");
@@ -463,7 +463,7 @@ fn test010d_get_span_annotation_noduplicates() {
         Ok(doc) => {
             if let Some(sentence) = doc.get_element_by_id("example.p.1.s.2") {
                 let mut count = 0;
-                for span in sentence.get_annotations(AnnotationType::CHUNKING, Cmp::Any, true) {
+                for span in sentence.get_annotations(AnnotationType::CHUNKING, Cmp::Any, Recursion::Always) {
                     count += 1;
                     assert_eq!(span.elementtype(), ElementType::Chunk);
                 }
@@ -484,7 +484,7 @@ fn test011_features() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
-                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,false) {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,Recursion::No) {
                     if let Some(feature) = pos.get_feature(Cmp::Is("number".to_string())) {
                         assert_matches!(feature.elementtype(), ElementType::Feature);
                         assert_matches!(feature.subset(), Some("number"));

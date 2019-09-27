@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use strum::IntoEnumIterator;
 
-#[derive(Debug)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum AcceptedData {
     AcceptElementType(ElementType),
     AcceptElementGroup(ElementGroup),

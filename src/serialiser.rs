@@ -198,7 +198,7 @@ impl Document {
         //Select children
         let mut stack = vec![];
         let mut previous_depth = 0;
-        for item in self.select_data_by_key(root_key,Selector::all_data(),true, true) {
+        for item in self.select_data_by_key(root_key,Selector::all_data(),Recursion::Always, true) {
             while item.depth < previous_depth {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
