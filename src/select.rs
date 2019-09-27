@@ -574,19 +574,14 @@ impl<'a> Iterator for AncestorIterator<'a> {
     type Item = SelectElementsItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        println!("DEBUG 1");
         if let Some(element) = self.document.get_elementdata(self.key) {
-            println!("DEBUG 2");
             if let Some(parent_key) = element.parent {
-                println!("DEBUG 3");
                 self.key = parent_key;
                 if self.selector.matches(&self.document, &DataType::Element(parent_key)) {
-                    println!("DEBUG MATCH");
                     return Some(SelectElementsItem {
                         element: self.document.get_element(parent_key).expect("Parent no longer exists")
                     });
                 } else if self.recursive {
-                    println!("DEBUG RECURSE");
                     //recurse
                     return self.next();
                 }

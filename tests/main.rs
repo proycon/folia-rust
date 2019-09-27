@@ -458,7 +458,7 @@ fn test010c_get_span_annotation() {
 }
 
 #[test]
-fn test010d_get_span_annotation() {
+fn test010d_get_span_annotation_noduplicates() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(sentence) = doc.get_element_by_id("example.p.1.s.2") {
