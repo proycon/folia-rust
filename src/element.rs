@@ -106,6 +106,15 @@ impl Storable<ElementKey> for ElementData {
 }
 
 impl ElementData {
+    pub fn id(&self) -> Option<&str> {
+        for attrib in self.attribs.iter() {
+            if let Attribute::Id(id) = attrib {
+                return Some(id.as_str());
+            }
+        }
+        None
+    }
+
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
@@ -341,6 +350,10 @@ pub trait ReadElement {
         }
     }
 
+    fn id(&self) -> Option<&str> {
+        self.elementdata().id()
+    }
+
     fn class_key(&self) -> Option<ClassKey> {
         self.elementdata().class_key().expect("Unwrapping class key result")
     }
@@ -414,7 +427,7 @@ pub trait ReadElement {
     fn xml(&self) -> Result<String, FoliaError> {
         if let Some(doc) = self.document() {
             let mut writer = Writer::new(Cursor::new(Vec::new()));
-            doc.xml_elements(&mut writer, self.key().unwrap());
+            doc.xml_elements(&mut writer, self.key().unwrap())?;
             let result = writer.into_inner().into_inner();
             let result = from_utf8(&result).expect("encoding utf-8");
             Ok(result.to_string())
@@ -533,6 +546,20 @@ impl<'a> Element<'a> {
         } else {
             self.get_features(subset).next().map(|e| e.element)
         }
+    }
+
+    ///High leverl-function to get a particular ancestor by annoation type and set. This function
+    ///returns only one element
+    pub fn get_ancestor(&self, elementtype: ElementType, set: Cmp<String>) -> Option<Element> {
+        if self.document.is_none() { //saves us from a panic in the deeper call
+            None
+        } else {
+            self.get_ancestors(elementtype,set).next().map(|e| e.element)
+        }
+    }
+
+    pub fn get_ancestors(&self, elementtype: ElementType, set: Cmp<String>) -> AncestorIterator {
+        self.ancestors(Selector::from_query(self.document().expect("Unwrapping document on element for get_ancestors()"), &Query::select().element(Cmp::Is(elementtype)).set(set)).expect("Compiling query for get_ancestors()"))
     }
 
 }

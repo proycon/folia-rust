@@ -398,7 +398,27 @@ fn test010a_get_inline_annotation() {
 }
 
 #[test]
-fn test010b_get_span_annotation() {
+fn test010b_get_ancestor() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
+                if let Some(sentence) = word.get_ancestor(ElementType::Sentence, Cmp::Any) {
+                    assert_matches!(sentence.id(),Some("example.p.1.s.2"));
+                } else {
+                    assert!(false, "annotation not found");
+                }
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test010c_get_span_annotation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {

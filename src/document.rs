@@ -220,7 +220,9 @@ impl Document {
                     }
                     if let Some(idref) = idref {
                         let mut span_key: Option<ElementKey> = None;
-                        for ancestor in self.ancestors_by_key(element_key, Selector::elements().elementgroup(Cmp::Is(ElementGroup::Span))) {
+                        let selector = Selector::elements().elementgroup(Cmp::Is(ElementGroup::Span));
+                        //we get our ancestors the normal way
+                        for ancestor in self.ancestors_by_key(element_key, selector) {
                             span_key = Some(ancestor.element.key().expect("unwrapping ancestor key"));
                             break;
                         }
@@ -228,9 +230,13 @@ impl Document {
                             if let Some(target_element) = self.get_mut_elementdata_by_id(&idref) {
                                 target_element.data.push(DataType::SpanReference(span_key));
                             } else {
-                                return Err(FoliaError::InternalError("Wref span parent not found!".to_string()));
+                                return Err(FoliaError::ParseError("Wref span parent not found! (element gone missing)".to_string()));
                             }
+                        } else {
+                            return Err(FoliaError::ParseError("Wref span parent not found!".to_string()));
                         }
+                    } else {
+                        return Err(FoliaError::ParseError("Wref element does not reference anything!".to_string()));
                     }
                 },
                 _ => {}

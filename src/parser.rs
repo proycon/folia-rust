@@ -287,7 +287,7 @@ impl Document {
 
         if let Some(body) = body {
             doc.add(body,None)?;
-            doc.apply_properties(properties);
+            doc.apply_properties(properties)?;
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
@@ -312,6 +312,7 @@ impl Document {
                         if let Some(parent_key) = stack.last() {
                             self.attach_element(*parent_key, key)?;
                         }
+                        self.post_add(key)?;
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
@@ -327,6 +328,7 @@ impl Document {
                             break;
                         }
                         let key = stack.pop().unwrap();
+                        self.post_add(key)?;
                         if let Some(elem) = self.get_elementdata(key) {
 
                             //verify we actually close the right thing (otherwise we have malformed XML)

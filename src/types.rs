@@ -46,6 +46,7 @@ impl ElementGroup {
         //foliaspec:elementgroup_elementtypes_map(self)
         match self {
             ElementGroup::Structure => &[ElementType::Word, ElementType::Paragraph, ElementType::Sentence, ElementType::Text],
+            ElementGroup::Span => &[ElementType::Chunk],
             _ => &[],
         }
     }

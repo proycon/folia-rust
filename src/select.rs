@@ -527,6 +527,7 @@ pub struct AncestorIterator<'a> {
 
     pub(crate) key: ElementKey,
 
+    pub(crate) recursive: bool,
     pub(crate) iteration: usize,
 }
 
@@ -535,14 +536,19 @@ impl<'a> Iterator for AncestorIterator<'a> {
     type Item = SelectElementsItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        println!("DEBUG 1");
         if let Some(element) = self.document.get_elementdata(self.key) {
+            println!("DEBUG 2");
             if let Some(parent_key) = element.parent {
+                println!("DEBUG 3");
                 self.key = parent_key;
                 if self.selector.matches(&self.document, &DataType::Element(parent_key)) {
+                    println!("DEBUG MATCH");
                     return Some(SelectElementsItem {
                         element: self.document.get_element(parent_key).expect("Parent no longer exists")
                     });
-                } else {
+                } else if self.recursive {
+                    println!("DEBUG RECURSE");
                     //recurse
                     return self.next();
                 }
@@ -553,12 +559,13 @@ impl<'a> Iterator for AncestorIterator<'a> {
 }
 
 impl<'a> AncestorIterator<'a> {
-    pub fn new(document: &'a Document, selector: Selector, key: ElementKey) -> AncestorIterator<'a> {
+    pub fn new(document: &'a Document, selector: Selector, key: ElementKey, recursive: bool) -> AncestorIterator<'a> {
         AncestorIterator {
             document: document,
             selector: selector,
             key: key,
             iteration: 0,
+            recursive: recursive,
         }
     }
 }
@@ -569,12 +576,12 @@ pub trait SelectAncestors<'a> {
 
 impl<'a> SelectAncestors<'a> for Element<'a> {
     fn ancestors(&'a self, selector: Selector) -> AncestorIterator<'a> {
-        AncestorIterator::new(self.document().expect("Getting document from element"), selector, self.key().expect("Unwrapping acenstor key"))
+        AncestorIterator::new(self.document().expect("Getting document from element"), selector, self.key().expect("Unwrapping acenstor key"), true)
     }
 }
 
 impl Document {
    pub fn ancestors_by_key<'a>(&'a self, key: ElementKey, selector: Selector) -> AncestorIterator<'a> {
-        AncestorIterator::new(self, selector, key)
+        AncestorIterator::new(self, selector, key, true)
     }
 }
