@@ -68,6 +68,17 @@ impl<'a> Element<'a> {
                                    delimiter = s.to_string();
                                }
                            }
+                        } else if element.elementtype() == ElementType::WordReference {
+                            //follow the reference
+                            if let Some(element) = element.resolve() {
+                               if let Ok(textpart) = element.text_by_key(set,textclass,false, retaintokenisation, Some(delimiter.clone())) {
+                                   //delimiter will be buffered and only printed upon next iteration
+                                   text += &textpart;
+                                   if let Ok(s) = element.get_textdelimiter(retaintokenisation) {
+                                       delimiter = s.to_string();
+                                   }
+                               }
+                            }
                         } else if element.elementtype() == ElementType::TextContent {
                             textcontent_element = Some(element);
                         }
