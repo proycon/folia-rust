@@ -109,7 +109,7 @@ impl Document {
                                             processor_id = Some(value.clone());
                                         },
                                         otherwise => {
-                                            eprintln!("WARNING: Unhandled attribute annotator/@{:?}",otherwise);
+                                            eprintln!("WARNING: Unhandled attribute annotator/@{:?}",str::from_utf8(otherwise).unwrap());
                                         }
                                     }
                                 }
@@ -141,7 +141,7 @@ impl Document {
                                             doc.metadata.metadatatype = Some(value);
                                         },
                                         otherwise => {
-                                            eprintln!("WARNING: Unhandled attribute metadata/@{:?}",otherwise);
+                                            eprintln!("WARNING: Unhandled attribute metadata/@{:?}",str::from_utf8(otherwise).unwrap());
                                         }
                                     }
                                 }
@@ -162,7 +162,7 @@ impl Document {
                                             meta_id = Some(value.clone());
                                         },
                                         otherwise => {
-                                            eprintln!("WARNING: Unhandled attribute meta/@{:?}",otherwise);
+                                            eprintln!("WARNING: Unhandled attribute meta/@{:?}",str::from_utf8(otherwise).unwrap());
                                         }
                                     }
                                 }
@@ -492,7 +492,7 @@ impl Declaration {
                         //TODO: handle old-style default
                     },
                     otherwise => {
-                        eprintln!("WARNING: Unhandled attribute on declaration: @{:?}",otherwise);
+                        eprintln!("WARNING: Unhandled attribute on declaration: @{:?}",str::from_utf8(otherwise).unwrap());
                     }
                 }
             }

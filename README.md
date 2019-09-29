@@ -15,7 +15,7 @@ At the moment, it is  still pre-alpha, under heavy development, and not function
 
 * [x] Structure annotation
 * [x] Inline annotation
-* [ ] Span annotation
+* [x] Span annotation
 * [ ] Text markup
 * [ ] Subtoken annotation (e.g. morphology)
 * [ ] Alternative
@@ -38,3 +38,4 @@ At the moment, it is  still pre-alpha, under heavy development, and not function
 * [ ] JSON serialisation
 
 * [ ] Folia Query Language (FQL)
+    * (no real FQL parser yet but underlying selector and query provide a strong basis for implementation)
