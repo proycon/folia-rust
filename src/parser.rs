@@ -21,6 +21,7 @@ use crate::elementstore::*;
 use crate::metadata::*;
 use crate::select::*;
 use crate::document::*;
+use crate::specification::*;
 
 impl Document {
     ///Parses a FoLiA document given a reader
@@ -255,13 +256,13 @@ impl Document {
                 (ref ns, Event::Start(ref e)) => {
                     match (*ns, e.local_name())  {
                         (Some(ns), b"text") if ns == NSFOLIA => {
-                            if let Ok(attribs)  =  ElementData::parse_attributes(&reader, e.attributes()) {
+                            if let Ok((attribs,_))  =  ElementData::parse_attributes(&reader, e.attributes(), ElementType::Text) {
                                 body = Some(ElementData::new(ElementType::Text).with_attribs(attribs));
                             }
                             break;
                         },
                         (Some(ns), b"speech") if ns == NSFOLIA => {
-                            if let Ok(attribs)  =  ElementData::parse_attributes(&reader, e.attributes()) {
+                            if let Ok((attribs,_))  =  ElementData::parse_attributes(&reader, e.attributes(), ElementType::Speech) {
                                 body = Some(ElementData::new(ElementType::Speech).with_attribs(attribs));
                             }
                             break;
@@ -305,21 +306,31 @@ impl Document {
                     (Some(ns), Event::Empty(ref e)) if ns == NSFOLIA => {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
-                        let elem = ElementData::parse(reader, e)?;
+                        let (elem, children) = ElementData::parse(reader, e)?;
                         let key = self.add(elem,stack.last().map(|key| *key))?;
 
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_key) = stack.last() {
                             self.attach_element(*parent_key, key)?;
                         }
+                        //add immediate children (limited to those derived from XML attributes)
+                        for child in children {
+                            let child_key = self.add(child, Some(key))?;
+                            self.attach_element(key, child_key)?;
+                        }
                         self.post_add(key)?;
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
-                        let elem = ElementData::parse(reader, e)?;
+                        let (elem, children) = ElementData::parse(reader, e)?;
                         let key = self.add(elem,stack.last().map(|key| *key))?;
                         stack.push(key);
+                        //add immediate children (limited to those derived from XML attributes)
+                        for child in children {
+                            let child_key = self.add(child, Some(key))?;
+                            self.attach_element(key, child_key)?;
+                        }
                     },
                     (Some(ns), Event::End(ref e)) if ns == NSFOLIA => {
                         //END TAG FOUND (</tag>)
@@ -450,23 +461,46 @@ impl Processor {
 }
 
 impl ElementData {
-    fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes) -> Result<Vec<Attribute>, FoliaError> {
+    fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes, elementtype: ElementType) -> Result<(Vec<Attribute>,Vec<ElementData>), FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
+        let mut children: Vec<ElementData> = Vec::new();
         for attrib in attribiter {
-            match Attribute::parse(&reader, &attrib.expect("Parsing XML attribute")) {
+            let attrib = &attrib.expect("Parsing XML attribute");
+            match Attribute::parse(&reader, attrib) {
+                //normal behaviour
                 Ok(attrib) => { attributes.push(attrib); },
-                Err(e) => { return Err(e); }
+                Err(e) => {
+                    //an attribute can be a shortcut for a subset and translate to a
+                    //ElementType::Feature
+                    if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                        let properties = Properties::new(elementtype);
+                        let featuregroup = ElementGroup::Feature;
+                        for accepteddata in properties.accepted_data.iter() {
+                            if let AcceptedData::AcceptElementType(acceptedtype) = accepteddata {
+                                if featuregroup.contains(*acceptedtype) {
+                                    let properties = Properties::new(*acceptedtype);
+                                    if properties.subset.is_some() && str::from_utf8(attrib.key).unwrap() == properties.subset.unwrap() {
+                                        let child = ElementData::new(*acceptedtype).with_children(vec![DataType::Text(value.clone())]);
+                                        children.push(child);
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return Err(e);
+                }
             }
         }
-        Ok(attributes)
+        Ok((attributes, children))
     }
 
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
-    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<ElementData, FoliaError> {
-        let attributes: Vec<Attribute> = ElementData::parse_attributes(reader, event.attributes())?;
+    pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<(ElementData,Vec<ElementData>), FoliaError> {
         let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).expect("utf-8 decoding"))?;
-        Ok(ElementData::new(elementtype).with_attribs(attributes))
+        let (attributes, children) = ElementData::parse_attributes(reader, event.attributes(), elementtype)?;
+        Ok((ElementData::new(elementtype).with_attribs(attributes), children))
     }
 }
 
