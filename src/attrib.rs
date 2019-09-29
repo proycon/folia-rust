@@ -17,7 +17,7 @@ use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET
+    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT
 }
 
 impl Into<&str> for AttribType {
@@ -42,7 +42,8 @@ impl Into<&str> for AttribType {
             AttribType::PROCESSOR => "processor",
             AttribType::HREF => "href",
             AttribType::FORMAT => "format",
-            AttribType::SUBSET => "subset"
+            AttribType::SUBSET => "subset",
+            AttribType::TEXT => "t"
         }
     }
 }
@@ -73,6 +74,7 @@ pub enum Attribute {
     Metadata(String),
     Idref(String),
     Space(bool),
+    Text(String),
 
     Processor(String),
     ProcessorRef(ProcKey), //encoded form
@@ -118,7 +120,7 @@ impl Attribute {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
-            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s)
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)
                 => Ok(&s),
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
@@ -170,6 +172,7 @@ impl Attribute {
             Attribute::Format(_) => AttribType::FORMAT,
             Attribute::Subset(_) => AttribType::SUBSET,
             Attribute::SubsetRef(_) => AttribType::SUBSET,
+            Attribute::Text(_) => AttribType::TEXT,
         }
     }
 
@@ -231,6 +234,9 @@ impl Attribute {
                 },
                 b"n" => {
                     Ok(Attribute::N(value))
+                },
+                b"t" => {
+                    Ok(Attribute::Text(value))
                 },
                 b"datetime" => {
                     Ok(Attribute::DateTime(value))
