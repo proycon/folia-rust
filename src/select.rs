@@ -420,44 +420,17 @@ impl<'a> Iterator for SelectIterator<'a> {
 
                     //return the current one
                     if self.selector.matches(self.document, item) {
-                        let returnitem: bool = if let DataType::SpanReference(key) = item {
-                            //we only return the item if we have not already done so earlier,
-                            //preventing duplicates
-                            let key: usize = *key as usize;
-                            if self.returned.is_empty() && self.returned_offset == 0 {
-                                self.returned_offset = key;
-                            }
-                            if key < self.returned_offset {
-                                //we need to prepend to the returned vector, changing the
-                                //returned_offset
-                                let l = self.returned_offset - key;
-                                let mut tmp: Vec<bool>  = Vec::with_capacity(self.returned.len() + l);
-                                tmp.push(true); //mark the current key as returned
-                                for i in 1..l {
-                                    tmp.push(false);
-                                }
-                                tmp.extend(&self.returned);
-                                self.returned = tmp;
-                                self.returned_offset = key;
-                                true
-                            } else if key - self.returned_offset >= self.returned.len() {
-                                while key - self.returned_offset >= self.returned.len() {
-                                    self.returned.push(false);
-                                }
-                                self.returned[key - self.returned_offset] = true;
-                                true
-                            } else {
-                                let already_returned = self.returned[key - self.returned_offset];
-                                if already_returned {
-                                    false
-                                } else {
-                                    self.returned[key - self.returned_offset] = true; //mark as returned
-                                    true
+                        let mut returnitem: bool = true;
+                        if let DataType::SpanReference(key) = item {
+                            returnitem = !self.already_returned(*key);
+                        } else if let DataType::Element(key) = item {
+                            if let Some(element) = self.document.get_elementdata(*key) {
+                                if ElementGroup::Span.contains(element.elementtype) {
+                                    returnitem = !self.already_returned(*key);
                                 }
                             }
-                        } else {
-                            true //<- returnitem
-                        };
+                        }
+
                         if returnitem {
                             return Some(SelectItem { data: item, parent_key: key, cursor: cursor, depth: current_depth});
                         }
@@ -474,6 +447,49 @@ impl<'a> Iterator for SelectIterator<'a> {
     }
 
 }
+
+impl<'a> SelectIterator<'a> {
+    ///Check if we hava already returned this key earlier (only used for certain types to optimise
+    ///performance)
+    pub fn already_returned(&mut self, key: ElementKey) -> bool {
+        //we only return the item if we have not already done so earlier,
+        //preventing duplicates
+        let key: usize = key as usize;
+        if self.returned.is_empty() && self.returned_offset == 0 {
+            self.returned_offset = key;
+        }
+        if key < self.returned_offset {
+            //we need to prepend to the returned vector, changing the
+            //returned_offset
+            let l = self.returned_offset - key;
+            let mut tmp: Vec<bool>  = Vec::with_capacity(self.returned.len() + l);
+            tmp.push(true); //mark the current key as returned
+            for i in 1..l {
+                tmp.push(false);
+            }
+            tmp.extend(&self.returned);
+            self.returned = tmp;
+            self.returned_offset = key;
+            false
+        } else if key - self.returned_offset >= self.returned.len() {
+            while key - self.returned_offset >= self.returned.len() {
+                self.returned.push(false);
+            }
+            self.returned[key - self.returned_offset] = true;
+            false
+        } else {
+            let already_returned = self.returned[key - self.returned_offset];
+            if already_returned {
+                true
+            } else {
+                self.returned[key - self.returned_offset] = true; //mark as returned
+                false
+            }
+        }
+    }
+}
+
+
 
 ///This trait is for collections for which a ``SelectIterator`` can be created to iterate over data
 ///items contained in it.
