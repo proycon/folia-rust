@@ -18,6 +18,7 @@ pub struct Declaration {
     pub annotationtype: AnnotationType,
     pub set: Option<String>,
     pub alias: Option<String>,
+    pub format: Option<String>,
     pub processors: Vec<ProcKey>,
     pub classes: Option<ClassStore>,
     pub subsets: Option<SubsetStore>,
@@ -26,8 +27,8 @@ pub struct Declaration {
 
 impl Declaration {
     ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()``.
-    pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>) -> Declaration {
-        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , classes: None, key: None, subclasses: None, subsets: None }
+    pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>, format: Option<String>) -> Declaration {
+        Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , format: format, classes: None, key: None, subclasses: None, subsets: None }
     }
 
     ///Returns the key of default processor, if any

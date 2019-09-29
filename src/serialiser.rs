@@ -89,6 +89,9 @@ impl Document {
                 if let Some(alias) = &declaration.alias {
                     dec_start.push_attribute(("alias", alias.as_str() ));
                 }
+                if let Some(format) = &declaration.format {
+                    dec_start.push_attribute(("format", format.as_str() ));
+                }
                 let dec_end = BytesEnd::owned(tagname.as_bytes().to_vec());
                 if declaration.processors.is_empty() {
                     writer.write_event(Event::Empty(dec_start)).map_err(to_serialisation_error)?;

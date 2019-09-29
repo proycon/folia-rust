@@ -475,6 +475,7 @@ impl Declaration {
         let declaration_type = get_declaration_type(str::from_utf8(tag).expect("utf-8 decoding"))?;
         let mut set: Option<String> = None;
         let mut alias: Option<String> = None;
+        let mut format: Option<String> = None;
         for attrib in event.attributes() {
             let attrib = attrib.expect("unwrapping declaration attribute");
             if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
@@ -484,6 +485,9 @@ impl Declaration {
                     },
                     b"alias" => {
                         alias = Some(value.clone());
+                    },
+                    b"format" => {
+                        format = Some(value.clone());
                     },
                     b"annotator" => {
                         //TODO: handle old-style default
@@ -497,6 +501,6 @@ impl Declaration {
                 }
             }
         }
-        Ok(Declaration::new(declaration_type, set, alias))
+        Ok(Declaration::new(declaration_type, set, alias, format))
     }
 }

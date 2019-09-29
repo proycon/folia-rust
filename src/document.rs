@@ -87,7 +87,7 @@ impl Document {
 
     pub fn apply_properties(&mut self, properties: DocumentProperties) -> Result<(),FoliaError> {
         for (annotationtype, set) in properties.declare.iter() {
-            let dec_key = self.declare(*annotationtype, &set, &None)?;
+            let dec_key = self.declare(*annotationtype, &set, &None,&None)?;
             if set.is_some() {
                 if set.as_ref().unwrap() == DEFAULT_TEXT_SET {
                      self.add_class(dec_key, &"current".to_string())?;
@@ -315,7 +315,7 @@ impl Document {
 
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
     ///key of the existing one.
-    pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>) -> Result<DecKey,FoliaError> {
+    pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>, format: &Option<String>) -> Result<DecKey,FoliaError> {
         //first we simply check the index
         if let Some(found_key) = <Self as Store<Declaration,DecKey>>::id_to_key(self,Declaration::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
             return Ok(found_key);
@@ -340,7 +340,7 @@ impl Document {
         }
 
         //if we reach this point we have no defaults and add a new declaration
-        let added_key = self.add_declaration(Declaration::new(annotationtype, set.clone(), alias.clone()))?;
+        let added_key = self.add_declaration(Declaration::new(annotationtype, set.clone(), alias.clone(), format.clone()))?;
         Ok(added_key)
     }
 
@@ -468,7 +468,7 @@ impl Store<ElementData,ElementKey> for Document {
         if let Some(annotationtype) = element.elementtype.annotationtype() {
             //Declare the element (either declares anew or just resolves the to the right
             //declaration.
-            let deckey = self.declare(annotationtype, &element.set().unwrap().map(|s| s.to_string()),  &None)?;
+            let deckey = self.declare(annotationtype, &element.set().unwrap().map(|s| s.to_string()),  &None,&None)?;
             declaration_key  = Some(deckey);
 
             if let Ok(Some(class)) = element.class() {
@@ -489,7 +489,7 @@ impl Store<ElementData,ElementKey> for Document {
                         //get the declaration key from the parent context:
                         let parent = self.get_elementdata(parent_key).ok_or( FoliaError::InternalError("Context for feature does not exist!".to_string()))?;
 
-                        let deckey = self.declare(parent.elementtype.annotationtype().expect(format!("Unwrapping annotation type of parent {}", element.elementtype).as_str() ), &element.set().unwrap().map(|s| s.to_string()),  &None)?;
+                        let deckey = self.declare(parent.elementtype.annotationtype().expect(format!("Unwrapping annotation type of parent {}", element.elementtype).as_str() ), &element.set().unwrap().map(|s| s.to_string()),  &None, &None)?;
                         declaration_key  = Some(deckey);
 
                         if let Some(declaration) = self.get_mut_declaration(deckey) {
