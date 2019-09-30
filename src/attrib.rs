@@ -17,12 +17,13 @@ use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF, ORIGINAL, LINENR, PAGENR, NEWPAGE, XLINKTYPE
+    NONE, ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF, ORIGINAL, LINENR, PAGENR, NEWPAGE, XLINKTYPE
 }
 
 impl Into<&str> for AttribType {
     fn into(self) -> &'static str {
          match self {
+            AttribType::NONE => "NONE", //should not be serialised, need to check in advance
             AttribType::ID => "xml:id",
             AttribType::SET => "set",
             AttribType::CLASS => "class",
@@ -65,6 +66,7 @@ impl fmt::Display for AttribType {
 
 #[derive(Clone,PartialEq)]
 pub enum Attribute {
+    Ignore,
     Id(String),
     Set(String),
     DeclarationRef(DecKey), //encoded form for (annotationtype,set)
@@ -143,6 +145,7 @@ impl Attribute {
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
             Attribute::NewPage(b) => { if *b { Ok("yes") } else { Ok("no") } },
+            Attribute::Ignore => Err(FoliaError::TypeError("Ignore attribute can't be serialised".to_string())),
             _ =>  Err(FoliaError::TypeError("Attribute can't be cast as_str, use to_string() instead".to_string()))
         }
     }
@@ -153,6 +156,7 @@ impl Attribute {
             Attribute::Offset(n) => Ok(n.to_string()),
             Attribute::LineNr(n) => Ok(n.to_string()),
             Attribute::PageNr(n) => Ok(n.to_string()),
+            Attribute::Ignore => Err(FoliaError::TypeError("Ignore attribute can't be serialised".to_string())),
             _ =>  {
                 if let Ok(s) = self.as_str() {
                     Ok(s.to_string())
@@ -170,6 +174,7 @@ impl Attribute {
 
     pub fn attribtype(&self) -> AttribType {
         match self {
+            Attribute::Ignore => AttribType::NONE,
             Attribute::Id(_) => AttribType::ID,
             Attribute::Set(_) => AttribType::SET,
             Attribute::DeclarationRef(_) => AttribType::SET,
@@ -344,8 +349,12 @@ impl Attribute {
                         _ => Err(FoliaError::ParseError(format!("Invalid space value: '{}'", value)))
                     }
                 },
-                _ => {
-                    Err(FoliaError::ParseError(format!("Unknown attribute: '{}'", std::str::from_utf8(attrib.key).expect("unable to parse attribute name"))))
+                attrib_key => {
+                    if attrib_key.contains(&58) { //58 is a colon, we assume alien namespaces and ignore it
+                        Ok(Attribute::Ignore)
+                    } else {
+                        Err(FoliaError::ParseError(format!("Unknown attribute: '{}'", std::str::from_utf8(attrib.key).expect("unable to parse attribute name"))))
+                    }
                 }
             }
         } else {

@@ -224,7 +224,8 @@ impl Document {
                 if let Some(end) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
                 } else {
-                    return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
+                    eprintln!("WARNING: Unable to pop the end tag stack during parsing!!!");
+                    //return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
                 }
                 previous_depth -= 1;
             }
@@ -235,7 +236,7 @@ impl Document {
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());
                         for attrib in element.attribs().iter() {
-                            if !attrib.decodable() {
+                            if *attrib != Attribute::Ignore && !attrib.decodable()  {
                                 start.push_attribute((attrib.attribtype().into(), format!("{}",attrib).as_str() ));
                             }
                         }
