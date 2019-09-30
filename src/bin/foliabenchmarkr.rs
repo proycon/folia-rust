@@ -87,6 +87,7 @@ fn test(test_id: &str, filename: &str) {
             let mut m = Measurement::begin();
             let doc = Document::from_file(filename, DocumentProperties::default()).expect("loading folia document");
             m.end(test_id, filename, "Parse XML from file into full memory representation");
+            doc.id(); //just to make sure the compiler doesn't optimise doc away (not sure if needed but better safe than sorry)
         },
         _ => {
             eprintln!("No such test: {}", test_id);

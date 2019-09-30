@@ -125,10 +125,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "alt";
                 properties.annotationtype = Some(AnnotationType::ALTERNATIVE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::MorphologyLayer), AcceptedData::AcceptElementType(ElementType::PhonologyLayer)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::MorphologyLayer), AcceptedData::AcceptElementType(ElementType::PhonologyLayer)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -151,10 +151,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "altlayers";
                 properties.annotationtype = Some(AnnotationType::ALTERNATIVE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::ForeignData)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -203,10 +203,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "caption";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA,AttribType::SPACE ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -229,10 +229,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "cell";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA,AttribType::SPACE ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" | ");
@@ -255,7 +255,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "chunk";
                 properties.annotationtype = Some(AnnotationType::CHUNKING);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -281,7 +281,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "chunking";
                 properties.annotationtype = Some(AnnotationType::CHUNKING);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Chunk)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Chunk), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -309,7 +309,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::N,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::METADATA,AttribType::N ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -358,7 +358,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "coreferencechain";
                 properties.annotationtype = Some(AnnotationType::COREFERENCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::CoreferenceLink)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::CoreferenceLink), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[AcceptedData::AcceptElementType(ElementType::CoreferenceLink)];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -384,7 +384,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "coreferences";
                 properties.annotationtype = Some(AnnotationType::COREFERENCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::CoreferenceChain)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::CoreferenceChain), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -409,7 +409,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "coreferencelink";
                 properties.annotationtype = Some(AnnotationType::COREFERENCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LevelFeature), AcceptedData::AcceptElementType(ElementType::ModalityFeature), AcceptedData::AcceptElementType(ElementType::TimeFeature)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LevelFeature), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::ModalityFeature), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::TimeFeature), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -435,10 +435,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "correction";
                 properties.annotationtype = Some(AnnotationType::CORRECTION);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::New), AcceptedData::AcceptElementType(ElementType::Original), AcceptedData::AcceptElementType(ElementType::Current), AcceptedData::AcceptElementType(ElementType::Suggestion), AcceptedData::AcceptElementType(ElementType::ErrorDetection), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Current), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ErrorDetection), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::New), AcceptedData::AcceptElementType(ElementType::Original), AcceptedData::AcceptElementType(ElementType::Suggestion)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -486,7 +486,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "def";
                 properties.annotationtype = Some(AnnotationType::DEFINITION);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -512,7 +512,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "dependencies";
                 properties.annotationtype = Some(AnnotationType::DEPENDENCY);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Dependency)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Dependency), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -537,7 +537,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "dependency";
                 properties.annotationtype = Some(AnnotationType::DEPENDENCY);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::DependencyDependent), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Headspan)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::DependencyDependent), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[AcceptedData::AcceptElementType(ElementType::DependencyDependent), AcceptedData::AcceptElementType(ElementType::Headspan)];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -592,7 +592,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::N,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::METADATA,AttribType::N ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -615,7 +615,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "div";
                 properties.annotationtype = Some(AnnotationType::DIVISION);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -693,7 +693,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "entities";
                 properties.annotationtype = Some(AnnotationType::ENTITY);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Entity)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entity), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -718,7 +718,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "entity";
                 properties.annotationtype = Some(AnnotationType::ENTITY);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -744,7 +744,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "entry";
                 properties.annotationtype = Some(AnnotationType::ENTRY);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Definition), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Term), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::String)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Definition), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Term), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -796,7 +796,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "event";
                 properties.annotationtype = Some(AnnotationType::EVENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::ActorFeature), AcceptedData::AcceptElementType(ElementType::BegindatetimeFeature), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::EnddatetimeFeature), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::ActorFeature), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::BegindatetimeFeature), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::EnddatetimeFeature), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -822,7 +822,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "ex";
                 properties.annotationtype = Some(AnnotationType::EXAMPLE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -900,7 +900,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "figure";
                 properties.annotationtype = Some(AnnotationType::FIGURE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Caption), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Caption), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -977,10 +977,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "gap";
                 properties.annotationtype = Some(AnnotationType::GAP);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Content), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::ForeignData)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Content), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1003,7 +1003,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "head";
                 properties.annotationtype = Some(AnnotationType::HEAD);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1081,10 +1081,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "hiddenw";
                 properties.annotationtype = Some(AnnotationType::HIDDENTOKEN);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::TEXTCLASS,AttribType::METADATA,AttribType::SPACE ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -1133,7 +1133,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "label";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1288,7 +1288,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "list";
                 properties.annotationtype = Some(AnnotationType::LIST);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Caption), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::ListItem), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Caption), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::ListItem), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1314,10 +1314,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "item";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Label), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Label), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n");
@@ -1340,10 +1340,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "metric";
                 properties.annotationtype = Some(AnnotationType::METRIC);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ValueFeature), AcceptedData::AcceptElementType(ElementType::ForeignData)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::ValueFeature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1392,7 +1392,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "morpheme";
                 properties.annotationtype = Some(AnnotationType::MORPHOLOGICAL);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::FunctionFeature), AcceptedData::AcceptElementType(ElementType::Morpheme), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::FunctionFeature), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Morpheme), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -1418,7 +1418,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "morphology";
                 properties.annotationtype = Some(AnnotationType::MORPHOLOGICAL);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Morpheme)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Morpheme)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -1468,7 +1468,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "note";
                 properties.annotationtype = Some(AnnotationType::NOTE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1494,7 +1494,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "observation";
                 properties.annotationtype = Some(AnnotationType::OBSERVATION);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -1520,7 +1520,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "observations";
                 properties.annotationtype = Some(AnnotationType::OBSERVATION);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Observation)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Observation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -1570,7 +1570,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "p";
                 properties.annotationtype = Some(AnnotationType::PARAGRAPH);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1596,7 +1596,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "part";
                 properties.annotationtype = Some(AnnotationType::PART);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::PhonContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1648,7 +1648,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "phoneme";
                 properties.annotationtype = Some(AnnotationType::PHONOLOGICAL);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::FunctionFeature), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Phoneme), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::FunctionFeature), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Phoneme), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -1674,7 +1674,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "phonology";
                 properties.annotationtype = Some(AnnotationType::PHONOLOGICAL);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Phoneme)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Phoneme)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -1725,7 +1725,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "pos";
                 properties.annotationtype = Some(AnnotationType::POS);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::HeadFeature)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::HeadFeature), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -1751,7 +1751,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "predicate";
                 properties.annotationtype = Some(AnnotationType::PREDICATE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::SemanticRole), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::SemanticRole), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -1777,7 +1777,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "quote";
                 properties.annotationtype = Some(AnnotationType::QUOTE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Reference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1803,7 +1803,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "ref";
                 properties.annotationtype = Some(AnnotationType::REFERENCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1829,10 +1829,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "relation";
                 properties.annotationtype = Some(AnnotationType::RELATION);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1855,7 +1855,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "row";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Cell), AcceptedData::AcceptElementGroup(ElementGroup::Inline)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Cell), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1881,7 +1881,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "semrole";
                 properties.annotationtype = Some(AnnotationType::SEMROLE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -1907,7 +1907,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "semroles";
                 properties.annotationtype = Some(AnnotationType::SEMROLE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::SemanticRole), AcceptedData::AcceptElementType(ElementType::Predicate)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Predicate), AcceptedData::AcceptElementType(ElementType::SemanticRole)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -1932,7 +1932,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "sense";
                 properties.annotationtype = Some(AnnotationType::SENSE);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::SynsetFeature)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::SynsetFeature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -1958,7 +1958,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "s";
                 properties.annotationtype = Some(AnnotationType::SENTENCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -1984,7 +1984,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "sentiment";
                 properties.annotationtype = Some(AnnotationType::SENTIMENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::PolarityFeature), AcceptedData::AcceptElementType(ElementType::StrengthFeature), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::Target), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PolarityFeature), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::StrengthFeature), AcceptedData::AcceptElementType(ElementType::Target), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -2010,7 +2010,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "sentiments";
                 properties.annotationtype = Some(AnnotationType::SENTIMENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Sentiment)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Sentiment)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -2061,10 +2061,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "spanrelation";
                 properties.annotationtype = Some(AnnotationType::SPANRELATION);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2087,7 +2087,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "spanrelations";
                 properties.annotationtype = Some(AnnotationType::SPANRELATION);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::SpanRelation)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::SpanRelation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -2112,10 +2112,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "speech";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA,AttribType::SPACE ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n\n");
@@ -2138,7 +2138,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "statement";
                 properties.annotationtype = Some(AnnotationType::STATEMENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::StatementRelation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::StatementRelation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -2164,7 +2164,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "statements";
                 properties.annotationtype = Some(AnnotationType::STATEMENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Statement)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Statement)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -2241,10 +2241,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "str";
                 properties.annotationtype = Some(AnnotationType::STRING);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::N,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2322,7 +2322,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::CONFIDENCE,AttribType::N ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::N ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2370,7 +2370,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "su";
                 properties.annotationtype = Some(AnnotationType::SYNTAX);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::SyntacticUnit), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::SyntacticUnit), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -2396,7 +2396,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "syntax";
                 properties.annotationtype = Some(AnnotationType::SYNTAX);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::SyntacticUnit)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::SyntacticUnit)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -2421,7 +2421,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "table";
                 properties.annotationtype = Some(AnnotationType::TABLE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Row), AcceptedData::AcceptElementType(ElementType::TableHead)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Row), AcceptedData::AcceptElementType(ElementType::TableHead)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -2447,10 +2447,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "tablehead";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Row)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Row)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -2499,7 +2499,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "term";
                 properties.annotationtype = Some(AnnotationType::TERM);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -2525,10 +2525,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "text";
                 properties.annotationtype = None;
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Whitespace)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::ANNOTATOR,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::METADATA,AttribType::SPACE ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n\n");
@@ -2551,7 +2551,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t";
                 properties.annotationtype = Some(AnnotationType::TEXT);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA ];
@@ -2753,7 +2753,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "timesegment";
                 properties.annotationtype = Some(AnnotationType::TIMESEGMENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::ActorFeature), AcceptedData::AcceptElementType(ElementType::BegindatetimeFeature), AcceptedData::AcceptElementType(ElementType::EnddatetimeFeature), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::ActorFeature), AcceptedData::AcceptElementType(ElementType::BegindatetimeFeature), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::EnddatetimeFeature), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
@@ -2779,7 +2779,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "timing";
                 properties.annotationtype = Some(AnnotationType::TIMESEGMENT);
-                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::TimeSegment)];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::TimeSegment)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ID ];
@@ -2804,7 +2804,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "utt";
                 properties.annotationtype = Some(AnnotationType::UTTERANCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Word), AcceptedData::AcceptElementType(ElementType::Hiddenword)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
@@ -2882,10 +2882,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "w";
                 properties.annotationtype = Some(AnnotationType::TOKEN);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID,AttribType::CLASS,AttribType::ANNOTATOR,AttribType::N,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::SRC,AttribType::BEGINTIME,AttribType::ENDTIME,AttribType::SPEAKER,AttribType::TEXTCLASS,AttribType::METADATA,AttribType::SPACE ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
