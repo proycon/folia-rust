@@ -158,6 +158,7 @@ impl Document {
                         },
                         (Some(ns), b"submetadata") if ns == NSFOLIA => {
                             let mut processor_id: Option<String> = None;
+                            let mut submetadata_type: Option<String> = None;
                             for attrib in e.attributes() {
                                 let attrib = attrib.expect("unwrapping annotator attribute");
                                 if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
@@ -165,8 +166,11 @@ impl Document {
                                         b"xml:id" => {
                                             submetadata = Some(value.clone());
                                         },
+                                        b"type" => {
+                                            submetadata_type = Some(value.clone());
+                                        },
                                         otherwise => {
-                                            eprintln!("WARNING: Unhandled attribute annotator/@{:?}",str::from_utf8(otherwise).unwrap());
+                                            eprintln!("WARNING: Unhandled attribute submetadata/@{:?}",str::from_utf8(otherwise).unwrap());
                                         }
                                     }
                                 }

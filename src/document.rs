@@ -237,7 +237,7 @@ impl Document {
                                 return Err(FoliaError::ParseError("Wref span parent not found! (element gone missing)".to_string()));
                             }
                         } else {
-                            return Err(FoliaError::ParseError("Wref span parent not found!".to_string()));
+                            return Err(FoliaError::ParseError(format!("Wref span parent not found! (idref={})",idref)));
                         }
                     } else {
                         return Err(FoliaError::ParseError("Wref element does not reference anything!".to_string()));

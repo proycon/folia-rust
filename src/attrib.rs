@@ -17,7 +17,7 @@ use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT
+    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE
 }
 
 impl Into<&str> for AttribType {
@@ -43,7 +43,8 @@ impl Into<&str> for AttribType {
             AttribType::HREF => "href",
             AttribType::FORMAT => "format",
             AttribType::SUBSET => "subset",
-            AttribType::TEXT => "t"
+            AttribType::TEXT => "t",
+            AttribType::TYPE => "type"
         }
     }
 }
@@ -75,6 +76,7 @@ pub enum Attribute {
     Idref(String),
     Space(bool),
     Text(String),
+    Type(String), //used by references
 
     Processor(String),
     ProcessorRef(ProcKey), //encoded form
@@ -120,7 +122,7 @@ impl Attribute {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
-            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s)
                 => Ok(&s),
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
@@ -173,6 +175,7 @@ impl Attribute {
             Attribute::Subset(_) => AttribType::SUBSET,
             Attribute::SubsetRef(_) => AttribType::SUBSET,
             Attribute::Text(_) => AttribType::TEXT,
+            Attribute::Type(_) => AttribType::TYPE,
         }
     }
 
@@ -256,6 +259,9 @@ impl Attribute {
                 b"id" => {
                     Ok(Attribute::Idref(value))
                 },
+                b"type" => {
+                    Ok(Attribute::Type(value))
+                },
                 b"confidence" => {
                     if let Ok(value) = f64::from_str(&value) {
                         Ok(Attribute::Confidence(value))
@@ -271,7 +277,6 @@ impl Attribute {
                     }
                 },
                 _ => {
-                    //TODO: handle feature/subset attributes
                     Err(FoliaError::ParseError(format!("Unknown attribute: '{}'", std::str::from_utf8(attrib.key).expect("unable to parse attribute name"))))
                 }
             }
