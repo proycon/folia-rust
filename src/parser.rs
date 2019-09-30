@@ -464,7 +464,7 @@ impl ElementData {
     fn parse_attributes<R: BufRead>(reader: &Reader<R>, attribiter: quick_xml::events::attributes::Attributes, elementtype: ElementType) -> Result<(Vec<Attribute>,Vec<ElementData>), FoliaError> {
         let mut attributes: Vec<Attribute> = Vec::new();
         let mut children: Vec<ElementData> = Vec::new();
-        for attrib in attribiter {
+        'outerloop: for attrib in attribiter {
             let attrib = &attrib.expect("Parsing XML attribute");
             match Attribute::parse(&reader, attrib) {
                 //normal behaviour
@@ -481,10 +481,13 @@ impl ElementData {
                                     let properties = Properties::new(*acceptedtype);
                                     if properties.subset.is_some() && str::from_utf8(attrib.key).unwrap() == properties.subset.unwrap() {
                                         let child = ElementData::new(ElementType::Feature).
-                                                                with_attribs(vec![Attribute::Subset(properties.subset.unwrap().to_string())]).
+                                                                with_attribs(vec![
+                                                                    Attribute::Subset(properties.subset.unwrap().to_string()),
+                                                                    Attribute::Class(value.clone())
+                                                                ]).
                                                                 with_children(vec![DataType::Text(value.clone())]);
                                         children.push(child);
-                                        continue;
+                                        continue 'outerloop;
                                     }
                                 }
                             }
