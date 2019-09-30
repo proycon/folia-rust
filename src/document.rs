@@ -165,7 +165,7 @@ impl Document {
         match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
             Ok(child_key) => {
                 self.attach_element(parent_key, child_key)?;
-                self.post_add(child_key)?;
+                self.post_add(child_key, None)?;
                 Ok(child_key)
             },
             Err(err) => {
@@ -208,7 +208,7 @@ impl Document {
     }
 
     ///Performs postprocessing after adding an element
-    pub(crate) fn post_add(&mut self, element_key: ElementKey) -> Result<(),FoliaError> {
+    pub(crate) fn post_add(&mut self, element_key: ElementKey, stack: Option<&Vec<ElementKey>>) -> Result<(),FoliaError> {
         if let Some(element) = self.get_elementdata(element_key) {
             match element.elementtype {
                 ElementType::WordReference => {
@@ -226,9 +226,18 @@ impl Document {
                         let mut span_key: Option<ElementKey> = None;
                         let selector = Selector::elements().elementgroup(Cmp::Is(ElementGroup::Span));
                         //we get our ancestors the normal way
-                        for ancestor in self.ancestors_by_key(element_key, selector) {
-                            span_key = Some(ancestor.element.key().expect("unwrapping ancestor key"));
-                            break;
+                        if stack.is_some() {
+                            for key in stack.unwrap().iter().rev() {
+                                if selector.matches(&self, &DataType::Element(*key)) {
+                                    span_key = Some(*key);
+                                    break;
+                                }
+                            }
+                        } else {
+                            for ancestor in self.ancestors_by_key(element_key, selector) {
+                                span_key = Some(ancestor.element.key().expect("unwrapping ancestor key"));
+                                break;
+                            }
                         }
                         if let Some(span_key) = span_key {
                             if let Some(target_element) = self.get_mut_elementdata_by_id(&idref) {

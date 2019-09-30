@@ -353,7 +353,7 @@ impl Document {
                             let child_key = self.add(child, Some(key))?;
                             self.attach_element(key, child_key)?;
                         }
-                        self.post_add(key)?;
+                        self.post_add(key, Some(&stack))?;
                     },
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
@@ -374,7 +374,7 @@ impl Document {
                             break;
                         }
                         let key = stack.pop().unwrap();
-                        self.post_add(key)?;
+                        self.post_add(key, Some(&stack))?;
                         if let Some(elem) = self.get_elementdata(key) {
 
                             //verify we actually close the right thing (otherwise we have malformed XML)
