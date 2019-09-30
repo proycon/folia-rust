@@ -17,7 +17,7 @@ use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE
+    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF
 }
 
 impl Into<&str> for AttribType {
@@ -44,7 +44,10 @@ impl Into<&str> for AttribType {
             AttribType::FORMAT => "format",
             AttribType::SUBSET => "subset",
             AttribType::TEXT => "t",
-            AttribType::TYPE => "type"
+            AttribType::TYPE => "type",
+            AttribType::AUTH => "auth",
+            AttribType::OFFSET => "offset",
+            AttribType::REF => "ref"
         }
     }
 }
@@ -77,6 +80,9 @@ pub enum Attribute {
     Space(bool),
     Text(String),
     Type(String), //used by references
+    Auth(String), //for backward compatibility
+    Offset(u16),
+    Ref(String),
 
     Processor(String),
     ProcessorRef(ProcKey), //encoded form
@@ -122,7 +128,7 @@ impl Attribute {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
-            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s)
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s)
                 => Ok(&s),
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
@@ -139,7 +145,8 @@ impl Attribute {
                 } else {
                     Err(FoliaError::TypeError("Attribute can't be cast to_string() without decoding".to_string()))
                 }
-            }
+            },
+            Attribute::Offset(n) => Ok(n.to_string()),
         }
     }
 
@@ -176,6 +183,9 @@ impl Attribute {
             Attribute::SubsetRef(_) => AttribType::SUBSET,
             Attribute::Text(_) => AttribType::TEXT,
             Attribute::Type(_) => AttribType::TYPE,
+            Attribute::Offset(_) => AttribType::OFFSET,
+            Attribute::Ref(_) => AttribType::REF,
+            Attribute::Auth(_) => AttribType::AUTH
         }
     }
 
@@ -261,6 +271,19 @@ impl Attribute {
                 },
                 b"type" => {
                     Ok(Attribute::Type(value))
+                },
+                b"auth" => {
+                    Ok(Attribute::Auth(value))
+                },
+                b"offset" => {
+                    if let Ok(value) = u16::from_str(&value) {
+                        Ok(Attribute::Offset(value))
+                    } else {
+                        Err(FoliaError::ParseError(format!("Invalid offset value: '{}'", value)))
+                    }
+                },
+                b"ref" => {
+                    Ok(Attribute::Ref(value))
                 },
                 b"confidence" => {
                     if let Ok(value) = f64::from_str(&value) {
