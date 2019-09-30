@@ -480,7 +480,7 @@ fn test010d_get_span_annotation_noduplicates() {
 
 
 #[test]
-fn test011_features() {
+fn test011a_features() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
@@ -505,3 +505,63 @@ fn test011_features() {
     }
 }
 
+#[test]
+fn test011b_feature_as_attribute() {
+const TEST_FEAT_AS_ATTRIB: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
+<FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
+  <metadata type="native">
+      <annotations>
+          <token-annotation set="https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl">
+             <annotator processor="p1" />
+          </token-annotation>
+          <text-annotation>
+             <annotator processor="p1" />
+          </text-annotation>
+          <sentence-annotation>
+             <annotator processor="p1" />
+          </sentence-annotation>
+          <pos-annotation set="adhoc">
+             <annotator processor="p2" />
+          </pos-annotation>
+      </annotations>
+      <provenance>
+         <processor xml:id="p1" name="proycon" type="manual" />
+      </provenance>
+      <meta id="language">eng</meta>
+  </metadata>
+  <text xml:id="example.text">
+      <s xml:id="example.p.1.s.1">
+         <w xml:id="example.p.1.s.1.w.1" class="WORD">
+            <t>example</t>
+            <pos class="N(singular)" head="N">
+                <feat subset="number" class="singular" />
+            </pos>
+         </w>
+       </s>
+  </text>
+</FoLiA>"#;
+    match Document::from_str(str::from_utf8(TEST_FEAT_AS_ATTRIB).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
+                if let Some(pos) = word.get_annotation(AnnotationType::POS, Cmp::Any,Recursion::No) {
+                    if let Some(feature) = pos.get_feature(Cmp::Is("head".to_string())) {
+                        assert_matches!(feature.elementtype(), ElementType::Feature);
+                        assert_matches!(feature.subset(), Some("head"));
+                        assert_matches!(feature.class(), Some("N"));
+                    } else {
+                        assert!(false, "feature not found");
+                    }
+                } else {
+                    assert!(false, "annotation not found");
+                }
+
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+
+}

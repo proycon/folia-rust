@@ -480,7 +480,9 @@ impl ElementData {
                                 if featuregroup.contains(*acceptedtype) {
                                     let properties = Properties::new(*acceptedtype);
                                     if properties.subset.is_some() && str::from_utf8(attrib.key).unwrap() == properties.subset.unwrap() {
-                                        let child = ElementData::new(*acceptedtype).with_children(vec![DataType::Text(value.clone())]);
+                                        let child = ElementData::new(ElementType::Feature).
+                                                                with_attribs(vec![Attribute::Subset(properties.subset.unwrap().to_string())]).
+                                                                with_children(vec![DataType::Text(value.clone())]);
                                         children.push(child);
                                         continue;
                                     }
