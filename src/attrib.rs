@@ -17,7 +17,7 @@ use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF
+    ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF, ORIGINAL, LINENR, PAGENR, NEWPAGE, XLINKTYPE
 }
 
 impl Into<&str> for AttribType {
@@ -40,14 +40,19 @@ impl Into<&str> for AttribType {
             AttribType::IDREF => "id",
             AttribType::SPACE => "space",
             AttribType::PROCESSOR => "processor",
-            AttribType::HREF => "href",
+            AttribType::HREF => "xlink:href",
             AttribType::FORMAT => "format",
             AttribType::SUBSET => "subset",
             AttribType::TEXT => "t",
             AttribType::TYPE => "type",
             AttribType::AUTH => "auth",
             AttribType::OFFSET => "offset",
-            AttribType::REF => "ref"
+            AttribType::REF => "ref",
+            AttribType::LINENR => "linenr",
+            AttribType::PAGENR => "pagenr",
+            AttribType::NEWPAGE => "newpage",
+            AttribType::ORIGINAL => "original",
+            AttribType::XLINKTYPE => "xlink:type",
         }
     }
 }
@@ -83,6 +88,11 @@ pub enum Attribute {
     Auth(String), //for backward compatibility
     Offset(u16),
     Ref(String),
+    Original(String), //used by t-correction
+    LineNr(u16), //used by linebreak
+    PageNr(u16), //used by linebreak
+    NewPage(bool), //used by linebreak
+    XLinkType(String),
 
     Processor(String),
     ProcessorRef(ProcKey), //encoded form
@@ -128,10 +138,11 @@ impl Attribute {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
-            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s)
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s) | Attribute::Original(s)
                 => Ok(&s),
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
+            Attribute::NewPage(b) => { if *b { Ok("yes") } else { Ok("no") } },
             _ =>  Err(FoliaError::TypeError("Attribute can't be cast as_str, use to_string() instead".to_string()))
         }
     }
@@ -139,6 +150,9 @@ impl Attribute {
     pub fn to_string(&self) -> Result<String,FoliaError> {
         match self {
             Attribute::Confidence(f) => Ok(f.to_string()),
+            Attribute::Offset(n) => Ok(n.to_string()),
+            Attribute::LineNr(n) => Ok(n.to_string()),
+            Attribute::PageNr(n) => Ok(n.to_string()),
             _ =>  {
                 if let Ok(s) = self.as_str() {
                     Ok(s.to_string())
@@ -146,7 +160,6 @@ impl Attribute {
                     Err(FoliaError::TypeError("Attribute can't be cast to_string() without decoding".to_string()))
                 }
             },
-            Attribute::Offset(n) => Ok(n.to_string()),
         }
     }
 
@@ -179,13 +192,18 @@ impl Attribute {
             Attribute::ProcessorRef(_) => AttribType::PROCESSOR,
             Attribute::Href(_) => AttribType::HREF,
             Attribute::Format(_) => AttribType::FORMAT,
+            Attribute::XLinkType(_) => AttribType::XLINKTYPE,
             Attribute::Subset(_) => AttribType::SUBSET,
             Attribute::SubsetRef(_) => AttribType::SUBSET,
             Attribute::Text(_) => AttribType::TEXT,
             Attribute::Type(_) => AttribType::TYPE,
             Attribute::Offset(_) => AttribType::OFFSET,
             Attribute::Ref(_) => AttribType::REF,
-            Attribute::Auth(_) => AttribType::AUTH
+            Attribute::Auth(_) => AttribType::AUTH,
+            Attribute::Original(_) => AttribType::ORIGINAL,
+            Attribute::LineNr(_) => AttribType::LINENR,
+            Attribute::PageNr(_) => AttribType::PAGENR,
+            Attribute::NewPage(_) => AttribType::NEWPAGE
         }
     }
 
@@ -239,6 +257,9 @@ impl Attribute {
                 b"xlink:href" => {
                     Ok(Attribute::Href(value))
                 },
+                b"xlink:type" => {
+                    Ok(Attribute::XLinkType(value))
+                },
                 b"speaker" => {
                     Ok(Attribute::Speaker(value))
                 },
@@ -275,11 +296,35 @@ impl Attribute {
                 b"auth" => {
                     Ok(Attribute::Auth(value))
                 },
+                b"original" => {
+                    Ok(Attribute::Original(value))
+                },
                 b"offset" => {
                     if let Ok(value) = u16::from_str(&value) {
                         Ok(Attribute::Offset(value))
                     } else {
                         Err(FoliaError::ParseError(format!("Invalid offset value: '{}'", value)))
+                    }
+                },
+                b"linenr" => {
+                    if let Ok(value) = u16::from_str(&value) {
+                        Ok(Attribute::LineNr(value))
+                    } else {
+                        Err(FoliaError::ParseError(format!("Invalid offset value: '{}'", value)))
+                    }
+                },
+                b"pagenr" => {
+                    if let Ok(value) = u16::from_str(&value) {
+                        Ok(Attribute::PageNr(value))
+                    } else {
+                        Err(FoliaError::ParseError(format!("Invalid offset value: '{}'", value)))
+                    }
+                },
+                b"newpage" => {
+                    match value.as_str() {
+                        "yes" | "true" => Ok(Attribute::NewPage(true)),
+                        "no" | "false" => Ok(Attribute::NewPage(false)),
+                        _ => Err(FoliaError::ParseError(format!("Invalid newpage value: '{}'", value)))
                     }
                 },
                 b"ref" => {
