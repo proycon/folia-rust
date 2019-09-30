@@ -39,6 +39,7 @@ impl Document {
                             provenancestore: ProvenanceStore::default(),
                             declarationstore: DeclarationStore::default(),
                             metadata: Metadata::default(),
+                            submetadata: HashMap::default(),
                             autodeclare: properties.autodeclare,
         };
 
@@ -81,6 +82,7 @@ impl Document {
         //parse metadata
         let mut parsedeclarations = false;
         let mut parseprovenance = false;
+        let mut submetadata: Option<String> = None;
         let mut text: Option<String> = None;
         let mut meta_id: Option<String> = None;
         let mut declaration_key: Option<DecKey> = None;
@@ -154,6 +156,25 @@ impl Document {
                         (Some(ns), b"provenance") if ns == NSFOLIA => {
                             parseprovenance = true;
                         },
+                        (Some(ns), b"submetadata") if ns == NSFOLIA => {
+                            let mut processor_id: Option<String> = None;
+                            for attrib in e.attributes() {
+                                let attrib = attrib.expect("unwrapping annotator attribute");
+                                if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
+                                    match attrib.key {
+                                        b"xml:id" => {
+                                            submetadata = Some(value.clone());
+                                        },
+                                        otherwise => {
+                                            eprintln!("WARNING: Unhandled attribute annotator/@{:?}",str::from_utf8(otherwise).unwrap());
+                                        }
+                                    }
+                                }
+                            }
+                            if submetadata.is_none() {
+                                return Err(FoliaError::ParseError("Submetadata has no ID".to_string()));
+                            }
+                        },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             for attrib in e.attributes() {
                                 let attrib = attrib.expect("unwrapping meta attribute");
@@ -206,6 +227,9 @@ impl Document {
                 },
                 (ref ns, Event::End(ref e)) => {
                     match (*ns, e.local_name())  {
+                        (Some(ns), b"submetadata") if ns == NSFOLIA => {
+                            submetadata = None;
+                        },
                         (Some(ns), b"metadata") if ns == NSFOLIA => {
                             break;
                         },
@@ -230,7 +254,14 @@ impl Document {
                         },
                         (Some(ns), b"meta") if ns == NSFOLIA => {
                             if let (Some(text), Some(meta_id)) = (&text, &meta_id) {
-                                doc.metadata.data.insert(meta_id.clone(), text.clone());
+                                if let Some(submetadata_id) = &submetadata {
+                                    let submetadata_opt: Option<&mut Metadata> = doc.submetadata.get_mut(submetadata_id);
+                                    if let Some(submetadata) = submetadata_opt {
+                                        submetadata.data.insert(meta_id.clone(), text.clone());
+                                    }
+                                } else {
+                                    doc.metadata.data.insert(meta_id.clone(), text.clone());
+                                }
                             }
                         },
                         (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {

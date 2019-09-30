@@ -71,6 +71,24 @@ impl Document {
             writer.write_event(Event::End(BytesEnd::borrowed(b"meta"))).map_err(to_serialisation_error)?;
             writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         }
+        //there is a bit too much duplication going on here, to be solved later
+        for (submetadata_id, submetadata) in self.submetadata.iter() {
+            let mut submetadata_start = BytesStart::borrowed_name(b"submetadata");
+            if let Some(metadatatype) = &submetadata.metadatatype {
+                submetadata_start.push_attribute(("type", metadatatype.as_str() ));
+            }
+            if let Some(src) = &self.metadata.src {
+                submetadata_start.push_attribute(("src", src.as_str() ));
+            }
+            for (meta_id, value) in submetadata.data.iter() {
+                let mut meta_start = BytesStart::borrowed_name(b"meta");
+                meta_start.push_attribute(("id", meta_id.as_str() ));
+                writer.write_event(Event::Start(meta_start)).map_err(to_serialisation_error)?;
+                writer.write_event(Event::Text(BytesText::from_plain_str(value))).map_err(to_serialisation_error)?;
+                writer.write_event(Event::End(BytesEnd::borrowed(b"meta"))).map_err(to_serialisation_error)?;
+                writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
+            }
+        }
         writer.write_event(Event::End(BytesEnd::borrowed(b"metadata"))).map_err(to_serialisation_error)?;
         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
         Ok(())

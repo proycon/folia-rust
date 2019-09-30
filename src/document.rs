@@ -39,6 +39,8 @@ pub struct Document {
     pub declarationstore: DeclarationStore,
     ///Metadata consists of a simple key/value store (or a reference to external metadata)
     pub metadata: Metadata,
+    ///Submetadata
+    pub submetadata: HashMap<String,Metadata>,
 
     pub autodeclare: bool,
 }
@@ -72,6 +74,7 @@ impl Document {
             provenancestore:  ProvenanceStore::default(),
             declarationstore: DeclarationStore::default(),
             metadata: Metadata::default(),
+            submetadata: HashMap::default(),
             autodeclare: properties.autodeclare,
         };
         let mut body = match properties.bodytype {
@@ -123,6 +126,7 @@ impl Document {
 
     ///Returns the filename associated with this document (i.e. the file from which it was loaded)
     pub fn filename(&self) -> Option<&str> { self.filename.as_ref().map(String::as_str) } //String::as_str equals  |x| &**x
+
 
 
 
