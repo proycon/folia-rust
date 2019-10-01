@@ -16,11 +16,13 @@ use crate::metadata::*;
 use crate::store::*;
 
 #[derive(Debug,Copy,Clone,PartialEq)]
+///Attribute Type
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
     NONE, ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF, ORIGINAL, LINENR, PAGENR, NEWPAGE, XLINKTYPE
 }
 
 impl Into<&str> for AttribType {
+    ///Get a string representation of the attribute type
     fn into(self) -> &'static str {
          match self {
             AttribType::NONE => "NONE", //should not be serialised, need to check in advance
@@ -65,6 +67,7 @@ impl fmt::Display for AttribType {
 }
 
 #[derive(Clone,PartialEq)]
+///This type hold attributes (including the attribute value)
 pub enum Attribute {
     Ignore,
     Id(String),
@@ -135,6 +138,9 @@ impl Attribute {
         }
     }
 
+    ///Get the attribute value as a ``&str``, note that this does only works
+    ///for attributes from which a string slice can be borrowed. Use ``to_string()`` for
+    ///the others.
     pub fn as_str(&self) -> Result<&str,FoliaError> {
         match self {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
@@ -153,6 +159,9 @@ impl Attribute {
         }
     }
 
+    ///Convert the attribute value to string. This does not work for encoded attributes (i.e.
+    ///attributes that refer to a certain key), those need
+    ///explicit decoding first.
     pub fn to_string(&self) -> Result<String,FoliaError> {
         match self {
             Attribute::Confidence(f) => Ok(f.to_string()),
@@ -172,10 +181,12 @@ impl Attribute {
     }
 
 
+    ///Tests if two attributes are the same type (does not take their values into account)
     pub fn sametype(&self, other: &Attribute) -> bool {
         self.attribtype() == other.attribtype()
     }
 
+    ///Get the type of the attribute
     pub fn attribtype(&self) -> AttribType {
         match self {
             Attribute::Ignore => AttribType::NONE,

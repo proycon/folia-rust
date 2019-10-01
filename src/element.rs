@@ -84,6 +84,8 @@ impl Storable<ElementKey> for ElementData {
         }
     }
 
+    ///Returns ``true`` if this element is encodable, i.e. if it needs to be encoded
+    ///prior to being stored. An element is encodable if it has one or more encodable elements.
     fn encodable(&self) -> bool {
         for attrib in self.attribs.iter() {
             if attrib.encodable() {
@@ -106,6 +108,7 @@ impl Storable<ElementKey> for ElementData {
 }
 
 impl ElementData {
+    ///Returns the ID of the element (if any)
     pub fn id(&self) -> Option<&str> {
         for attrib in self.attribs.iter() {
             if let Attribute::Id(id) = attrib {
@@ -249,22 +252,27 @@ pub trait ReadElement {
     fn document(&self) -> Option<&Document>;
 
 
+    ///Return the key of this element
     fn key(&self) -> Option<ElementKey> {
         self.elementdata().key()
     }
 
+    ///Gives access to all attributes
     fn attribs(&self) -> &Vec<Attribute> {
         &self.elementdata().attribs()
     }
 
+    ///Get the element type of this element
     fn elementtype(&self) -> ElementType {
         self.elementdata().elementtype
     }
 
+    ///Get a specific attribute by type
     fn attrib(&self, atype: AttribType) -> Option<&Attribute> {
         self.elementdata().attrib(atype)
     }
 
+    ///Check if a specific attribute exists (by type)
     fn has_attrib(&self, atype: AttribType) -> bool {
         self.elementdata().has_attrib(atype)
     }
@@ -350,22 +358,28 @@ pub trait ReadElement {
         }
     }
 
+    ///Get the ID of the element
     fn id(&self) -> Option<&str> {
         self.elementdata().id()
     }
 
+    ///Get the class key, i.e. the encoded (numeric) form of the class
     fn class_key(&self) -> Option<ClassKey> {
         self.elementdata().class_key().expect("Unwrapping class key result")
     }
+    ///Get the subset key, i.e. the encoded (numeric) form of the subset
     fn subset_key(&self) -> Option<SubsetKey> {
         self.elementdata().subset_key().expect("Unwrapping subset key result")
     }
+    ///Get the declaration key, i.e. the encoded (numeric) form of the set (and annotationtype)
     fn declaration_key(&self) -> Option<DecKey> {
         self.elementdata().declaration_key().expect("Unwrapping declaration key result")
     }
+    ///Get the processor key, i.e. the encoded (numeric) form of the processor
     fn processor_key(&self) -> Option<ProcKey> {
         self.elementdata().processor_key().expect("Unwrapping Processor key result")
     }
+    ///Get the parent's element key, i.e. the encoded (numeric) form of the parent element
     fn parent_key(&self) -> Option<ElementKey> {
         self.elementdata().parent_key()
     }
@@ -452,6 +466,7 @@ pub trait ReadElement {
 
 
 impl<'a> PartialEq for Element<'a> {
+    ///Equality test for elements, two elements are considered equal if they have the same key
     fn eq(&self, other: &Self) -> bool {
         self.data.key().is_some() && self.data.key() == other.data.key()
     }
@@ -541,6 +556,8 @@ impl<'a> Element<'a> {
     }
 
 
+    ///High-level function to get a particular feature by annotation type and set, returns an
+    ///single element (the first feature).
     pub fn get_feature(&self, subset: Cmp<String>) -> Option<Element> {
         if self.document.is_none() { //saves us from a panic in the deeper call
             None
@@ -549,7 +566,7 @@ impl<'a> Element<'a> {
         }
     }
 
-    ///High leverl-function to get a particular ancestor by annoation type and set. This function
+    ///High level-function to get a particular ancestor by annoation type and set. This function
     ///returns only one element
     pub fn get_ancestor(&self, elementtype: ElementType, set: Cmp<String>) -> Option<Element> {
         if self.document.is_none() { //saves us from a panic in the deeper call
@@ -559,6 +576,8 @@ impl<'a> Element<'a> {
         }
     }
 
+    ///Returns an iterator over the ancestors of this element, starting with the parent and moving
+    ///up the tree.
     pub fn get_ancestors(&self, elementtype: ElementType, set: Cmp<String>) -> AncestorIterator {
         self.ancestors(Selector::from_query(self.document().expect("Unwrapping document on element for get_ancestors()"), &Query::select().element(Cmp::Is(elementtype)).set(set)).expect("Compiling query for get_ancestors()"))
     }

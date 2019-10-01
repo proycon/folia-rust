@@ -24,10 +24,12 @@ pub type Subset = String;
 
 #[repr(u8)]
 #[derive(Copy,Clone,PartialEq,Eq,PartialOrd,Hash,EnumIter)]
+///This represents the type of a FoLiA element.
 //foliaspec:elementtype
 pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
 #[derive(Copy,Clone,PartialEq,Debug,Hash,EnumIter)]
+///This represents groups of element types that share similar characteristics.
 //foliaspec:elementgroup
 pub enum ElementGroup { Layer, Content, CorrectionChild, HigherOrder, Inline, Span, SpanRole, Structure, Subtoken, TextMarkup, Feature }
 
@@ -59,6 +61,7 @@ impl ElementGroup {
 }
 
 #[derive(Debug,Copy,Clone,PartialEq,Eq,Hash,EnumIter)]
+///Defines all annotation types (as part of the AnnotationType enumeration)
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)
 pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
@@ -270,6 +273,7 @@ impl fmt::Display for AnnotationType {
 
 
 impl AnnotationType {
+    ///A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
     pub fn elementtype(&self) -> ElementType {
         //foliaspec:annotationtype_elementtype_map(self)
         //A mapping from annotation types to element types, based on the assumption that there is always only one primary element for an annotation type (and possible multiple secondary ones which are not included in this map,w)
@@ -702,10 +706,13 @@ impl std::str::FromStr for ElementType {
 
 
 #[derive(Debug,PartialEq,Clone)]
+///This data structure represents a data item in the document tree.
 pub enum DataType {
+    ///Text item
     Text(String),
     ///A reference to an element
     Element(ElementKey),
+    ///Comment item
     Comment(String),
     ///A reference to a span element (the reverse of wref, not expressed explicitly in the XML)
     SpanReference(ElementKey),
