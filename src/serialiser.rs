@@ -221,8 +221,11 @@ impl Document {
         let mut previous_depth = 0;
         for item in self.select_data_by_key(root_key,Selector::all_data(),Recursion::Always, true) {
             while item.depth < previous_depth {
-                if let Some(end) = stack.pop() {
+                if let Some((end,elementtype)) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
+                    if !ElementGroup::TextMarkup.contains(elementtype) {
+                        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
+                    }
                 } else {
                     eprintln!("WARNING: Unable to pop the end tag stack during parsing!!!");
                     //return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
@@ -277,7 +280,10 @@ impl Document {
                         } else {
                             writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
                             let end = BytesEnd::owned(tag.to_vec());
-                            stack.push(end);
+                            stack.push((end,element.elementtype()));
+                        }
+                        if !ElementGroup::TextMarkup.contains(element.elementtype()) && element.elementtype() != ElementType::TextContent && element.elementtype() != ElementType::PhonContent {
+                            writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
                         }
                     }
                 },
@@ -297,7 +303,7 @@ impl Document {
         }
 
         //don't forget the final closing elements
-        while let Some(end) = stack.pop() {
+        while let Some((end, elementtype)) = stack.pop() {
             writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
         }
 
