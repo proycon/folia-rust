@@ -260,7 +260,7 @@ impl Attribute {
                 b"subset" => {
                     Ok(Attribute::Subset(value))
                 },
-                b"xlink:format" => {
+                b"format" => {
                     Ok(Attribute::Format(value))
                 },
                 b"xlink:href" => {
