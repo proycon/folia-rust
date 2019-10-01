@@ -140,13 +140,16 @@ impl Attribute {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
-            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s) | Attribute::Original(s)
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s) | Attribute::Original(s) | Attribute::Auth(s) | Attribute::XLinkType(s)
                 => Ok(&s),
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
             Attribute::NewPage(b) => { if *b { Ok("yes") } else { Ok("no") } },
             Attribute::Ignore => Err(FoliaError::TypeError("Ignore attribute can't be serialised".to_string())),
-            _ =>  Err(FoliaError::TypeError("Attribute can't be cast as_str, use to_string() instead".to_string()))
+            _ =>  {
+                let attribtype: &str  = self.attribtype().into();
+                Err(FoliaError::TypeError(format!("Attribute {} can't be cast as_str, use to_string() instead", attribtype)))
+            }
         }
     }
 
@@ -161,7 +164,8 @@ impl Attribute {
                 if let Ok(s) = self.as_str() {
                     Ok(s.to_string())
                 } else {
-                    Err(FoliaError::TypeError("Attribute can't be cast to_string() without decoding".to_string()))
+                    let attribtype: &str  = self.attribtype().into();
+                    Err(FoliaError::TypeError(format!("Attribute {} can't be cast to_string() without decoding", attribtype)))
                 }
             },
         }
