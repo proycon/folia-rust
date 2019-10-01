@@ -94,12 +94,13 @@ impl Document {
                 (ref ns, Event::Empty(ref e)) => {
                     match (*ns, e.local_name())  {
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
-                            let processor = Processor::parse(&reader, &e)?;
+                            let processor = Processor::parse(&reader, &e)
+                                                      .map_err(FoliaError::add_parseerror("Error parsing processor"))?;
                             if processor_stack.is_empty() {
-                                doc.add_processor(processor)?;
+                                doc.add_processor(processor).map_err(FoliaError::add_parseerror("Error adding processor"))?;
                             } else {
                                 let parent_key = processor_stack.last().expect("Polling processor stack");
-                                doc.add_subprocessor(*parent_key, processor)?;
+                                doc.add_subprocessor(*parent_key, processor).map_err(FoliaError::add_parseerror("Error adding subprocessor"))?;
                             }
                         },
                         (Some(ns), b"annotator") if ns == NSFOLIA && parsedeclarations => {
@@ -196,19 +197,19 @@ impl Document {
                             text = None;
                         },
                         (Some(ns), b"processor") if ns == NSFOLIA && parseprovenance => {
-                            let processor = Processor::parse(&reader, &e)?;
+                            let processor = Processor::parse(&reader, &e).map_err(FoliaError::add_parseerror("Error parsing processor"))?;
                             if processor_stack.is_empty() {
-                                let processor_key = doc.add_processor(processor)?;
+                                let processor_key = doc.add_processor(processor).map_err(FoliaError::add_parseerror("Error adding processor"))?;
                                 processor_stack.push(processor_key);
                             } else {
                                 let parent_key = processor_stack.last().expect("Polling processor stack");
-                                let processor_key = doc.add_subprocessor(*parent_key, processor)?;
+                                let processor_key = doc.add_subprocessor(*parent_key, processor).map_err(FoliaError::add_parseerror("Error adding subprocessor"))?;
                                 processor_stack.push(processor_key);
                             }
                         },
                         (Some(ns), tag) if ns == NSFOLIA && parsedeclarations => {
-                            let declaration = Declaration::parse(&reader, e, tag)?;
-                            let result = doc.add_declaration(declaration)?;
+                            let declaration = Declaration::parse(&reader, e, tag).map_err(FoliaError::add_parseerror("Error parsing declaration"))?;
+                            let result = doc.add_declaration(declaration).map_err(FoliaError::add_parseerror("Error adding declaration"))?;
                             declaration_key = Some(result);
                         },
                         (Some(ns), tag) if ns == NSFOLIA => {
@@ -322,8 +323,8 @@ impl Document {
 
 
         if let Some(body) = body {
-            doc.add(body,None)?;
-            doc.apply_properties(properties)?;
+            doc.add(body,None).map_err(FoliaError::add_parseerror("Error adding body"))?;
+            doc.apply_properties(properties).map_err(FoliaError::add_parseerror("Error applying properties"))?;
             doc.parse_elements(reader, &mut buf, &mut nsbuf)?;
             Ok(doc)
         } else {
@@ -341,8 +342,13 @@ impl Document {
                     (Some(ns), Event::Empty(ref e)) if ns == NSFOLIA => {
                         //EMPTY TAG FOUND (<tag/>)
                         //eprintln!("EMPTY TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
-                        let (elem, children) = ElementData::parse(reader, e)?;
-                        let key = self.add(elem,stack.last().map(|key| *key))?;
+                        let tagname = str::from_utf8(e.local_name()).expect("tag is not valid utf-8");
+                        let (elem, children) = ElementData::parse(reader, e)
+                                                .map_err(FoliaError::add_parseerror_string(
+                                                         format!("Error parsing <{}/>", tagname))  )?;
+                        let key = self.add(elem,stack.last().map(|key| *key))
+                                                .map_err(FoliaError::add_parseerror_string(
+                                                         format!("Error adding <{}/>", tagname))  )?;
 
                         // Since there is no Event::End after, directly append it to the current node
                         if let Some(parent_key) = stack.last() {
@@ -358,8 +364,13 @@ impl Document {
                     (Some(ns), Event::Start(ref e)) if ns == NSFOLIA => {
                         //START TAG FOUND (<tag>)
                         //eprintln!("START TAG: {}", str::from_utf8(e.local_name()).expect("Tag is not valid utf-8"));
-                        let (elem, children) = ElementData::parse(reader, e)?;
-                        let key = self.add(elem,stack.last().map(|key| *key))?;
+                        let tagname = str::from_utf8(e.local_name()).expect("tag is not valid utf-8");
+                        let (elem, children) = ElementData::parse(reader, e)
+                                                .map_err(FoliaError::add_parseerror_string(
+                                                         format!("Error parsing <{}>", tagname))  )?;
+                        let key = self.add(elem,stack.last().map(|key| *key))
+                                                .map_err(FoliaError::add_parseerror_string(
+                                                         format!("Error adding <{}>", tagname))  )?;
                         stack.push(key);
                         //add immediate children (limited to those derived from XML attributes)
                         for child in children {
@@ -538,8 +549,10 @@ impl ElementData {
     ///Parse this element from XML, note that this does not handle the child elements, those are
     ///appended by the main parser in Document::parse_body()
     pub(crate) fn parse<R: BufRead>(reader: &Reader<R>, event: &quick_xml::events::BytesStart) -> Result<(ElementData,Vec<ElementData>), FoliaError> {
-        let elementtype = ElementType::from_str(str::from_utf8(event.local_name()).expect("utf-8 decoding"))?;
-        let (attributes, children) = ElementData::parse_attributes(reader, event.attributes(), elementtype)?;
+        let elementname = str::from_utf8(event.local_name()).expect("utf-8 decoding");
+        let elementtype = ElementType::from_str(elementname)?;
+        let (attributes, children) = ElementData::parse_attributes(reader, event.attributes(), elementtype)
+                                     .map_err(FoliaError::add_parseerror_string(format!("Error parsing attributes for {}", elementname)))?;
         Ok((ElementData::new(elementtype).with_attribs(attributes), children))
     }
 }
