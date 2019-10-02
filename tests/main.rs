@@ -85,6 +85,97 @@ const EXAMPLE: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
   </text>
 </FoLiA>"#;
 
+const EXAMPLE_DEP: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
+<FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
+  <metadata>
+      <annotations>
+          <token-annotation set="https://raw.githubusercontent.com/LanguageMachines/uctodata/master/setdefinitions/tokconfig-eng.foliaset.ttl">
+			 <annotator processor="p1" />
+		  </token-annotation>
+          <text-annotation>
+			 <annotator processor="p1" />
+          </text-annotation>
+          <sentence-annotation>
+			 <annotator processor="p1" />
+          </sentence-annotation>
+          <paragraph-annotation>
+			 <annotator processor="p1" />
+          </paragraph-annotation>
+          <dependency-annotation set="alpino-dependencies"> <!-- an ad-hoc set -->
+			 <annotator processor="p2" />
+		  </dependency-annotation>
+          <syntax-annotation set="alpino-constituents"> <!-- an ad-hoc set -->
+			 <annotator processor="p2" />
+		  </syntax-annotation>
+      </annotations>
+      <provenance>
+         <processor xml:id="p1" name="proycon" type="manual" />
+         <processor xml:id="p2" name="alpino" />
+      </provenance>
+  </metadata>
+  <text xml:id="example.text">
+    <p xml:id="example.p.1">
+        <s xml:id="example.p.1.s.1">
+          <t>De man begroette hem.</t>
+          <w xml:id="example.p.1.s.1.w.1"><t>De</t></w>
+          <w xml:id="example.p.1.s.1.w.2"><t>man</t></w>
+          <w xml:id="example.p.1.s.1.w.3"><t>begroette</t></w>
+          <w xml:id="example.p.1.s.1.w.4" space="no"><t>hem</t></w>
+          <w xml:id="example.p.1.s.1.w.5"><t>.</t></w>
+          <dependencies>
+            <dependency xml:id="example.p.1.s.1.dependency.1" class="su">
+                <hd>
+                    <wref id="example.p.1.s.1.w.3" t="begroette"/>
+                </hd>
+                <dep>
+                    <wref id="example.p.1.s.1.w.2" t="man" />
+                </dep>
+            </dependency>
+            <dependency xml:id="example.p.1.s.1.dependency.3" class="obj1">
+                <hd>
+                    <wref id="example.p.1.s.1.w.3" t="begroette"/>
+                </hd>
+                <dep>
+                    <wref id="example.p.1.s.1.w.4" t="hem" />
+                </dep>
+            </dependency>
+            <dependency xml:id="example.p.1.s.1.dependency.2" class="det">
+                <hd>
+                   <wref id="example.p.1.s.1.w.2" t="man" />
+                </hd>
+                <dep>
+                    <wref id="example.p.1.s.1.w.1" t="De" />
+                </dep>
+            </dependency>
+          </dependencies>
+          <syntax>
+            <su xml:id="example.p.1.s.1.su.1" class="top">
+                <su xml:id="example.p.1.s.1.su.1_1" class="smain">
+                    <su xml:id="example.p.1.s.1.su.1_1_1" class="np">
+                        <su xml:id="example.p.1.s.1.su.1_1_1_1" class="top">
+                            <wref id="example.p.1.s.1.w.1" t="De" />
+                        </su>
+                        <su xml:id="example.p.1.s.1.su.1_1_1_2" class="top">
+                            <wref id="example.p.1.s.1.w.2" t="man" />
+                        </su>
+                    </su>
+                    <su xml:id="example.p.1.s.1.su.1_1_2" class="verb">
+                        <wref id="example.p.1.s.1.w.3" t="begroette" />
+                    </su>
+                    <su xml:id="example.p.1.s.1.su.1_1_3" class="pron">
+                        <wref id="example.p.1.s.1.w.4" t="hem" />
+                    </su>
+                </su>
+                <su xml:id="example.p.1.s.1.su.1_2" class="punct">
+                    <wref id="example.p.1.s.1.w.5" t="." />
+                </su>
+            </su>
+          </syntax>
+        </s>
+    </p>
+  </text>
+</FoLiA>"#;
+
 #[test]
 fn test001_instantiate() {
     match Document::new("example", DocumentProperties::default()) {
@@ -564,4 +655,24 @@ const TEST_FEAT_AS_ATTRIB: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
         }
     }
 
+}
+
+#[test]
+fn test012_spanroles() {
+    match Document::from_str(str::from_utf8(EXAMPLE_DEP).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(dependency) = doc.get_element_by_id("example.p.1.s.1.dependency.1") {
+                let layer = dependency.get_parent().expect("getting parent of dependency");
+                assert_eq!(layer.elementtype(),  ElementType::DependenciesLayer, "Sanity check for parent");
+                assert_eq!(layer.get_parent().expect("getting parent of layer").elementtype(),  ElementType::Sentence, "Sanity check for parent of span layer");
+                assert!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).is_some());
+                assert!(dependency.get_element(ElementType::Headspan, Cmp::Any, Recursion::Always).is_some());
+            } else {
+                assert!(false, "word not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
 }

@@ -218,18 +218,19 @@ impl Document {
         let dec_is_default: Vec<bool> = self.declarationstore.default_mask();
 
         //Select children
-        let mut stack = vec![];
+        let mut stack: Vec<(BytesEnd,ElementType,String)> = vec![];
         let mut previous_depth = 0;
+        let mut last_start: String = "<ROOT>".to_string();
         for item in self.select_data_by_key(root_key,Selector::all_data(),Recursion::Always, true) {
             while item.depth < previous_depth {
-                if let Some((end,elementtype)) = stack.pop() {
+                if let Some((end,elementtype,tagstring)) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
                     if !ElementGroup::TextMarkup.contains(elementtype) {
                         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
                     }
+                    eprintln!("Popped end tag {}", tagstring.as_str());
                 } else {
-                    eprintln!("WARNING: Unable to pop the end tag stack during parsing!!!");
-                    //return Err(FoliaError::SerialisationError("Unable to pop the end tag stack".to_string()));
+                    return Err(FoliaError::SerialisationError(format!("Unable to pop the end tag stack depth {} < previous depth {}, last start element={}", item.depth, previous_depth, last_start)));
                 }
                 previous_depth -= 1;
             }
@@ -281,7 +282,9 @@ impl Document {
                         } else {
                             writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
                             let end = BytesEnd::owned(tag.to_vec());
-                            stack.push((end,element.elementtype()));
+                            eprintln!("Pushed start tag {}", tagstring.as_str());
+                            last_start = tagstring.clone();
+                            stack.push((end,element.elementtype(),tagstring));
                         }
                         if !ElementGroup::TextMarkup.contains(element.elementtype()) && element.elementtype() != ElementType::TextContent && element.elementtype() != ElementType::PhonContent {
                             writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
@@ -304,7 +307,7 @@ impl Document {
         }
 
         //don't forget the final closing elements
-        while let Some((end, _elementtype)) = stack.pop() {
+        while let Some((end, _elementtype, tagstring)) = stack.pop() {
             writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
         }
 
