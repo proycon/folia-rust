@@ -164,7 +164,7 @@ impl Document {
 
     ///Adds a new element as a child of another, this is a higher-level function that/
     ///takes care of adding and attaching for you.
-    pub fn add_element_to(&mut self, parent_key: ElementKey, mut element: ElementData) -> Result<ElementKey, FoliaError> {
+    pub fn add_element_to(&mut self, parent_key: ElementKey, element: ElementData) -> Result<ElementKey, FoliaError> {
         match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
             Ok(child_key) => {
                 self.attach_element(parent_key, child_key)?;

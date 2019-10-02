@@ -79,23 +79,23 @@ impl Error for FoliaError {
     fn description(&self) -> &str {
         match *self {
             FoliaError::IoError(ref err) => err.description(),
-            FoliaError::XmlError(ref err) => "XML Error",
-            FoliaError::ParseError(ref err) => "Parse Error",
-            FoliaError::SerialisationError(ref err) => "Serialisation Error",
-            FoliaError::ValidationError(ref err) => "Validation Error",
-            FoliaError::InternalError(ref err) => "Internal Error",
-            FoliaError::EncodeError(ref err) => "Encode Error",
-            FoliaError::KeyError(ref err) => "Key Error",
-            FoliaError::QueryError(ref err) => "Query Error",
-            FoliaError::TypeError(ref err) => "Type Error",
-            FoliaError::NoTextError(ref err) => "No Text Error",
+            FoliaError::XmlError(ref _err) => "XML Error",
+            FoliaError::ParseError(ref _err) => "Parse Error",
+            FoliaError::SerialisationError(ref _err) => "Serialisation Error",
+            FoliaError::ValidationError(ref _err) => "Validation Error",
+            FoliaError::InternalError(ref _err) => "Internal Error",
+            FoliaError::EncodeError(ref _err) => "Encode Error",
+            FoliaError::KeyError(ref _err) => "Key Error",
+            FoliaError::QueryError(ref _err) => "Query Error",
+            FoliaError::TypeError(ref _err) => "Type Error",
+            FoliaError::NoTextError(ref _err) => "No Text Error",
             FoliaError::IndexError => "invalid index",
         }
     }
 
-    fn cause(&self)  -> Option<&Error> {
+    fn cause(&self)  -> Option<&dyn Error> {
         match *self {
-            FoliaError::IoError(ref err) => Some(err as &Error),
+            FoliaError::IoError(ref err) => Some(err as &dyn Error),
             FoliaError::XmlError(ref _err) => None,
             FoliaError::ParseError(ref _err) => None,
             FoliaError::SerialisationError(ref _err) => None,

@@ -158,7 +158,6 @@ impl Document {
                             parseprovenance = true;
                         },
                         (Some(ns), b"submetadata") if ns == NSFOLIA => {
-                            let mut processor_id: Option<String> = None;
                             let mut submetadata_type: Option<String> = None;
                             for attrib in e.attributes() {
                                 let attrib = attrib.expect("unwrapping annotator attribute");

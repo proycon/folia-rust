@@ -74,6 +74,7 @@ impl Document {
         //there is a bit too much duplication going on here, to be solved later
         for (submetadata_id, submetadata) in self.submetadata.iter() {
             let mut submetadata_start = BytesStart::borrowed_name(b"submetadata");
+            submetadata_start.push_attribute(("xml:id", submetadata_id.as_str() ));
             if let Some(metadatatype) = &submetadata.metadatatype {
                 submetadata_start.push_attribute(("type", metadatatype.as_str() ));
             }
@@ -303,7 +304,7 @@ impl Document {
         }
 
         //don't forget the final closing elements
-        while let Some((end, elementtype)) = stack.pop() {
+        while let Some((end, _elementtype)) = stack.pop() {
             writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
         }
 

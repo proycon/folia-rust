@@ -111,7 +111,7 @@ impl<'a> Element<'a> {
             //no text delimiter of itself, recurse into children to inherit delimiter
             for item in self.elementdata().data.iter().rev() {
                 if let DataType::Element(element_key) = item {
-                    //TODO
+                    unimplemented!() //TODO
                 }
             }
             Ok("")

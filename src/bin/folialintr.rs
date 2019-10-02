@@ -1,7 +1,7 @@
 extern crate clap;
 
 use std::str;
-use clap::{App,Arg};
+use clap::App;
 use folia::*;
 
 fn main() {

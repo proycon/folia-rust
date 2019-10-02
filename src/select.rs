@@ -464,7 +464,7 @@ impl<'a> SelectIterator<'a> {
             let l = self.returned_offset - key;
             let mut tmp: Vec<bool>  = Vec::with_capacity(self.returned.len() + l);
             tmp.push(true); //mark the current key as returned
-            for i in 1..l {
+            for _ in 1..l {
                 tmp.push(false);
             }
             tmp.extend(&self.returned);

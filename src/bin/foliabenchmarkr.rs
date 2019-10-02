@@ -6,7 +6,7 @@ use std::time::{SystemTime,Duration};
 use std::os;
 use std::mem;
 use std::fs;
-use clap::{App,Arg};
+use clap::App;
 use folia::*;
 
 //getrusage functions extracted from: https://github.com/anler/getrusage/
