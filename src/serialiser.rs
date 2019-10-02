@@ -200,20 +200,6 @@ impl Document {
     }
 
     pub(crate) fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
-        //Start the root tag (and obtain data for its end)
-        /*
-        let root_end = if let Some(element) = self.get_elementdata(root_key) {
-            let tagstring = element.elementtype.to_string();
-            let tag = tagstring.as_bytes();
-            let start = BytesStart::owned(tag.to_vec(), tag.len());
-            writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
-            BytesEnd::owned(tag.to_vec())
-        } else {
-            return Err(FoliaError::SerialisationError(format!("Specified root element not found: {}", root_key)));
-        };
-        writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
-        */
-
         //caches declarations that are defaults
         let dec_is_default: Vec<bool> = self.declarationstore.default_mask();
 
@@ -228,7 +214,7 @@ impl Document {
                     if !ElementGroup::TextMarkup.contains(elementtype) {
                         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
                     }
-                    eprintln!("Popped end tag {}", tagstring.as_str());
+                    eprintln!("[DEBUG] <-- Popped end tag {}", tagstring.as_str());
                 } else {
                     return Err(FoliaError::SerialisationError(format!("Unable to pop the end tag stack depth {} < previous depth {}, last start element={}", item.depth, previous_depth, last_start)));
                 }
@@ -238,6 +224,7 @@ impl Document {
                 DataType::Element(key) => {
                     if let Some(element) = self.get_element(*key) {
                         let tagstring = element.elementtype().to_string();
+                        eprintln!("[DEBUG] (processing tag {})", tagstring.as_str());
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());
                         for attrib in element.attribs().iter() {
@@ -282,7 +269,7 @@ impl Document {
                         } else {
                             writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
                             let end = BytesEnd::owned(tag.to_vec());
-                            eprintln!("Pushed start tag {}", tagstring.as_str());
+                            eprintln!("[DEBUG] --> Pushed start tag {}", tagstring.as_str());
                             last_start = tagstring.clone();
                             stack.push((end,element.elementtype(),tagstring));
                         }
@@ -292,10 +279,12 @@ impl Document {
                     }
                 },
                 DataType::Text(text) => {
+                    eprintln!("[DEBUG] (processing text)");
                     let text = BytesText::from_plain_str(text.as_str());
                     writer.write_event(Event::Text(text)).map_err(to_serialisation_error)?;
                 },
                 DataType::Comment(comment) => {
+                    eprintln!("[DEBUG] (processing comment)");
                     let text = BytesText::from_plain_str(comment.as_str());
                     writer.write_event(Event::Comment(text)).map_err(to_serialisation_error)?;
                 }
@@ -309,11 +298,9 @@ impl Document {
         //don't forget the final closing elements
         while let Some((end, _elementtype, tagstring)) = stack.pop() {
             writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
+            eprintln!("[DEBUG] <-- Popped final end tag {}", tagstring.as_str());
         }
 
-        //Write root end tag
-        //writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
-        //writer.write_event(Event::End(root_end)).map_err(to_serialisation_error)?;
         Ok(())
     }
 }
