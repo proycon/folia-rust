@@ -1,3 +1,8 @@
+[![Crate](https://img.shields.io/crates/v/folia.svg)](https://crates.io/crates/folia)
+[![Docs](https://docs.rs/folia/badge.svg)](https://docs.rs/folia/)
+[![Build Status](https://travis-ci.com/proycon/folia-rust.svg?branch=master)](https://travis-ci.com/proycon/folia-rust)
+[![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/folia-rust)](http://applejack.science.ru.nl/languagemachines/)
+
 This is a high-performance Rust library for handling the [FoLiA XML format](https://proycon.github.io/folia), a rich format
 for linguistic annotation.
 
