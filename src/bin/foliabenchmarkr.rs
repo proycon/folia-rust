@@ -74,9 +74,11 @@ impl Measurement {
         self.duration = self.begintime.elapsed().ok();
         self.endmem = get_resident().expect("unwrapping memory");
         let mem = self.endmem - self.beginmem;
+        let mem: f64 = (mem as f64) / 1024.0 / 1024.0;
         let rusage = Rusage::new().expect("Rusage");
         let endpeak = rusage.peakrss();
         let peakmem = endpeak - self.beginpeak;
+        let peakmem: f64 = (peakmem as f64) / 1024.0;
         println!("{} - [{}] - {} - time: {}ms, mem: {}, peak mem: {}", filename, test_id, title, self.duration.unwrap().as_secs_f64() * 1000.0, mem, peakmem);
     }
 }
@@ -86,6 +88,17 @@ fn test(test_id: &str, filename: &str) {
         "parse" => {
             let mut m = Measurement::begin();
             let doc = Document::from_file(filename, DocumentProperties::default()).expect("loading folia document");
+            m.end(test_id, filename, "Parse XML from file into full memory representation");
+            doc.id(); //just to make sure the compiler doesn't optimise doc away (not sure if needed but better safe than sorry)
+        },
+        "select" => {
+            let doc = Document::from_file(filename, DocumentProperties::default()).expect("loading folia document");
+            let mut m = Measurement::begin();
+            let selector = Selector::elements().element(Cmp::Is(ElementType::Word));
+            let mut count = 0;
+            for _element in doc.select(selector, Recursion::Always) {
+                count += 1;
+            }
             m.end(test_id, filename, "Parse XML from file into full memory representation");
             doc.id(); //just to make sure the compiler doesn't optimise doc away (not sure if needed but better safe than sorry)
         },

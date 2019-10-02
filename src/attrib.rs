@@ -95,7 +95,7 @@ pub enum Attribute {
     Ref(String),
     Original(String), //used by t-correction
     LineNr(u16), //used by linebreak
-    PageNr(u16), //used by linebreak
+    PageNr(String), //used by linebreak
     NewPage(bool), //used by linebreak
     XLinkType(String),
 
@@ -146,7 +146,7 @@ impl Attribute {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
             Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
-            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s) | Attribute::Original(s) | Attribute::Auth(s) | Attribute::XLinkType(s)
+            Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s) | Attribute::Original(s) | Attribute::Auth(s) | Attribute::XLinkType(s) | Attribute::PageNr(s)
                 => Ok(&s),
             Attribute::AnnotatorType(t) => Ok(t.as_str()),
             Attribute::Space(b) => { if *b { Ok("yes") } else { Ok("no") } },
@@ -167,7 +167,6 @@ impl Attribute {
             Attribute::Confidence(f) => Ok(f.to_string()),
             Attribute::Offset(n) => Ok(n.to_string()),
             Attribute::LineNr(n) => Ok(n.to_string()),
-            Attribute::PageNr(n) => Ok(n.to_string()),
             Attribute::Ignore => Err(FoliaError::TypeError("Ignore attribute can't be serialised".to_string())),
             _ =>  {
                 if let Ok(s) = self.as_str() {
@@ -319,6 +318,9 @@ impl Attribute {
                 b"original" => {
                     Ok(Attribute::Original(value))
                 },
+                b"pagenr" => {
+                    Ok(Attribute::PageNr(value))
+                },
                 b"offset" => {
                     if let Ok(value) = u16::from_str(&value) {
                         Ok(Attribute::Offset(value))
@@ -330,14 +332,7 @@ impl Attribute {
                     if let Ok(value) = u16::from_str(&value) {
                         Ok(Attribute::LineNr(value))
                     } else {
-                        Err(FoliaError::ParseError(format!("Invalid offset value: '{}'", value)))
-                    }
-                },
-                b"pagenr" => {
-                    if let Ok(value) = u16::from_str(&value) {
-                        Ok(Attribute::PageNr(value))
-                    } else {
-                        Err(FoliaError::ParseError(format!("Invalid offset value: '{}'", value)))
+                        Err(FoliaError::ParseError(format!("Invalid line number value: '{}'", value)))
                     }
                 },
                 b"newpage" => {
