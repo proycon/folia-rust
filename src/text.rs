@@ -1,4 +1,5 @@
 use std::fmt;
+use std::borrow::Cow;
 
 use crate::common::*;
 use crate::types::*;
@@ -104,17 +105,20 @@ impl<'a> Element<'a> {
     }
 
     ///Returns the text delimiter for this element
-    pub fn get_textdelimiter(&self, retaintokenisation: bool) -> Result<&str,FoliaError> {
+    pub fn get_textdelimiter(&self, retaintokenisation: bool) -> Result<Cow<str>,FoliaError> {
         let doc = self.document().ok_or(FoliaError::KeyError("Element has no associated document".to_string()))?;
         let properties =  doc.props(self.elementtype());
         if properties.textdelimiter.is_none() {
             //no text delimiter of itself, recurse into children to inherit delimiter
             for item in self.elementdata().data.iter().rev() {
                 if let DataType::Element(element_key) = item {
-                    unimplemented!() //TODO
+                    if let Some(element) = doc.get_element(*element_key) {
+                        //recurse
+                        element.get_textdelimiter(retaintokenisation).map(|s| s.to_owned());
+                    }
                 }
             }
-            Ok("")
+            Ok(Cow::Borrowed(""))
         } else if properties.optional_attribs.contains(&AttribType::SPACE) {
             let space: bool = retaintokenisation || match self.attrib(AttribType::SPACE) {
                 Some(Attribute::Space(space)) => {
@@ -125,12 +129,12 @@ impl<'a> Element<'a> {
                 }
             };
             if space {
-                Ok(properties.textdelimiter.unwrap())
+                Ok(Cow::Borrowed(properties.textdelimiter.unwrap()))
             } else {
-                Ok("")
+                Ok(Cow::Borrowed(""))
             }
         } else {
-            Ok(properties.textdelimiter.unwrap())
+            Ok(Cow::Borrowed(properties.textdelimiter.unwrap()))
         }
     }
 
