@@ -667,8 +667,9 @@ fn test012_spanroles() {
                 assert_eq!(layer.get_parent().expect("getting parent of layer").elementtype(),  ElementType::Sentence, "Sanity check for parent of span layer");
                 assert!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).is_some());
                 assert!(dependency.get_element(ElementType::Headspan, Cmp::Any, Recursion::Always).is_some());
+                assert_eq!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).unwrap().text(None,None,false,true).expect("unwrapping text of dep"), "man");
             } else {
-                assert!(false, "word not found");
+                assert!(false, "dependency not found");
             }
         },
         Err(err) => {
