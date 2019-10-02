@@ -91,6 +91,13 @@ fn test(test_id: &str, filename: &str) {
             m.end(test_id, filename, "Parse XML from file into full memory representation");
             doc.id(); //just to make sure the compiler doesn't optimise doc away (not sure if needed but better safe than sorry)
         },
+        "serialise" => {
+            let doc = Document::from_file(filename, DocumentProperties::default()).expect("loading folia document");
+            let mut m = Measurement::begin();
+            doc.xml(0).unwrap();
+            m.end(test_id, filename, "Parse XML from file into full memory representation");
+            doc.id(); //just to make sure the compiler doesn't optimise doc away (not sure if needed but better safe than sorry)
+        },
         "select" => {
             let doc = Document::from_file(filename, DocumentProperties::default()).expect("loading folia document");
             let mut m = Measurement::begin();
