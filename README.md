@@ -89,3 +89,42 @@ if let Some(element) = doc.get_element_by_id("example.s.1.w.1") {
 
 }
 ```
+
+## Benchmarks
+
+As the primary goal of this library is to provide a high-performance library, we ran some limited benchmarks against the other more mature and more feature complete FoLiA libraries: [FoliaPy](https://github.com/proycon/foliapy), written in Python, and [libfolia](https://github.com/LanguageMachines/libfolia), written in C++.
+
+Tested on a Intel(R) Core(TM) i7-4770K CPU @ 3.50GHz, Linux 5.3
+
+**Note:** The folia-rust implementation does only a minimal validation whereas the others do a a complete shallow validation
+on parsing, including also a text consistency validation.
+
+### Benchmarks on a +-100MB FoLiA document
+
+(``bosb002gide03_01.nederlab.folia.xml``)
+
+#### Parse from file into a full memory representation (DOM)
+
+
+| Implementation | CPU | Memory | Peak Memory |
+|--------------- |-----|--------|-------------|
+| foliapy v2.2.1 | 60.9 s | 2083 MB |  - |
+| libfolia v2.3 | 14.7 s | 2656 MB | 2681 MB |
+| folia-rust v0.0.1 | 2.6 s | 531 MB | 622 MB |
+
+#### Selecting and iterating over all words
+
+| Implementation | CPU | Memory | Peak Memory |
+|--------------- |-----|--------|-------------|
+| foliapy v2.2.1 | 1.46 s | - |  - |
+| libfolia v2.3 | 0.84 s | - | - |
+| folia-rust v0.0.1 | 0.122 s | - | - |
+
+#### Serialisation (without disk writing)
+
+| Implementation | CPU | Memory | Peak Memory |
+|--------------- |-----|--------|-------------|
+| foliapy v2.2.1 | 77.7 s | - |  - |
+| libfolia v2.3 | 5.06s | - | - |
+| folia-rust v0.0.1 | 1.14s | - | - |
+
