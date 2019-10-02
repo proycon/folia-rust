@@ -416,7 +416,7 @@ fn test009a_text() {
         Ok(doc) => {
             if let Some(word) = doc.get_element_by_id("example.p.1.s.2.w.4") {
                 assert_eq!(&word.get_textdelimiter(true).expect("unwrapping text delimiter"), " ");
-                match word.text(None, None, false, true) {
+                match word.text(&TextParameters::default()) {
                     Ok(text) => assert_eq!(text, "example"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
                 }
@@ -435,7 +435,7 @@ fn test009b_text_composed_retaintokenisation() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(sentence) = doc.get_element_by_id("example.p.1.s.1") {
-                match sentence.text(None, None, false, true) {
+                match sentence.text(&TextParameters::default().retaintokenisation(true)) {
                     Ok(text) => assert_eq!(text, "Hello world !"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
                 }
@@ -454,7 +454,7 @@ fn test009c_text_composed_detokenise() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
             if let Some(sentence) = doc.get_element_by_id("example.p.1.s.1") {
-                match sentence.text(None, None, false, false) {
+                match sentence.text(&TextParameters::default()) {
                     Ok(text) => assert_eq!(text, "Hello world!"),
                     Err(err) => assert!(false, format!("Obtaining text failed with error: {}",err))
                 }
@@ -474,7 +474,7 @@ fn test009c_text_on_span() {
         Ok(doc) => {
             if let Some(chunk) = doc.get_element_by_id("example.p.1.s.2.chunk.1") {
                 assert_matches!(chunk.class(),Some("np"));
-                match chunk.text(None,None,false,false) {
+                match chunk.text(&TextParameters::default()) {
                     Ok(text) => assert_eq!(text, "an example"),
                     Err(err) => assert!(false, format!("Obtaining text on span failed with error: {}",err))
                 }
@@ -667,7 +667,7 @@ fn test012_spanroles() {
                 assert_eq!(layer.get_parent().expect("getting parent of layer").elementtype(),  ElementType::Sentence, "Sanity check for parent of span layer");
                 assert!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).is_some());
                 assert!(dependency.get_element(ElementType::Headspan, Cmp::Any, Recursion::Always).is_some());
-                assert_eq!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).unwrap().text(None,None,false,true).expect("unwrapping text of dep"), "man");
+                assert_eq!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).unwrap().text(&TextParameters::default()).expect("unwrapping text of dep"), "man");
             } else {
                 assert!(false, "dependency not found");
             }

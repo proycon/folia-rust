@@ -37,7 +37,7 @@ for word in doc.select(selector, folia::Recursion::Always) {
     //print the ID and the text
     println!("{}\t{}",
         word.id().or(Some("No-ID")),
-        word.text(None,None,false,true)
+        word.text(&folia::TextParameters::default())
     );
 }
 ```

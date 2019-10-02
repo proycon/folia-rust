@@ -12,6 +12,49 @@ use crate::metadata::*;
 use crate::select::*;
 use crate::document::*;
 
+#[derive(Clone)]
+///Parameters for the text() method
+pub struct TextParameters {
+    pub set: Option<String>,
+    pub textclass: Option<String>,
+    pub strict: bool,
+    pub retaintokenisation: bool,
+}
+
+impl<'a> Default for TextParameters {
+    fn default() -> Self {
+        Self {
+            set: Some(DEFAULT_TEXT_SET.to_string()),
+            textclass: Some("current".to_string()),
+            strict: false,
+            retaintokenisation: false,
+        }
+    }
+}
+
+impl TextParameters {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn retaintokenisation(mut self, retaintokenisation: bool) -> Self {
+        self.retaintokenisation = retaintokenisation;
+        self
+    }
+
+    pub fn set(mut self, set: &str) -> Self {
+        self.set = Some(set.to_string());
+        self
+    }
+
+    pub fn textclass(mut self, textclass: &str) -> Self {
+        self.textclass = Some(textclass.to_string());
+        self
+    }
+}
+
+
+
 
 impl<'a> Element<'a> {
 
@@ -151,23 +194,13 @@ impl<'a> Element<'a> {
     ///Returns the text content of a given element
     ///This method takes string parameters for set and textclass, which can be set to None to
     ///fallback to the default text set and "current class".
-    pub fn text(&self, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
+    pub fn text(&self, textparameters: &TextParameters) -> Result<String,FoliaError> {
         let doc = self.document().ok_or(FoliaError::KeyError("Element has no associated document".to_string()))?;
-        let set: &str = if let Some(set) = set {
-            set
+        if let Some(dec_key) = doc.get_declaration_key_by_id(Declaration::index_id(AnnotationType::TEXT, &textparameters.set.as_ref().map(|s| s.as_str())).as_str()) {
+            let class_key = doc.class_key(dec_key, &textparameters.textclass.as_ref().map(|s| s.as_str()).expect("unwrapping textclass")  )?;
+            self.text_by_key(dec_key, class_key,textparameters.strict,textparameters.retaintokenisation, None)
         } else {
-            DEFAULT_TEXT_SET
-        };
-        let textclass: &str = if let Some(textclass) = textclass {
-            textclass
-        } else {
-            "current"
-        };
-        if let Some(dec_key) = doc.get_declaration_key_by_id(Declaration::index_id(AnnotationType::TEXT, &Some(set)).as_str()) {
-            let class_key = doc.class_key(dec_key, textclass)?;
-            self.text_by_key(dec_key, class_key,strict,retaintokenisation, None)
-        } else {
-            Err(FoliaError::EncodeError(format!("No declaration for the specified text set ({})", set)))
+            Err(FoliaError::EncodeError(format!("No declaration for the specified text set ({})", textparameters.set.as_ref().map(|s| s.as_str()).expect("unwrapping set"))))
         }
     }
 }
@@ -186,9 +219,9 @@ impl Document {
     }
 
     ///Returns the text of the given element
-    pub fn text(&self, element_key: ElementKey, set: Option<&str>, textclass: Option<&str>, strict: bool, retaintokenisation: bool) -> Result<String,FoliaError> {
+    pub fn text(&self, element_key: ElementKey, textparameters: &TextParameters) -> Result<String,FoliaError> {
         if let Some(element) = self.get_element(element_key) {
-            element.text(set, textclass, strict, retaintokenisation)
+            element.text(textparameters)
         } else {
             Err(FoliaError::KeyError(format!("No such element key: {}", element_key)))
         }

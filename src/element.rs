@@ -475,7 +475,7 @@ impl<'a> Eq for Element<'a> { }
 
 impl<'a> fmt::Display for Element<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Ok(text) = self.text(None,None,false,false) {
+        if let Ok(text) = self.text(&TextParameters::default()) {
             write!(f, "{}", text)
         } else {
             Err(fmt::Error)
