@@ -1,9 +1,9 @@
 [package]
 name = "folia"
-version = "0.0.1"
+version = "0.0.2"
 description = "High-performance library for handling the FoLiA XML format (Format for Linguistic Annotation)"
 authors = ["Maarten van Gompel <proycon@anaproy.nl>"]
-homepage = "https://github.io/proycon/folia"
+homepage = "https://proycon.github.io/folia"
 repository = "https://github.com/proycon/folia-rust"
 documentation = "https://docs.rs/folia"
 categories = ["science","text-processing"]
