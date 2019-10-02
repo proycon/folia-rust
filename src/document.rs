@@ -26,7 +26,9 @@ use crate::serialiser::*;
 use crate::parser::*;
 use crate::specification::*;
 
+///Represents a FoLiA document, owns all data
 pub struct Document {
+    ///The ID of the document
     pub id: String,
     ///The FoLiA version of the document
     pub version: String,
@@ -47,6 +49,7 @@ pub struct Document {
 
 
 #[derive(Clone)]
+///Properties for document parsing/instantiation/serialisation/handling.
 pub struct DocumentProperties {
     pub bodytype: BodyType,
     pub autodeclare: bool,
