@@ -1,8 +1,24 @@
 [package]
 name = "folia"
 version = "0.0.1"
+description = "High-performance library for handling the FoLiA XML format (Format for Linguistic Annotation)"
 authors = ["Maarten van Gompel <proycon@anaproy.nl>"]
+homepage = "https://github.io/proycon/folia"
+repository = "https://github.com/proycon/folia-rust"
+documentation = "https://docs.rs/folia"
+categories = ["science","text-processing"]
+keywords = ["nlp","text-processing","linguistic-annotation","linguistics","computational-linguistics","xml"]
+license = "GPL-3.0+"
+license-file = "LICENSE"
+readme = "README.md"
 edition = "2018"
+
+
+
+[badges]
+travis-ci = { repository = "proycon/folia-rust", branch = "master" }
+maintenance = { status = "actively-developed" }
+
 
 [dependencies]
 quick-xml = "0.16.0"
