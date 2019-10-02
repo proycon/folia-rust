@@ -318,7 +318,7 @@ fn test007_metadata() {
 fn test008a_selector_type() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            let selector = doc.select_data(Selector::elements().element(Cmp::Is(ElementType::Word)), Recursion::Always);
+            let selector = doc.select_data(Selector::elements().element(Cmp::Is(ElementType::Word)), Recursion::Always, true);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -344,7 +344,7 @@ fn test008b_selector_set_class() {
                         .element(Cmp::Is(ElementType::Word))
                         .set(Cmp::Is(set.to_string()))
                         .class(Cmp::Is("PUNCTUATION".to_string()))).expect("Compiling query")
-            , Recursion::Always);
+            , Recursion::Always, true);
             assert!(selector.selector().matchable());
             let mut count = 0;
             for item in selector {
@@ -395,7 +395,7 @@ fn test008d_selector_elementgroup() {
                         .elementgroup(Cmp::Is(ElementGroup::Structure))
                         .set(Cmp::Any)
                         .class(Cmp::Any)).expect("Compiling query")
-            , Recursion::Always);
+            , Recursion::Always, true);
             assert!(selector.selector.matchable());
             let mut count = 0;
             for item in selector {

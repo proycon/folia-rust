@@ -207,14 +207,14 @@ impl Document {
         let mut stack: Vec<(BytesEnd,ElementType,String)> = vec![];
         let mut previous_depth = 0;
         let mut last_start: String = "<ROOT>".to_string();
-        for item in self.select_data_by_key(root_key,Selector::all_data(),Recursion::Always, true) {
+        for item in self.select_data_by_key(root_key,Selector::all_data(),Recursion::Always, true, false) {
             while item.depth < previous_depth {
                 if let Some((end,elementtype,tagstring)) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
                     if !ElementGroup::TextMarkup.contains(elementtype) {
                         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
                     }
-                    eprintln!("[DEBUG] <-- Popped end tag {}", tagstring.as_str());
+                    //eprintln!("[DEBUG] <-- Popped end tag {} ({})", tagstring.as_str(), item.depth);
                 } else {
                     return Err(FoliaError::SerialisationError(format!("Unable to pop the end tag stack depth {} < previous depth {}, last start element={}", item.depth, previous_depth, last_start)));
                 }
@@ -224,7 +224,7 @@ impl Document {
                 DataType::Element(key) => {
                     if let Some(element) = self.get_element(*key) {
                         let tagstring = element.elementtype().to_string();
-                        eprintln!("[DEBUG] (processing tag {})", tagstring.as_str());
+                        //eprintln!("[DEBUG] (processing tag {} ({}))", tagstring.as_str(), item.depth);
                         let tag = tagstring.as_bytes();
                         let mut start = BytesStart::owned(tag.to_vec(), tag.len());
                         for attrib in element.attribs().iter() {
@@ -269,7 +269,7 @@ impl Document {
                         } else {
                             writer.write_event(Event::Start(start)).map_err(to_serialisation_error)?;
                             let end = BytesEnd::owned(tag.to_vec());
-                            eprintln!("[DEBUG] --> Pushed start tag {}", tagstring.as_str());
+                            //eprintln!("[DEBUG] --> Pushed start tag {} ({})", tagstring.as_str(), item.depth);
                             last_start = tagstring.clone();
                             stack.push((end,element.elementtype(),tagstring));
                         }
@@ -279,12 +279,12 @@ impl Document {
                     }
                 },
                 DataType::Text(text) => {
-                    eprintln!("[DEBUG] (processing text)");
+                    //eprintln!("[DEBUG] (processing text)");
                     let text = BytesText::from_plain_str(text.as_str());
                     writer.write_event(Event::Text(text)).map_err(to_serialisation_error)?;
                 },
                 DataType::Comment(comment) => {
-                    eprintln!("[DEBUG] (processing comment)");
+                    //eprintln!("[DEBUG] (processing comment)");
                     let text = BytesText::from_plain_str(comment.as_str());
                     writer.write_event(Event::Comment(text)).map_err(to_serialisation_error)?;
                 }
@@ -298,7 +298,7 @@ impl Document {
         //don't forget the final closing elements
         while let Some((end, _elementtype, tagstring)) = stack.pop() {
             writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
-            eprintln!("[DEBUG] <-- Popped final end tag {}", tagstring.as_str());
+            //eprintln!("[DEBUG] <-- Popped final end tag {}", tagstring.as_str());
         }
 
         Ok(())
