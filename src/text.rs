@@ -114,7 +114,17 @@ impl<'a> Element<'a> {
                 if let DataType::Element(element_key) = item {
                     if let Some(element) = doc.get_element(*element_key) {
                         //recurse
-                        element.get_textdelimiter(retaintokenisation).map(|s| s.to_owned());
+                        match element.get_textdelimiter(retaintokenisation) {
+                            Ok(Cow::Borrowed(s)) => {
+                                return Ok(Cow::Owned(s.to_owned()));
+                            },
+                            Ok(Cow::Owned(s)) => {
+                                return Ok(Cow::Owned(s));
+                            },
+                            Err(e) => {
+                                return Err(e);
+                            }
+                        }
                     }
                 }
             }
