@@ -20,7 +20,7 @@ maintenance = { status = "actively-developed" }
 
 
 [dependencies]
-quick-xml = "0.16.0"
+quick-xml = "0.16.1"
 matches = "0.1.8"
 strum = "0.16.0"
 strum_macros = "0.16.0"

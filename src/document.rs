@@ -106,7 +106,7 @@ impl Document {
     ///Load a FoliA document from file. Invokes the XML parser and loads it all into memory.
     pub fn from_file(filename: &str, properties: DocumentProperties) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_file(Path::new(filename))?;
-        reader.trim_text(true);
+        reader.trim_text(false);
         let mut doc = Self::parse(&mut reader, properties)?;
         //associate the filename with the document
         doc.filename = Some(filename.to_string());
@@ -116,7 +116,7 @@ impl Document {
     ///Load a FoliA document from XML string representation, loading it all into memory.
     pub fn from_str(data: &str, properties: DocumentProperties) -> Result<Self, FoliaError> {
         let mut reader = Reader::from_str(data);
-        reader.trim_text(true);
+        reader.trim_text(false);
         Self::parse(&mut reader, properties)
     }
 

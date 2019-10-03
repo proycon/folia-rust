@@ -405,7 +405,6 @@ impl Document {
                     (None, Event::Text(s)) => {
                         let text = s.unescape_and_decode(reader)?;
                         if text.trim() != "" {
-                            //eprintln!("TEXT: {}", text);
                             if let Some(parent_key) = stack.last() {
                                 self.get_mut_elementdata(*parent_key).map( |parent| {
                                     parent.push(DataType::Text(text));

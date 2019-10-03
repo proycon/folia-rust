@@ -176,6 +176,37 @@ const EXAMPLE_DEP: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
   </text>
 </FoLiA>"#;
 
+const EXAMPLE_MARKUP: &[u8] = br#"<?xml version="1.0" encoding="utf-8"?>
+<FoLiA xmlns="http://ilk.uvt.nl/folia" version="2.0" xml:id="example">
+  <metadata type="native">
+      <annotations>
+          <text-annotation>
+             <annotator processor="p1" />
+          </text-annotation>
+          <sentence-annotation>
+             <annotator processor="p1" />
+          </sentence-annotation>
+          <paragraph-annotation>
+             <annotator processor="p1" />
+          </paragraph-annotation>
+          <style-annotation set="adhoc">
+             <annotator processor="p1" />
+          </style-annotation>
+      </annotations>
+      <provenance>
+         <processor xml:id="p1" name="proycon" type="manual" />
+      </provenance>
+      <meta id="language">eng</meta>
+  </metadata>
+  <text xml:id="example.text">
+    <p xml:id="example.p.1">
+      <s xml:id="example.p.1.s.1">
+        <t>Hello <t-style class="bold">world</t-style>! How are <t-style class="italics">you</t-style> today?</t>
+      </s>
+    </p>
+  </text>
+</FoLiA>"#;
+
 #[test]
 fn test001_instantiate() {
     match Document::new("example", DocumentProperties::default()) {
@@ -668,6 +699,22 @@ fn test012_spanroles() {
                 assert!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).is_some());
                 assert!(dependency.get_element(ElementType::Headspan, Cmp::Any, Recursion::Always).is_some());
                 assert_eq!(dependency.get_element(ElementType::DependencyDependent, Cmp::Any, Recursion::Always).unwrap().text(&TextParameters::default()).expect("unwrapping text of dep"), "man");
+            } else {
+                assert!(false, "dependency not found");
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test013_textmarkup() {
+    match Document::from_str(str::from_utf8(EXAMPLE_MARKUP).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            if let Some(sentence) = doc.get_element_by_id("example.p.1.s.1") {
+                assert_eq!(sentence.text(&TextParameters::default()).expect("unwrapping text of dep"), "Hello world! How are you today?");
             } else {
                 assert!(false, "dependency not found");
             }
