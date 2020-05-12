@@ -5,6 +5,9 @@ extern crate strum;
 #[macro_use]
 extern crate strum_macros;
 
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 
 
 pub mod common;

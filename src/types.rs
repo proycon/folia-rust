@@ -23,12 +23,12 @@ pub type Class = String;
 pub type Subset = String;
 
 #[repr(u8)]
-#[derive(Copy,Clone,PartialEq,Eq,PartialOrd,Hash,EnumIter)]
+#[derive(Copy,Clone,PartialEq,Eq,PartialOrd,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents the type of a FoLiA element.
 //foliaspec:elementtype
 pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
-#[derive(Copy,Clone,PartialEq,Debug,Hash,EnumIter)]
+#[derive(Copy,Clone,PartialEq,Debug,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents groups of element types that share similar characteristics.
 //foliaspec:elementgroup
 pub enum ElementGroup { Layer, Content, CorrectionChild, HigherOrder, Inline, Span, SpanRole, Structure, Subtoken, TextMarkup, Feature }
@@ -60,7 +60,7 @@ impl ElementGroup {
     }
 }
 
-#[derive(Debug,Copy,Clone,PartialEq,Eq,Hash,EnumIter)]
+#[derive(Debug,Copy,Clone,PartialEq,Eq,Hash,EnumIter,Serialize,Deserialize)]
 ///Defines all annotation types (as part of the AnnotationType enumeration)
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)

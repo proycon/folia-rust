@@ -1,6 +1,6 @@
 [package]
 name = "folia"
-version = "0.0.2"
+version = "0.0.3"
 description = "High-performance library for handling the FoLiA XML format (Format for Linguistic Annotation)"
 authors = ["Maarten van Gompel <proycon@anaproy.nl>"]
 homepage = "https://proycon.github.io/folia"
@@ -26,3 +26,5 @@ strum = "0.16.0"
 strum_macros = "0.16.0"
 clap = "2.33.0"
 libc = "0.2.62"
+serde = "1.0.110"
+serde_derive = "1.0.110"
