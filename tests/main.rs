@@ -296,7 +296,7 @@ fn test005_decode() {
 fn test006a_serialise_all_unchecked() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            match doc.xml(0) {
+            match doc.xml(0,4) {
                 Ok(xml) => {
                     println!("{}",str::from_utf8(&xml).expect("conversion from utf-8"));
                 },
@@ -315,9 +315,9 @@ fn test006a_serialise_all_unchecked() {
 fn test006a_serialise_word() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
         Ok(doc) => {
-            if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {;
-                match word.xml() {
-                    Ok(xml) => assert_eq!(xml, "<w xml:id=\"example.p.1.s.1.w.1\" class=\"WORD\">\n<t>Hello</t></w>"),
+            if let Some(word) = doc.get_element_by_id("example.p.1.s.1.w.1") {
+                match word.xml(4) {
+                    Ok(xml) => assert_eq!(xml, "<w xml:id=\"example.p.1.s.1.w.1\" class=\"WORD\">\n    <t>Hello</t>\n</w>"),
                     Err(err) => assert!(false, format!("Serialisation failed with error: {}",err))
                 }
             } else {

@@ -438,9 +438,12 @@ pub trait ReadElement {
     }
 
     ///Serialise this element (and everything under it) to XML
-    fn xml(&self) -> Result<String, FoliaError> {
+    fn xml(&self, indent: usize) -> Result<String, FoliaError> {
         if let Some(doc) = self.document() {
-            let mut writer = Writer::new(Cursor::new(Vec::new()));
+            let mut writer = match indent {
+                0 => Writer::new(Cursor::new(Vec::new())),
+                indent =>  Writer::new_with_indent(Cursor::new(Vec::new()), b' ', indent)
+            };
             doc.xml_elements(&mut writer, self.key().unwrap())?;
             let result = writer.into_inner().into_inner();
             let result = from_utf8(&result).expect("encoding utf-8");

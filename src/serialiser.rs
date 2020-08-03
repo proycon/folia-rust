@@ -29,8 +29,11 @@ fn to_serialisation_error(err: quick_xml::Error) -> FoliaError {
 
 impl Document {
     ///Serialises a document to XML (vector of bytes, utf-8)
-    pub fn xml(&self, root_key: ElementKey) -> Result<Vec<u8>, FoliaError> {
-        let mut writer = Writer::new(Cursor::new(Vec::new()));
+    pub fn xml(&self, root_key: ElementKey, indent: usize) -> Result<Vec<u8>, FoliaError> {
+        let mut writer = match indent {
+            0 => Writer::new(Cursor::new(Vec::new())),
+            indent =>  Writer::new_with_indent(Cursor::new(Vec::new()), b' ', indent)
+        };
 
         let mut doc_start = BytesStart::borrowed_name(b"FoLiA");
         doc_start.push_attribute(("xmlns", str::from_utf8(NSFOLIA).unwrap() ));
@@ -199,6 +202,7 @@ impl Document {
         Ok(())
     }
 
+    ///Serialize elements to XML
     pub(crate) fn xml_elements(&self, writer: &mut Writer<Cursor<Vec<u8>>>, root_key: ElementKey) -> Result<(), FoliaError> {
         //caches declarations that are defaults
         let dec_is_default: Vec<bool> = self.declarationstore.default_mask();

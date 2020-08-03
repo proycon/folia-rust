@@ -18,7 +18,7 @@ fn main() {
     for filename in argmatches.values_of("file").expect("Expected one or more files") {
         match Document::from_file(filename, DocumentProperties::default()) {
             Ok(doc) => {
-                match doc.xml(0) {
+                match doc.xml(0,4) {
                     Ok(xml) => println!("{}",str::from_utf8(&xml).unwrap()),
                     Err(err) => eprintln!("{}",err)
                 }

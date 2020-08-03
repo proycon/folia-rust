@@ -140,6 +140,22 @@ impl Document {
 
     //************** Methods providing easy write adccess into the underlying Stores ********************
 
+    /*
+    ///High-level method for adding annotations to elements. This method will perform
+    pub fn annotate(&mut self, parent_key: ElementKey, element: ElementData) -> Result<ElementKey, FoliaError> {
+        match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
+            Ok(child_key) => {
+                self.attach_element(parent_key, child_key)?;
+                self.post_add(child_key, None)?;
+                Ok(child_key)
+            },
+            Err(err) => {
+                Err(FoliaError::InternalError(format!("Unable to add element to parent: {}", err)))
+            }
+        }
+    }
+    */
+
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` instead)
     pub fn add_element(&mut self, element: ElementData) -> Result<ElementKey, FoliaError> {
