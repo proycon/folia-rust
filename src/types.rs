@@ -2,6 +2,7 @@ use std::convert::Into;
 use std::fmt;
 
 use crate::error::FoliaError;
+use crate::element::ElementData;
 
 use strum_macros::EnumIter;
 
@@ -740,6 +741,9 @@ pub enum DataType {
     Comment(String),
     ///A reference to a span element (the reverse of wref, not expressed explicitly in the XML)
     SpanReference(ElementKey),
+    ///A to-be-constructed element, this is a only a temporary value that allows nested
+    ///construction, it will not actually appear in the document's data model
+    AddElement(ElementData),
 }
 
 impl DataType {

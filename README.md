@@ -56,24 +56,43 @@ for word in doc.select(selector, folia::Recursion::Always) {
 }
 ```
 
-We can create a document from scratch:
+We can create a document from scratch, all new elements can be using the high-level ``annotate()`` method:
 
 ```rust
 let doc = folia::Document::new("example", folia::DocumentProperties::default()).expect("instantiating folia");
 let root: ElementKey = 0; //root element always has key 0
 //add a sentence, returns its key
-let sentence = doc.add_element_to(root,
+let sentence = doc.annotate(root,
                     folia::ElementData::new(folia::ElementType::Sentence).
                     with_attrib(folia::Attribute::Id("s.1".to_string())) ).expect("Adding sentence");
 
-doc.add_element_to(sentence,
-                 folia::ElementData::new(folia::ElementType::Word).
-                              with(folia::DataType::text("hello"))).expect("Adding word 1");
-doc.add_element_to(sentence,
-                 folia::ElementData::new(folia::ElementType::Word).
-                              with(folia::DataType::text("world"))).expect("Adding word 2");
+doc.annotate(sentence,
+             ElementData::new(ElementType::Word)
+             .with_attrib(Attribute::Id("word.1".to_string()))
+             .with_text("hello".to_string())
+            ).expect("Adding word 1");
+
+doc.annotate(sentence,
+             ElementData::new(ElementType::Word)
+             .with_attrib(Attribute::Id("word.2".to_string()))
+             .with_text("world".to_string())
+            ).expect("Adding word 2");
 
 ```
+
+Let's add a named entity for the above two words:
+
+```rust
+doc.annotate(sentence,
+             ElementData::new(ElementType::Entity)
+             .with_attrib(Attribute::Set("adhoc".to_string()))
+             .with_attrib(Attribute::Class("greeting".to_string()))
+             .with_span(&[ "word.1", "word.2" ])
+).expect("adding entity");
+```
+
+Note that this will work regardless of the first parameter (``sentence``), as the span is explicitly provided:
+``annotate()`` will automatically find out where add the layer (if needed).
 
 
 If you have an element's key (a numerical internal identifier), you can easily obtain a ``FoliaElement`` instance:

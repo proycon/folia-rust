@@ -144,6 +144,7 @@ impl Document {
     ///Add an element to the document (but the element will be an orphan unless it is the very
     ///first one, you may want to use ``add_element_to`` or ``annotate`` instead)
     pub fn add_element(&mut self, element: ElementData) -> Result<ElementKey, FoliaError> {
+        let (element,_) = self.add_children(element)?;
         <Self as Store<ElementData,ElementKey>>::add(self, element, None)
     }
 
@@ -167,8 +168,17 @@ impl Document {
     ///takes care of adding and attaching for you. You may want to use ``annotate`` instead
     ///as that is an even higher-level function.
     pub fn add_element_to(&mut self, parent_key: ElementKey, element: ElementData) -> Result<ElementKey, FoliaError> {
+        let (element,added_subelements) = self.add_children(element)?;
         match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
             Ok(child_key) => {
+                if let Some(added_subelements) = added_subelements {
+                    for subchild_key in added_subelements.iter() {
+                        if let Some(subchilddata) = self.get_mut_elementdata(*subchild_key) {
+                            subchilddata.set_parent_key(Some(child_key));
+                        }
+                        self.post_add(*subchild_key, None)?;
+                    }
+                }
                 self.attach_element(parent_key, child_key)?;
                 self.post_add(child_key, None)?;
                 Ok(child_key)
@@ -176,6 +186,53 @@ impl Document {
             Err(err) => {
                 Err(FoliaError::InternalError(format!("Unable to add element to parent: {}", err)))
             }
+        }
+    }
+
+    ///Before we can add an element, we need to create and add its hitherto 'unborn' children.
+    pub(crate) fn add_children(&mut self, mut element: ElementData) -> Result<(ElementData, Option<Vec<ElementKey>>),FoliaError> {
+        let mut has_unborn_children = false;
+        for child in element.data.iter() {
+            if let DataType::AddElement(_) = child {
+                has_unborn_children = true;
+            }
+        }
+        if has_unborn_children {
+            let mut added_elements: Vec<ElementKey> = Vec::new();
+            let mut new_data: Vec<DataType> = Vec::new();
+            for child in element.data {
+                if let DataType::AddElement(child_elementdata) = child {
+                    //first we do a recursion step to add the grandchildren, if any
+                    let child_key = match self.add_children(child_elementdata) {
+                        Ok((child_elementdata_new, Some(added_grandchildren))) => {
+                            let child_key = <Self as Store<ElementData,ElementKey>>::add(self, child_elementdata_new, None)?;
+                            for grandchild_key in added_grandchildren {
+                                if let Some(subchilddata) = self.get_mut_elementdata(grandchild_key) {
+                                    subchilddata.set_parent_key(Some(child_key));
+                                }
+                                self.post_add(grandchild_key, None)?;
+                            }
+                            child_key
+                        },
+                        Ok((child_elementdata_new, None)) => {
+                            let child_key = <Self as Store<ElementData,ElementKey>>::add(self, child_elementdata_new, None)?;
+                            child_key
+                        }
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    };
+                    new_data.push(DataType::Element(child_key));
+                    added_elements.push(child_key);
+                } else {
+                    new_data.push(child);
+                }
+            }
+            eprintln!("DEBUG: new_data={:?}",new_data);
+            element.data = new_data;
+            Ok((element, Some(added_elements)))
+        } else {
+            Ok((element, None))
         }
     }
 

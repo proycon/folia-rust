@@ -235,7 +235,8 @@ impl Selector {
                 }
             },
             DataType::Text(_) => self.datatypes.contains(&DataTypeSelector::Text),
-            DataType::Comment(_) => self.datatypes.contains(&DataTypeSelector::Comments)
+            DataType::Comment(_) => self.datatypes.contains(&DataTypeSelector::Comments),
+            DataType::AddElement(_) => false,
         };
         if let Some(next) = &self.next {
             matches || next.matches(document, item)

@@ -37,7 +37,7 @@ pub enum ValidationStrategy {
 }
 
 
-#[derive(Clone)]
+#[derive(Clone,PartialEq,Debug)]
 ///This is the structure that represents any instance of a FoLiA element. The type of the structure
 ///is represented by ``elementtype``. An elements holds and owns attributes, encoded attributes (if
 ///it is encoded already),  data items (which may be text, comments or child elements (by key)), and a link
@@ -670,6 +670,26 @@ impl ElementData {
     }
 
 
+
+    ///High-level builder method to provide the span
+    pub fn with_span(mut self, span_ids: &[&str]) -> Self {
+        for id in span_ids.iter() {
+            self = self.add_element(ElementData::new(ElementType::WordReference).with_attrib(Attribute::Idref(id.to_string())));
+        }
+        self
+    }
+
+    ///High-level builder method to provide textcontent
+    pub fn with_text(self, text: String) -> Self {
+        self.add_element(ElementData::new(ElementType::TextContent).with(DataType::Text(text)))
+    }
+
+    ///High-level builder method: add child to be constructed. The actual encoding happens later
+    ///when ``Document.add_element()`` is called.
+    pub fn add_element(mut self, data: ElementData) -> Self {
+        self.data.push(DataType::AddElement(data));
+        self
+    }
 
 
     ///Low-level add function

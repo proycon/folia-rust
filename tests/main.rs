@@ -222,19 +222,26 @@ fn test001_instantiate() {
 
 
 #[test]
-fn test002_append() {
+fn test002_add_element_to() {
     match Document::new("example", DocumentProperties::default()) {
         Ok(mut doc) => {
             let root: ElementKey = 0;
             let sentence = doc.add_element_to(root,
-                                            ElementData::new(ElementType::Sentence)
-                                                                .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
+                                              ElementData::new(ElementType::Sentence)
+                                              .with_attrib(Attribute::Id("s.1".to_string()))
+                                              ).expect("Addubg sentence");
+
             doc.add_element_to(sentence,
-                             ElementData::new(ElementType::Word)
-                                                 .with(DataType::text("hello"))).expect("Adding word 1");
+                               ElementData::new(ElementType::Word)
+                              .with_attrib(Attribute::Id("word.1".to_string()))
+                              .with_text("hello".to_string())
+                              ).expect("Adding word 1");
+
             doc.add_element_to(sentence,
-                             ElementData::new(ElementType::Word)
-                                                 .with(DataType::text("world"))).expect("Adding word 2");
+                               ElementData::new(ElementType::Word)
+                               .with_attrib(Attribute::Id("word.2".to_string()))
+                               .with_text("world".to_string())
+                              ).expect("Adding word 2");
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
@@ -248,14 +255,21 @@ fn test002b_annotate_structure() {
         Ok(mut doc) => {
             let root: ElementKey = 0;
             let sentence = doc.annotate(root,
-                                            ElementData::new(ElementType::Sentence)
-                                                                .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
+                                        ElementData::new(ElementType::Sentence)
+                                        .with_attrib(Attribute::Id("s.1".to_string()))
+                                        ).expect("Adding sentence");
+
             doc.annotate(sentence,
-                             ElementData::new(ElementType::Word)
-                                                 .with(DataType::text("hello"))).expect("Adding word 1");
+                         ElementData::new(ElementType::Word)
+                         .with_attrib(Attribute::Id("word.1".to_string()))
+                         .with_text("hello".to_string())
+                        ).expect("Adding word 1");
+
             doc.annotate(sentence,
-                             ElementData::new(ElementType::Word)
-                                                 .with(DataType::text("world"))).expect("Adding word 2");
+                         ElementData::new(ElementType::Word)
+                         .with_attrib(Attribute::Id("word.2".to_string()))
+                         .with_text("world".to_string())
+                        ).expect("Adding word 2");
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
@@ -276,6 +290,52 @@ fn test002c_annotate_invalid() {
                 Err(FoliaError::ValidationError(_)) => true,
                 _ => false
             });
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test002c_annotate_span_fromstructure() {
+    match Document::new("example", DocumentProperties::default()) {
+        Ok(mut doc) => {
+            let root: ElementKey = 0;
+            let sentence = doc.annotate(root,
+                                            ElementData::new(ElementType::Sentence)
+                                                                .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
+            doc.annotate(sentence,
+                         ElementData::new(ElementType::Word)
+                         .with_attrib(Attribute::Id("word.1".to_string()))
+                         .with_text("hello".to_string())
+                        ).expect("Adding word 1");
+
+            doc.annotate(sentence,
+                         ElementData::new(ElementType::Word)
+                         .with_attrib(Attribute::Id("word.2".to_string()))
+                         .with_text("world".to_string())
+                        ).expect("Adding word 2");
+
+            //a layer doesn't exist yet at this stage and will be created automatically:
+            doc.annotate(sentence,
+                         ElementData::new(ElementType::Entity)
+                         .with_attrib(Attribute::Set("adhoc".to_string()))
+                         .with_attrib(Attribute::Class("greeting".to_string()))
+                         .with_span(&[ "word.1", "word.2" ])
+            ).expect("adding entity");
+
+            //add another one, the same layer should be re-used:
+            doc.annotate(sentence,
+                         ElementData::new(ElementType::Entity)
+                         .with_attrib(Attribute::Set("adhoc".to_string()))
+                         .with_attrib(Attribute::Class("greeting2".to_string()))
+                         .with_span(&[ "word.1", "word.2" ])
+            ).expect("adding second entity");
+
+            //DEBUG
+            let xml = doc.xml(0,4).unwrap();
+            println!("{}", str::from_utf8(&xml).unwrap());
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));

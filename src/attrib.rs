@@ -66,7 +66,7 @@ impl fmt::Display for AttribType {
     }
 }
 
-#[derive(Clone,PartialEq)]
+#[derive(Clone,PartialEq,Debug)]
 ///This type hold attributes (including the attribute value)
 pub enum Attribute {
     Ignore,
