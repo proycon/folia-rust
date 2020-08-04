@@ -257,6 +257,30 @@ impl AnnotationType {
         }
 
     }
+
+    ///Maps annotation types to their layer elements
+    pub fn layertype(&self) -> Option<ElementType> {
+        //foliaspec:annotationtype_layerclass_map(self)
+        //A mapping from annotation types to strings
+        match self {
+          AnnotationType::CHUNKING => Some(ElementType::ChunkingLayer),
+          AnnotationType::COREFERENCE => Some(ElementType::CoreferenceLayer),
+          AnnotationType::DEPENDENCY => Some(ElementType::DependenciesLayer),
+          AnnotationType::ENTITY => Some(ElementType::EntitiesLayer),
+          AnnotationType::MORPHOLOGICAL => Some(ElementType::MorphologyLayer),
+          AnnotationType::OBSERVATION => Some(ElementType::ObservationLayer),
+          AnnotationType::PREDICATE => Some(ElementType::SemanticRolesLayer),
+          AnnotationType::SEMROLE => Some(ElementType::SemanticRolesLayer),
+          AnnotationType::SENTIMENT => Some(ElementType::SentimentLayer),
+          AnnotationType::SPANRELATION => Some(ElementType::SpanRelationLayer),
+          AnnotationType::STATEMENT => Some(ElementType::StatementLayer),
+          AnnotationType::SYNTAX => Some(ElementType::SyntaxLayer),
+          AnnotationType::TIMESEGMENT => Some(ElementType::TimingLayer),
+          _ => None
+        }
+
+        //leave the above line empty for foliaspec!
+    }
 }
 
 impl Into<&str> for AnnotationType {

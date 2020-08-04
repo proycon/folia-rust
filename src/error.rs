@@ -16,6 +16,8 @@ pub enum FoliaError {
     ParseError(String),
     ///Serialisation errors occur if there is a problem during serialisation
     SerialisationError(String),
+    ///Incomplete errors occur when the information provided is not complete enough
+    IncompleteError(String),
     ///Validation errors occur when the FoLiA is not consistent, they are a level beyond Parse
     ///Errors
     ValidationError(String),
@@ -36,6 +38,7 @@ impl From<FoliaError> for String {
             FoliaError::XmlError(err) => format!("{}",err),
             FoliaError::ParseError(err) |
             FoliaError::SerialisationError(err) |
+            FoliaError::IncompleteError(err) |
             FoliaError::ValidationError(err) |
             FoliaError::InternalError(err) |
             FoliaError::EncodeError(err) |
@@ -82,6 +85,7 @@ impl Error for FoliaError {
             FoliaError::XmlError(ref _err) => "XML Error",
             FoliaError::ParseError(ref _err) => "Parse Error",
             FoliaError::SerialisationError(ref _err) => "Serialisation Error",
+            FoliaError::IncompleteError(ref _err) => "Incomplete Error",
             FoliaError::ValidationError(ref _err) => "Validation Error",
             FoliaError::InternalError(ref _err) => "Internal Error",
             FoliaError::EncodeError(ref _err) => "Encode Error",
@@ -98,6 +102,7 @@ impl Error for FoliaError {
             FoliaError::IoError(ref err) => Some(err as &dyn Error),
             FoliaError::XmlError(ref _err) => None,
             FoliaError::ParseError(ref _err) => None,
+            FoliaError::IncompleteError(ref _err) => None,
             FoliaError::SerialisationError(ref _err) => None,
             FoliaError::ValidationError(ref _err) => None,
             FoliaError::InternalError(ref _err) => None,
@@ -118,6 +123,7 @@ impl fmt::Display for FoliaError {
             FoliaError::XmlError(ref err) => fmt::Display::fmt(err, f),
             FoliaError::ParseError(ref err) |
             FoliaError::SerialisationError(ref err) |
+            FoliaError::IncompleteError(ref err) |
             FoliaError::ValidationError(ref err) |
             FoliaError::InternalError(ref err) |
             FoliaError::EncodeError(ref err) |

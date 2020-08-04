@@ -590,10 +590,26 @@ impl<'a> Element<'a> {
         }
     }
 
+    ///High level-function to get a particular ancestor by annoation type and set. This function
+    ///returns only one element
+    pub fn get_ancestor_by_group(&self, elementgroup: ElementGroup, set: Cmp<String>) -> Option<Element> {
+        if self.document.is_none() { //saves us from a panic in the deeper call
+            None
+        } else {
+            self.get_ancestors_by_group(elementgroup,set).next().map(|e| e.element)
+        }
+    }
+
     ///Returns an iterator over the ancestors of this element, starting with the parent and moving
     ///up the tree.
     pub fn get_ancestors(&self, elementtype: ElementType, set: Cmp<String>) -> AncestorIterator {
         self.ancestors(Selector::from_query(self.document().expect("Unwrapping document on element for get_ancestors()"), &Query::select().element(Cmp::Is(elementtype)).set(set)).expect("Compiling query for get_ancestors()"))
+    }
+
+    ///Returns an iterator over the ancestors of this element, starting with the parent and moving
+    ///up the tree.
+    pub fn get_ancestors_by_group(&self, elementgroup: ElementGroup, set: Cmp<String>) -> AncestorIterator {
+        self.ancestors(Selector::from_query(self.document().expect("Unwrapping document on element for get_ancestors_by_group()"), &Query::select().elementgroup(Cmp::Is(elementgroup)).set(set)).expect("Compiling query for get_ancestors_by_group()"))
     }
 
 }

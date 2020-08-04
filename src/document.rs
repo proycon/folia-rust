@@ -138,26 +138,11 @@ impl Document {
         self.elementstore.specification.get(elementtype)
     }
 
-    //************** Methods providing easy write adccess into the underlying Stores ********************
+    //************** Low-level methods providing easy write access into the underlying Stores ********************
 
-    /*
-    ///High-level method for adding annotations to elements. This method will perform
-    pub fn annotate(&mut self, parent_key: ElementKey, element: ElementData) -> Result<ElementKey, FoliaError> {
-        match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
-            Ok(child_key) => {
-                self.attach_element(parent_key, child_key)?;
-                self.post_add(child_key, None)?;
-                Ok(child_key)
-            },
-            Err(err) => {
-                Err(FoliaError::InternalError(format!("Unable to add element to parent: {}", err)))
-            }
-        }
-    }
-    */
 
     ///Add an element to the document (but the element will be an orphan unless it is the very
-    ///first one, you may want to use ``add_element_to`` instead)
+    ///first one, you may want to use ``add_element_to`` or ``annotate`` instead)
     pub fn add_element(&mut self, element: ElementData) -> Result<ElementKey, FoliaError> {
         <Self as Store<ElementData,ElementKey>>::add(self, element, None)
     }
@@ -176,10 +161,11 @@ impl Document {
         <Self as Store<Processor,ProcKey>>::add(self, processor, None)
     }
 
-    //************** Higher-order methods for adding things ********************
+    //************** Mid-level methods for adding things ********************
 
     ///Adds a new element as a child of another, this is a higher-level function that/
-    ///takes care of adding and attaching for you.
+    ///takes care of adding and attaching for you. You may want to use ``annotate`` instead
+    ///as that is an even higher-level function.
     pub fn add_element_to(&mut self, parent_key: ElementKey, element: ElementData) -> Result<ElementKey, FoliaError> {
         match <Self as Store<ElementData,ElementKey>>::add(self, element, Some(parent_key)) {
             Ok(child_key) => {
@@ -345,6 +331,7 @@ impl Document {
         Ok(())
     }
 
+
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
     ///key of the existing one.
     pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>, format: &Option<String>) -> Result<DecKey,FoliaError> {
@@ -376,7 +363,92 @@ impl Document {
         Ok(added_key)
     }
 
+    //************** High-level method for adding annotations ********************
 
+    ///This is a high-level function that adds an annotation to an element, and does all necessary validation. It will simply call `add_element_to` for token annotation elements that fit within the scope and validate. For span annotation, it will create and find or create the proper annotation layer and insert the element there.
+    pub fn annotate(&mut self, parent_key: ElementKey, element: ElementData) -> Result<ElementKey, FoliaError> {
+        let parent = self.get_element(parent_key).ok_or(
+            FoliaError::InternalError(format!("Specified element key not found: {:?}", parent_key))
+        )?;
+        if ElementGroup::Span.contains(element.elementtype) {
+            let mut addspanfromspanned = false;
+            let mut addspanfromstructure = false;
+            let layertype = element.elementtype.annotationtype().expect("annotation type").layertype().ok_or(
+                FoliaError::InternalError(format!("No layer type found for specified span type {:?}",element.elementtype))
+            )?;
+            let props = self.props(parent.elementtype());
+            if props.wrefable {
+                addspanfromspanned = true
+            } else if ElementGroup::Structure.contains(parent.elementtype()) {
+                addspanfromstructure = true
+            }
+
+            let mut set: Option<String> = None;
+            if addspanfromspanned || addspanfromstructure {
+                //get the set
+                let set_ref = &element.set()?;
+                if let Some(s) = set_ref {
+                    set = Some(s.to_string());
+                } else {
+                    if let Some(s) = self.get_default_set(element.elementtype.annotationtype().expect("annotation type")) {
+                        set = Some(s.to_string());
+                    }
+                    if set.is_none() {
+                        return Err(FoliaError::IncompleteError(format!("No set defined when adding span annotation and none could be inferred")));
+                    }
+                }
+            }
+
+            if addspanfromspanned {
+                //invoked from the spanned element (singular)
+                let ancestor = match set {
+                    Some(set) => parent.get_ancestor_by_group(ElementGroup::Structure, Cmp::Is(set.clone())),
+                    None => parent.get_ancestor_by_group(ElementGroup::Structure, Cmp::None)
+                };
+                if let Some(ancestor) = ancestor {
+                    let ancestor_key = ancestor.key().expect("ancestor key");
+                    self.annotate(ancestor_key, element) //recursion
+                } else {
+                    Err(FoliaError::IncompleteError(format!("No suitable structural ancestor found")))
+                }
+            } else if addspanfromstructure {
+                let layer_key = if let Ok(Some(layer)) = self.get_layer(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) ) {
+                    layer.key().expect("key")
+                } else {
+                    //no layer found yet, add a new one
+                    let layerdata = match set {
+                        Some(set) => ElementData::new(layertype).with_attrib(Attribute::Set(set.clone())),
+                        None => ElementData::new(layertype)
+                    };
+                    self.check_element_addable(parent_key, &layerdata)?;
+                    self.add_element_to(parent_key, layerdata)?
+                };
+                self.check_element_addable(layer_key, &element)?;
+                self.add_element_to(layer_key, element)
+            } else {
+                //normal behaviour
+                self.check_element_addable(parent_key, &element)?;
+                self.add_element_to(parent_key, element)
+            }
+        } else {
+            //normal behaviour
+            self.check_element_addable(parent_key, &element)?;
+            self.add_element_to(parent_key, element)
+        }
+    }
+
+    pub fn annotate_span(&mut self, parent_keys: &[ElementKey], element: ElementData) -> Result<ElementKey, FoliaError> {
+        if !ElementGroup::Span.contains(element.elementtype) {
+            return Err(FoliaError::TypeError(format!("Element passed to annotate_span is not a span element")));
+        }
+        if parent_keys.is_empty() {
+            return Err(FoliaError::IncompleteError(format!("No parent keys passed")));
+        }
+        let parent = self.get_element(parent_keys[0]).ok_or(
+            FoliaError::InternalError(format!("Specified element key not found"))
+        )?;
+        Ok(0) //TODO!!!! NOT FINISHED
+    }
 
     //************** Methods providing easy access to Store ****************
 
@@ -458,6 +530,52 @@ impl Document {
     }
     */
 
+    ///Get the layer under the specified element, for the given annotation type and set.
+    pub fn get_layer(&self, key: ElementKey, annotationtype: AnnotationType, set: Option<&str>) -> Result<Option<Element>,FoliaError> {
+        let layertype = annotationtype.layertype().ok_or(
+            FoliaError::InternalError(format!("No layer type found for specified span type {:?}",annotationtype))
+        )?;
+        let query = Query::select().element(Cmp::Is(layertype));
+        let selector = Selector::from_query(self, &query)?;
+        for layer in self.select(selector, Recursion::No) {
+            return Ok(Some(*layer));
+        }
+        Ok(None)
+    }
+
+    //
+    //************** Other high-level retrieval methods ****************
+    //
+
+    pub fn get_default_set(&self, annotationtype: AnnotationType) -> Option<&str> {
+        if let Some(default_key) = self.declarationstore.get_default_key(annotationtype) {
+            if let Some(declaration) = self.get_declaration(default_key) {
+                return declaration.set.as_ref().map(|s| s.as_str());
+            }
+        }
+        None
+    }
+
+    //************** Validation methods ****************
+    //
+    pub fn check_element_addable(&self, parent_key: ElementKey, element: &ElementData) -> Result<(), FoliaError> {
+        let parent = self.get_element(parent_key).ok_or(
+            FoliaError::InternalError(format!("Specified parent element key not found"))
+        )?;
+        let props = self.props(parent.elementtype());
+        for accepted_data in props.accepted_data.iter() {
+            match accepted_data {
+                AcceptedData::AcceptElementType(et) => if *et == element.elementtype {
+                    return Ok(())
+                },
+                AcceptedData::AcceptElementGroup(g) => if g.contains(element.elementtype) {
+                    return Ok(())
+                }
+            }
+        }
+        Err(FoliaError::ValidationError(format!("Can't add element type {:?} to {:?}", element.elementtype, parent.elementtype())))
+    }
+
 }
 
 
@@ -521,8 +639,9 @@ impl Store<ElementData,ElementKey> for Document {
                         //get the declaration key from the parent context:
                         let parent = self.get_elementdata(parent_key).ok_or( FoliaError::InternalError("Context for feature does not exist!".to_string()))?;
 
-                        let deckey = self.declare(parent.elementtype.annotationtype().expect(format!("Unwrapping annotation type of parent {}", element.elementtype).as_str() ), &element.set().unwrap().map(|s| s.to_string()),  &None, &None)?;
-                        declaration_key  = Some(deckey);
+                        let annotationtype = parent.elementtype.annotationtype().expect(format!("Unwrapping annotation type of parent {}", element.elementtype).as_str() );
+                        let deckey = self.declare(annotationtype, &element.set().unwrap().map(|s| s.to_string()),  &None, &None)?;
+                        declaration_key  = Some(deckey);;
 
                         if let Some(declaration) = self.get_mut_declaration(deckey) {
                             if let Ok(Some(class)) = element.class() {
