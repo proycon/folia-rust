@@ -228,7 +228,6 @@ impl Document {
                     new_data.push(child);
                 }
             }
-            eprintln!("DEBUG: new_data={:?}",new_data);
             element.data = new_data;
             Ok((element, Some(added_elements)))
         } else {
