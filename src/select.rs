@@ -701,7 +701,22 @@ impl<'a> SelectAncestors<'a> for Element<'a> {
 }
 
 impl Document {
-   pub fn ancestors_by_key<'a>(&'a self, key: ElementKey, selector: Selector) -> AncestorIterator<'a> {
+    pub fn ancestors_by_key<'a>(&'a self, key: ElementKey, selector: Selector) -> AncestorIterator<'a> {
         AncestorIterator::new(self, selector, key, Recursion::Always)
+    }
+
+    pub fn common_ancestors(&self, selector: Selector, elements: &[ElementKey]) -> Vec<ElementKey> {
+        let mut result: Vec<ElementKey> = Vec::new();
+        for sibling_key in elements {
+            if let Some(sibling) = self.get_element(*sibling_key) {
+                let ancestors: Vec<ElementKey> = sibling.ancestors(selector.clone()).map(|e| e.key().expect("get key")).collect();
+                if result.is_empty() {
+                    result = ancestors.into_iter().collect();
+                } else {
+                    result = result.into_iter().filter(|a| ancestors.contains(a)).collect();
+                }
+            }
+        }
+        result
     }
 }
