@@ -243,6 +243,47 @@ fn test002_append() {
 }
 
 #[test]
+fn test002b_annotate_simple() {
+    match Document::new("example", DocumentProperties::default()) {
+        Ok(mut doc) => {
+            let root: ElementKey = 0;
+            let sentence = doc.annotate(root,
+                                            ElementData::new(ElementType::Sentence)
+                                                                .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
+            doc.annotate(sentence,
+                             ElementData::new(ElementType::Word)
+                                                 .with(DataType::text("hello"))).expect("Adding word 1");
+            doc.annotate(sentence,
+                             ElementData::new(ElementType::Word)
+                                                 .with(DataType::text("world"))).expect("Adding word 2");
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test002c_annotate_invalid() {
+    match Document::new("example", DocumentProperties::default()) {
+        Ok(mut doc) => {
+            let root: ElementKey = 0;
+            let sentence = doc.annotate(root,
+                                            ElementData::new(ElementType::Sentence)
+                                                                .with_attrib(Attribute::Id("s.1".to_string())) ).expect("Obtaining sentence");
+            let result = doc.annotate(sentence, ElementData::new(ElementType::Speech));
+            assert!(match result {
+                Err(FoliaError::ValidationError(_)) => true,
+                _ => false
+            });
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
 fn test003_parse() {
     match Document::from_str(str::from_utf8(EXAMPLE).expect("decoding utf-8"), DocumentProperties::default()) {
         Ok(doc) => {
