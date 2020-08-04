@@ -32,7 +32,7 @@ let doc = folia::Document::from_file(filename, folia::DocumentProperties::defaul
 //Build a query, here you can match on any attribute
 let query = folia::Query::select().element(folia::Cmp::Is(folia::ElementType::Word));
 //Turn the query into a specific selector
-let selector = folia::Selector::from_query(&doc, &query);
+let selector = folia::Selector::from_query(&doc, &query).expect("selector");
 
 //Run the selector
 for word in doc.select(selector, folia::Recursion::Always) {

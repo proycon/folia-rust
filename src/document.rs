@@ -400,18 +400,45 @@ impl Document {
             }
 
             if addspanfromspanned {
-                //invoked from the spanned element (singular)
-                let ancestor = match set {
-                    Some(set) => parent.get_ancestor_by_group(ElementGroup::Structure, Cmp::Is(set.clone())),
-                    None => parent.get_ancestor_by_group(ElementGroup::Structure, Cmp::None)
-                };
-                if let Some(ancestor) = ancestor {
-                    let ancestor_key = ancestor.key().expect("ancestor key");
-                    self.annotate(ancestor_key, element) //recursion
+                //invoked from the spanned element (the parent_key/parent plays no role anymore)
+                let mut span_keys: Vec<ElementKey> = Vec::new();
+                for child in element.data.iter() {
+                    if let DataType::Element(k) = child {
+                        span_keys.push(*k);
+                    }
+                }
+                if span_keys.is_empty() {
+                    Err(FoliaError::IncompleteError(format!("Span is empty, can not be added from a wrefable parent")))
                 } else {
-                    Err(FoliaError::IncompleteError(format!("No suitable structural ancestor found")))
+                    let query = Query::select().elementgroup(Cmp::Is(ElementGroup::Structure));
+                    let common_ancestors = self.common_ancestors(Selector::from_query(&self,&query).expect("selector"), &span_keys);
+                    for ancestor_key in common_ancestors.iter() {
+                        let mut suitable = false; //is the ancestor suitable to hold a layer according to the specification?
+                        if let Some(ancestor) = self.get_element(*ancestor_key) {
+                            let props = self.props(ancestor.elementtype());
+                            suitable = props.accepted_data.contains(&AcceptedData::AcceptElementGroup(ElementGroup::Layer)) || props.accepted_data.contains(&AcceptedData::AcceptElementType(layertype));
+                        };
+                        if suitable {
+                            let layer_key = if let Ok(Some(layer)) = self.get_layer(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) ) {
+                                layer.key().expect("key")
+                            } else {
+                                //no layer found yet, add a new one
+                                let layerdata = match set {
+                                    Some(set) => ElementData::new(layertype).with_attrib(Attribute::Set(set.clone())),
+                                    None => ElementData::new(layertype)
+                                };
+                                self.check_element_addable(*ancestor_key, &layerdata)?;
+                                self.add_element_to(*ancestor_key, layerdata)?
+                            };
+                            self.check_element_addable(layer_key, &element)?;
+                            //we only did one iteration, taking the closest common ancestor
+                            return self.add_element_to(layer_key, element);
+                        }
+                    }
+                    Err(FoliaError::IncompleteError(format!("Unable to find suitable common ancestor to create annotation layer")))
                 }
             } else if addspanfromstructure {
+                //invoked from the parent structure element that holds the layer (usually a sentence)
                 let layer_key = if let Ok(Some(layer)) = self.get_layer(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) ) {
                     layer.key().expect("key")
                 } else {
@@ -437,17 +464,11 @@ impl Document {
         }
     }
 
-    pub fn annotate_span(&mut self, parent_keys: &[ElementKey], element: ElementData) -> Result<ElementKey, FoliaError> {
+    pub fn annotate_span(&mut self, element: ElementData) -> Result<ElementKey, FoliaError> {
         if !ElementGroup::Span.contains(element.elementtype) {
             return Err(FoliaError::TypeError(format!("Element passed to annotate_span is not a span element")));
         }
-        if parent_keys.is_empty() {
-            return Err(FoliaError::IncompleteError(format!("No parent keys passed")));
-        }
-        let parent = self.get_element(parent_keys[0]).ok_or(
-            FoliaError::InternalError(format!("Specified element key not found"))
-        )?;
-        Ok(0) //TODO!!!! NOT FINISHED
+        self.annotate(0, element) //use the root parent key because it doesn't matter, will be extracted from the element itself
     }
 
     //************** Methods providing easy access to Store ****************

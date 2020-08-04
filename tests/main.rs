@@ -243,7 +243,7 @@ fn test002_append() {
 }
 
 #[test]
-fn test002b_annotate_simple() {
+fn test002b_annotate_structure() {
     match Document::new("example", DocumentProperties::default()) {
         Ok(mut doc) => {
             let root: ElementKey = 0;
