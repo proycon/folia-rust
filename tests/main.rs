@@ -826,3 +826,38 @@ fn test013_textmarkup() {
         }
     }
 }
+
+#[test]
+fn test014a_common_ancestor() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            let sentence = doc.get_element_key_by_id("example.p.1.s.1").unwrap();
+            let par = doc.get_element_key_by_id("example.p.1").unwrap();
+            let word1 = doc.get_element_key_by_id("example.p.1.s.1.w.1").unwrap();
+            let word2 = doc.get_element_key_by_id("example.p.1.s.1.w.2").unwrap();
+            let query = Query::select().elementgroup(Cmp::Is(ElementGroup::Structure));
+            let common_ancestors = doc.common_ancestors(Selector::from_query(&doc,&query).expect("selector"), &[word1,word2]);
+            assert_eq!(common_ancestors, &[sentence,par, 0]);
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
+
+#[test]
+fn test014b_common_ancestor() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            let par = doc.get_element_key_by_id("example.p.1").unwrap();
+            let word1 = doc.get_element_key_by_id("example.p.1.s.1.w.1").unwrap();
+            let word2 = doc.get_element_key_by_id("example.p.1.s.2.w.1").unwrap();
+            let query = Query::select().elementgroup(Cmp::Is(ElementGroup::Structure));
+            let common_ancestors = doc.common_ancestors(Selector::from_query(&doc,&query).expect("selector"), &[word1,word2]);
+            assert_eq!(common_ancestors, &[par, 0]);
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}
