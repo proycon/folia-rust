@@ -861,3 +861,20 @@ fn test014b_common_ancestor() {
         }
     }
 }
+
+#[test]
+fn test015_get_layer() {
+    match Document::from_str(str::from_utf8(EXAMPLE).expect("conversion from utf-8 of example"), DocumentProperties::default()) {
+        Ok(doc) => {
+            let sentence_key = doc.get_element_key_by_id("example.p.1.s.2").unwrap();
+            if let Ok(Some(_)) = doc.get_layer_key(sentence_key, AnnotationType::CHUNKING, Some("shallowsyntaxset")) {
+                assert!(true);
+            } else {
+                assert!(false, format!("layer not found"));
+            }
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}

@@ -475,39 +475,43 @@ impl Document {
                             suitable = props.accepted_data.contains(&AcceptedData::AcceptElementGroup(ElementGroup::Layer)) || props.accepted_data.contains(&AcceptedData::AcceptElementType(layertype));
                         };
                         if suitable {
-                            let layer_key = if let Ok(Some(layer)) = self.get_layer(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) ) {
-                                layer.key().expect("key")
-                            } else {
+                            let mut layer_key: Option<ElementKey> = self.get_layer_key(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) )?;
+                            if layer_key.is_none() {
                                 //no layer found yet, add a new one
                                 let layerdata = match set {
                                     Some(set) => ElementData::new(layertype).with_attrib(Attribute::Set(set.clone())),
                                     None => ElementData::new(layertype)
                                 };
                                 self.check_element_addable(*ancestor_key, &layerdata)?;
-                                self.add_element_to(*ancestor_key, layerdata)?
+                                match self.add_element_to(*ancestor_key, layerdata) {
+                                    Ok(key) => layer_key = Some(key),
+                                    Err(e) => return Err(e)
+                                }
                             };
-                            self.check_element_addable(layer_key, &element)?;
+                            self.check_element_addable(layer_key.unwrap() , &element)?;
                             //we only did one iteration, taking the closest common ancestor
-                            return self.add_element_to(layer_key, element);
+                            return self.add_element_to(layer_key.unwrap(), element);
                         }
                     }
                     Err(FoliaError::IncompleteError(format!("Unable to find suitable common ancestor to create annotation layer")))
                 }
             } else if addspanfromstructure {
                 //invoked from the parent structure element that holds the layer (usually a sentence)
-                let layer_key = if let Ok(Some(layer)) = self.get_layer(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) ) {
-                    layer.key().expect("key")
-                } else {
+                let mut layer_key: Option<ElementKey> = self.get_layer_key(parent_key, element.elementtype.annotationtype().expect("annotation type"), set.as_ref().map(|s| s.as_str()) )?;
+                if layer_key.is_none() {
                     //no layer found yet, add a new one
                     let layerdata = match set {
                         Some(set) => ElementData::new(layertype).with_attrib(Attribute::Set(set.clone())),
                         None => ElementData::new(layertype)
                     };
                     self.check_element_addable(parent_key, &layerdata)?;
-                    self.add_element_to(parent_key, layerdata)?
+                    match self.add_element_to(parent_key, layerdata) {
+                        Ok(key) => layer_key = Some(key),
+                        Err(e) => return Err(e)
+                    }
                 };
-                self.check_element_addable(layer_key, &element)?;
-                self.add_element_to(layer_key, element)
+                self.check_element_addable(layer_key.unwrap(), &element)?;
+                self.add_element_to(layer_key.unwrap(), element)
             } else {
                 //normal behaviour
                 self.check_element_addable(parent_key, &element)?;
@@ -608,14 +612,19 @@ impl Document {
     */
 
     ///Get the layer under the specified element, for the given annotation type and set.
-    pub fn get_layer(&self, key: ElementKey, annotationtype: AnnotationType, set: Option<&str>) -> Result<Option<Element>,FoliaError> {
+    pub fn get_layer_key(&self, key: ElementKey, annotationtype: AnnotationType, set: Option<&str>) -> Result<Option<ElementKey>,FoliaError> {
         let layertype = annotationtype.layertype().ok_or(
             FoliaError::InternalError(format!("No layer type found for specified span type {:?}",annotationtype))
         )?;
-        let query = Query::select().element(Cmp::Is(layertype));
+        let query = Query::select().element(Cmp::Is(layertype)).set(match set {
+            Some(set) => Cmp::Is(set.to_string()),
+            None => Cmp::None,
+        });
         let selector = Selector::from_query(self, &query)?;
-        for layer in self.select(selector, Recursion::No) {
-            return Ok(Some(*layer));
+        if let Some(element) = self.get_element(key) {
+            for layer in element.select(selector, Recursion::No) {
+                return Ok(layer.key());
+            }
         }
         Ok(None)
     }
