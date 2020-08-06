@@ -270,6 +270,7 @@ impl Document {
 
     ///Performs postprocessing after adding an element
     pub(crate) fn post_add(&mut self, element_key: ElementKey, stack: Option<&Vec<ElementKey>>) -> Result<(),FoliaError> {
+        let mut add_attributes: Option<Vec<Attribute>> = None;
         if let Some(element) = self.get_elementdata(element_key) {
             match element.elementtype {
                 ElementType::WordReference => {
@@ -313,12 +314,34 @@ impl Document {
                         return Err(FoliaError::ParseError("Wref element does not reference anything!".to_string()));
                     }
                 },
-                _ => {}
-            };
-            Ok(())
+                elementtype => {
+                    if ElementGroup::Layer.contains(elementtype) {
+                        //Do we have a set already?
+                        if !element.has_attrib(AttribType::SET) {
+                            //Find out the set from the child elements
+                            let query = Query::select().elementgroup(Cmp::Is(ElementGroup::Span)).set(Cmp::Some);
+                            let selector = Selector::from_query(self, &query)?;
+                            for spanelement in self.get_element(element_key).expect("getting element").select(selector, Recursion::Always) {
+                                if spanelement.elementtype().annotationtype() == elementtype.annotationtype() {
+                                    if let Some(dec_key) = spanelement.declaration_key() {
+                                        add_attributes = Some(vec!(Attribute::DeclarationRef(dec_key)));
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         } else {
-            Err(FoliaError::KeyError("Element not found".to_string()))
+            return Err(FoliaError::KeyError("Element not found".to_string()));
         }
+        if let Some(add_attributes) = add_attributes {
+            if let Some(element) = self.get_mut_elementdata(element_key) {
+                element.set_attribs(add_attributes);
+            }
+        }
+        Ok(())
     }
 
     ///Removes the child from the parent, orphaning it, does NOT remove the element entirely
