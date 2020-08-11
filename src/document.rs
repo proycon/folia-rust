@@ -480,12 +480,7 @@ impl Document {
 
             if addspanfromspanned {
                 //invoked from the spanned element (the parent_key/parent plays no role anymore)
-                let mut span_keys: Vec<ElementKey> = Vec::new();
-                for child in element.data.iter() {
-                    if let DataType::Element(k) = child {
-                        span_keys.push(*k);
-                    }
-                }
+                let span_keys = self.get_span_keys(&element);
                 if span_keys.is_empty() {
                     Err(FoliaError::IncompleteError(format!("Span is empty, can not be added from a wrefable parent")))
                 } else {
@@ -551,7 +546,11 @@ impl Document {
         if !ElementGroup::Span.contains(element.elementtype) {
             return Err(FoliaError::TypeError(format!("Element passed to annotate_span is not a span element")));
         }
-        self.annotate(0, element) //use the root parent key because it doesn't matter, will be extracted from the element itself
+        let span_keys = self.get_span_keys(&element);
+        if span_keys.is_empty() {
+            return Err(FoliaError::IncompleteError(format!("Span is empty, can not be added from a wrefable parent")));
+        }
+        self.annotate(span_keys[0], element) //use the root parent key because it doesn't matter, will be extracted from the element itself
     }
 
     //************** Methods providing easy access to Store ****************
@@ -652,7 +651,24 @@ impl Document {
         Ok(None)
     }
 
-    //
+    pub fn get_span_keys(&self, elementdata: &ElementData) -> Vec<ElementKey> {
+        let mut span_keys: Vec<ElementKey> = Vec::new();
+        for child in elementdata.data.iter() {
+            if let DataType::Element(k) = child {
+                span_keys.push(*k);
+            } else if let DataType::AddElement(ed) = child {
+                if ed.elementtype == ElementType::WordReference {
+                    if let Some(a) = ed.attrib(AttribType::IDREF) {
+                        if let Some(k) = self.get_element_key_by_id(a.as_str().expect("str")) {
+                            span_keys.push(k);
+                        }
+                    }
+                }
+            }
+        }
+        span_keys
+    }
+
     //************** Other high-level retrieval methods ****************
     //
 
@@ -664,6 +680,7 @@ impl Document {
         }
         None
     }
+
 
     //************** Validation methods ****************
     //
