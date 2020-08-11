@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::borrow::Cow;
+use rand::prelude::*;
 
 use crate::common::*;
 use crate::error::*;
@@ -372,6 +373,95 @@ pub struct Processor {
     pub parent: Option<ProcKey>,
     pub metadata: Metadata,
     pub key: Option<ProcKey>
+}
+
+impl Processor {
+    ///Instantiates a new processor
+    pub fn new(name: String) -> Processor {
+        let mut randomidstring: Vec<u8> = Vec::new();
+        for _ in 0..16 {
+            randomidstring.push(rand::random::<u8>());
+        }
+        Processor {
+            id: format!("proc.{}.{}",name, hex::encode(randomidstring)),
+            name: name,
+            processortype: ProcessorType::default(),
+            version: "".to_string(),
+            folia_version: "".to_string(),
+            document_version: "".to_string(),
+            command: "".to_string(),
+            host: "".to_string(),
+            user: "".to_string(),
+            begindatetime: "".to_string(),
+            enddatetime: "".to_string(),
+            processors: vec!(),
+            src: "".to_string(),
+            format: "".to_string(),
+            resourcelink: "".to_string(),
+            parent: None,
+            metadata: Metadata::default(),
+            key: None,
+        }
+    }
+
+    //builder patterns
+    pub fn with_type(mut self, processortype: ProcessorType) -> Processor {
+        self.processortype = processortype;
+        self
+    }
+    pub fn with_id(mut self, value: String) -> Processor {
+        self.id = value;
+        self
+    }
+    pub fn with_version(mut self, value: String) -> Processor {
+        self.version = value;
+        self
+    }
+    pub fn with_folia_version(mut self, value: String) -> Processor {
+        self.folia_version = value;
+        self
+    }
+    pub fn with_document_version(mut self, value: String) -> Processor {
+        self.document_version = value;
+        self
+    }
+    pub fn with_command(mut self, value: String) -> Processor {
+        self.command = value;
+        self
+    }
+    pub fn with_host(mut self, value: String) -> Processor {
+        self.host = value;
+        self
+    }
+    pub fn with_user(mut self, value: String) -> Processor {
+        self.user = value;
+        self
+    }
+    pub fn with_begindatetime(mut self, value: String) -> Processor {
+        self.begindatetime = value;
+        self
+    }
+    pub fn with_enddatetime(mut self, value: String) -> Processor {
+        self.enddatetime = value;
+        self
+    }
+    pub fn with_src(mut self, value: String) -> Processor {
+        self.src = value;
+        self
+    }
+    pub fn with_format(mut self, value: String) -> Processor {
+        self.format = value;
+        self
+    }
+    pub fn with_resourcelink(mut self, value: String) -> Processor {
+        self.resourcelink = value;
+        self
+    }
+    ///attempts to automatically fill the processor's fields based on the environment
+    pub fn autofill(mut self) -> Processor {
+        //TODO
+        self
+    }
 }
 
 impl Storable<ProcKey> for Processor {

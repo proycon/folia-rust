@@ -878,3 +878,32 @@ fn test015_get_layer() {
         }
     }
 }
+
+#[test]
+fn test016_add_provenance() {
+    match Document::new("example", DocumentProperties::default()) {
+        Ok(mut doc) => {
+            //TODO
+            let root: ElementKey = 0;
+            let sentence = doc.annotate(root,
+                                        ElementData::new(ElementType::Sentence)
+                                        .with_attrib(Attribute::Id("s.1".to_string()))
+                                        ).expect("Adding sentence");
+
+            doc.annotate(sentence,
+                         ElementData::new(ElementType::Word)
+                         .with_attrib(Attribute::Id("word.1".to_string()))
+                         .with_text("hello".to_string())
+                        ).expect("Adding word 1");
+
+            doc.annotate(sentence,
+                         ElementData::new(ElementType::Word)
+                         .with_attrib(Attribute::Id("word.2".to_string()))
+                         .with_text("world".to_string())
+                        ).expect("Adding word 2");
+        },
+        Err(err) => {
+            assert!(false, format!("Instantiation failed with error: {}",err));
+        }
+    }
+}

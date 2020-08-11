@@ -53,7 +53,8 @@ pub struct Document {
 pub struct DocumentProperties {
     pub bodytype: BodyType,
     pub autodeclare: bool,
-    pub declare: Vec<(AnnotationType,Option<String>)>
+    pub declare: Vec<(AnnotationType,Option<String>)>,
+    pub processor: Option<Processor>,
 }
 
 impl Default for DocumentProperties {
@@ -61,7 +62,8 @@ impl Default for DocumentProperties {
         Self {
             bodytype: BodyType::Text,
             autodeclare: true,
-            declare: vec![(AnnotationType::TEXT, Some(DEFAULT_TEXT_SET.to_string()) )]
+            declare: vec![(AnnotationType::TEXT, Some(DEFAULT_TEXT_SET.to_string()) )],
+            processor: None,
         }
     }
 }
