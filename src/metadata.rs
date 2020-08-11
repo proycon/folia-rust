@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::borrow::Cow;
+use std::env;
+use std::time::{SystemTime, UNIX_EPOCH};
+use chrono::NaiveDateTime;
 use rand::prelude::*;
 
 use crate::common::*;
@@ -364,8 +367,8 @@ pub struct Processor {
     pub command: String,
     pub host: String,
     pub user: String,
-    pub begindatetime: String,
-    pub enddatetime: String,
+    pub begindatetime: Option<NaiveDateTime>,
+    pub enddatetime: Option<NaiveDateTime>,
     pub processors: Vec<ProcKey>,
     pub src: String,
     pub format: String,
@@ -392,8 +395,8 @@ impl Processor {
             command: "".to_string(),
             host: "".to_string(),
             user: "".to_string(),
-            begindatetime: "".to_string(),
-            enddatetime: "".to_string(),
+            begindatetime: None,
+            enddatetime: None,
             processors: vec!(),
             src: "".to_string(),
             format: "".to_string(),
@@ -437,12 +440,12 @@ impl Processor {
         self.user = value;
         self
     }
-    pub fn with_begindatetime(mut self, value: String) -> Processor {
-        self.begindatetime = value;
+    pub fn with_begindatetime(mut self, dt: NaiveDateTime) -> Processor {
+        self.begindatetime = Some(dt);
         self
     }
-    pub fn with_enddatetime(mut self, value: String) -> Processor {
-        self.enddatetime = value;
+    pub fn with_enddatetime(mut self, dt: NaiveDateTime) -> Processor {
+        self.enddatetime = Some(dt);
         self
     }
     pub fn with_src(mut self, value: String) -> Processor {
@@ -459,8 +462,12 @@ impl Processor {
     }
     ///attempts to automatically fill the processor's fields based on the environment
     pub fn autofill(mut self) -> Processor {
-        //TODO
-        self
+        let host: String = env::var("HOST").unwrap_or_default();
+        let user: String = env::var("USER").unwrap_or_default();
+        let begindatetime: NaiveDateTime = NaiveDateTime::from_timestamp(
+            std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).expect("Unable to get time").as_secs() as i64, 0
+        );
+        self.with_host(host).with_begindatetime(begindatetime).with_folia_version(FOLIAVERSION.to_string()).with_user(user)
     }
 }
 

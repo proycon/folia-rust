@@ -173,11 +173,11 @@ impl Document {
             if !processor.user.is_empty() {
                 processor_start.push_attribute(("user", processor.user.as_str() ));
             }
-            if !processor.begindatetime.is_empty() {
-                processor_start.push_attribute(("begindatetime", processor.begindatetime.as_str() ));
+            if let Some(dt) = processor.begindatetime {
+                processor_start.push_attribute(("begindatetime", dt.format("%Y-%m-%dT%H:%M:%S").to_string().as_str() ));
             }
-            if !processor.enddatetime.is_empty() {
-                processor_start.push_attribute(("enddatetime", processor.enddatetime.as_str() ));
+            if let Some(dt) = processor.enddatetime {
+                processor_start.push_attribute(("enddatetime", dt.format("%Y-%m-%dT%H:%M:%S").to_string().as_str() ));
             }
             if !processor.src.is_empty() {
                 processor_start.push_attribute(("src", processor.src.as_str() ));

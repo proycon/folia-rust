@@ -8,6 +8,7 @@ use std::fmt;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
+use chrono::NaiveDateTime;
 
 use crate::error::*;
 use crate::common::*;
@@ -79,7 +80,7 @@ pub enum Attribute {
     AnnotatorType(ProcessorType),
     Confidence(f64),
     N(String),
-    DateTime(String),
+    DateTime(NaiveDateTime),
     BeginTime(String),
     EndTime(String),
     Src(String),
@@ -144,7 +145,7 @@ impl Attribute {
     pub fn as_str(&self) -> Result<&str,FoliaError> {
         match self {
             Attribute::Id(s) | Attribute::Set(s) | Attribute::Class(s) | Attribute::Annotator(s) |
-            Attribute::N(s) | Attribute::DateTime(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
+            Attribute::N(s) | Attribute::BeginTime(s) | Attribute::EndTime(s) |
             Attribute::Src(s) | Attribute::Speaker(s) | Attribute::Textclass(s) | Attribute::Metadata(s) | Attribute::Idref(s) |
             Attribute::Processor(s) | Attribute::Href(s) | Attribute::Format(s) | Attribute::Subset(s) | Attribute::Text(s)| Attribute::Type(s) | Attribute::Ref(s) | Attribute::Original(s) | Attribute::Auth(s) | Attribute::XLinkType(s) | Attribute::PageNr(s)
                 => Ok(&s),
@@ -167,6 +168,7 @@ impl Attribute {
             Attribute::Confidence(f) => Ok(f.to_string()),
             Attribute::Offset(n) => Ok(n.to_string()),
             Attribute::LineNr(n) => Ok(n.to_string()),
+            Attribute::DateTime(dt) => Ok(dt.format("%Y-%m-%dT%H:%M:%S").to_string()),
             Attribute::Ignore => Err(FoliaError::TypeError("Ignore attribute can't be serialised".to_string())),
             _ =>  {
                 if let Ok(s) = self.as_str() {
@@ -292,7 +294,10 @@ impl Attribute {
                     Ok(Attribute::Text(value))
                 },
                 b"datetime" => {
-                    Ok(Attribute::DateTime(value))
+                    match NaiveDateTime::parse_from_str(&value, "%Y-%m-%dT%H:%M:$S") {
+                        Ok(dt) => Ok(Attribute::DateTime(dt)),
+                        Err(e) => Err(FoliaError::ParseError(format!("Unable to parse datetime {} -> {}",value, e)))
+                    }
                 },
                 b"begintime" => {
                     Ok(Attribute::BeginTime(value))

@@ -11,6 +11,7 @@ extern crate serde_derive;
 
 extern crate rand;
 extern crate hex;
+extern crate chrono;
 
 pub mod common;
 pub mod types;

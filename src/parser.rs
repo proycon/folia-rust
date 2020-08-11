@@ -10,6 +10,7 @@ use std::collections::HashMap;
 
 use quick_xml::Reader;
 use quick_xml::events::Event;
+use chrono::NaiveDateTime;
 
 use crate::common::*;
 use crate::types::*;
@@ -480,8 +481,18 @@ impl Processor {
                     b"command" => { processor.command = value; },
                     b"host" => { processor.host = value; },
                     b"user" => { processor.user = value; },
-                    b"begindatetime" => { processor.begindatetime = value; },
-                    b"enddatetime" => { processor.enddatetime = value; },
+                    b"begindatetime" => {
+                        match NaiveDateTime::parse_from_str(&value, "%Y-%m-%dT%H:%M:$S") {
+                            Ok(dt) => processor.begindatetime = Some(dt),
+                            Err(e) => return Err(FoliaError::ParseError(format!("Unable to parse begindatetime {} -> {}",value, e)))
+                        };
+                    },
+                    b"enddatetime" => {
+                        match NaiveDateTime::parse_from_str(&value, "%Y-%m-%dT%H:%M:$S") {
+                            Ok(dt) => processor.enddatetime = Some(dt),
+                            Err(e) => return Err(FoliaError::ParseError(format!("Unable to parse enddatetime {} -> {}",value, e)))
+                        };
+                    },
                     b"src" => { processor.src = value; },
                     b"format" => { processor.format = value; },
                     b"resourcelink" => { processor.resourcelink = value; },
