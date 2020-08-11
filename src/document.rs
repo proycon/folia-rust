@@ -550,7 +550,7 @@ impl Document {
         if span_keys.is_empty() {
             return Err(FoliaError::IncompleteError(format!("Span is empty, can not be added from a wrefable parent")));
         }
-        self.annotate(span_keys[0], element) //use the root parent key because it doesn't matter, will be extracted from the element itself
+        self.annotate(span_keys[0], element) //adding span from spannable element itself
     }
 
     //************** Methods providing easy access to Store ****************
