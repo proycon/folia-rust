@@ -375,7 +375,9 @@ pub struct Processor {
     pub resourcelink: String,
     pub parent: Option<ProcKey>,
     pub metadata: Metadata,
-    pub key: Option<ProcKey>
+    pub key: Option<ProcKey>,
+    ///This field is reserved for construction time only
+    pub pending_processors: Vec<Processor>,
 }
 
 impl Processor {
@@ -404,6 +406,36 @@ impl Processor {
             parent: None,
             metadata: Metadata::default(),
             key: None,
+            pending_processors: vec!(),
+        }
+    }
+
+    ///Returns a processor of type generator corresponding to this FoLiA library
+    pub fn this_library() -> Processor {
+        let mut randomidstring: Vec<u8> = Vec::new();
+        for _ in 0..16 {
+            randomidstring.push(rand::random::<u8>());
+        }
+        Processor {
+            id: format!("proc.folia-rust.{}", hex::encode(randomidstring)),
+            name: "folia-rust".to_string(),
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            processortype: ProcessorType::Generator,
+            folia_version: FOLIAVERSION.to_string(),
+            document_version: "".to_string(),
+            command: "".to_string(),
+            host: "".to_string(),
+            user: "".to_string(),
+            begindatetime: None,
+            enddatetime: None,
+            processors: vec!(),
+            src: "https://github.com/proycon/folia-rust".to_string(),
+            format: "text/html".to_string(),
+            resourcelink: "".to_string(),
+            parent: None,
+            metadata: Metadata::default(),
+            key: None,
+            pending_processors: vec!(),
         }
     }
 
@@ -460,6 +492,14 @@ impl Processor {
         self.resourcelink = value;
         self
     }
+    pub fn with_existing_subprocessor(mut self, key: ProcKey) -> Processor {
+        self.processors.push(key);
+        self
+    }
+    pub fn with_new_subprocessor(mut self, processor: Processor) -> Processor {
+        self.pending_processors.push(processor);
+        self
+    }
     ///attempts to automatically fill the processor's fields based on the environment
     pub fn autofill(self) -> Processor {
         let host: String = env::var("HOST").unwrap_or_default();
@@ -468,8 +508,9 @@ impl Processor {
         let begindatetime: NaiveDateTime = NaiveDateTime::from_timestamp(
             std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).expect("Unable to get time").as_secs() as i64, 0
         );
-        self.with_host(host).with_begindatetime(begindatetime).with_folia_version(FOLIAVERSION.to_string()).with_user(user).with_command(command)
+        self.with_host(host).with_begindatetime(begindatetime).with_folia_version(FOLIAVERSION.to_string()).with_user(user).with_command(command).with_new_subprocessor(Processor::this_library())
     }
+
 }
 
 impl Storable<ProcKey> for Processor {
