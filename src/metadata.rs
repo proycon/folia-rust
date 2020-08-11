@@ -461,13 +461,14 @@ impl Processor {
         self
     }
     ///attempts to automatically fill the processor's fields based on the environment
-    pub fn autofill(mut self) -> Processor {
+    pub fn autofill(self) -> Processor {
         let host: String = env::var("HOST").unwrap_or_default();
         let user: String = env::var("USER").unwrap_or_default();
+        let command: String = env::args().collect();
         let begindatetime: NaiveDateTime = NaiveDateTime::from_timestamp(
             std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).expect("Unable to get time").as_secs() as i64, 0
         );
-        self.with_host(host).with_begindatetime(begindatetime).with_folia_version(FOLIAVERSION.to_string()).with_user(user)
+        self.with_host(host).with_begindatetime(begindatetime).with_folia_version(FOLIAVERSION.to_string()).with_user(user).with_command(command)
     }
 }
 

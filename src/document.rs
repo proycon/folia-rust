@@ -43,6 +43,8 @@ pub struct Document {
     pub metadata: Metadata,
     ///Submetadata
     pub submetadata: HashMap<String,Metadata>,
+    ///The curerntly active processor
+    pub active_processor: Option<ProcKey>,
 
     pub autodeclare: bool,
 }
@@ -68,6 +70,25 @@ impl Default for DocumentProperties {
     }
 }
 
+impl DocumentProperties {
+    pub fn with_bodytype(mut self, bodytype: BodyType) -> DocumentProperties {
+        self.bodytype = bodytype;
+        self
+    }
+    pub fn with_autodeclare(mut self, value: bool) -> DocumentProperties {
+        self.autodeclare = value;
+        self
+    }
+    pub fn with_declaration(mut self, annotationtype: AnnotationType, set: Option<String>) -> DocumentProperties {
+        self.declare.push( (annotationtype,set) );
+        self
+    }
+    pub fn with_processor(mut self, processor: Processor) -> DocumentProperties {
+        self.processor = Some(processor);
+        self
+    }
+}
+
 impl Document {
     ///Create a new FoLiA document from scratch
     pub fn new(id: &str, properties: DocumentProperties) -> Result<Self, FoliaError> {
@@ -81,6 +102,7 @@ impl Document {
             metadata: Metadata::default(),
             submetadata: HashMap::default(),
             autodeclare: properties.autodeclare,
+            active_processor: None,
         };
         let mut body = match properties.bodytype {
             BodyType::Text => ElementData::new(ElementType::Text),
@@ -94,6 +116,10 @@ impl Document {
     }
 
     pub fn apply_properties(&mut self, properties: DocumentProperties) -> Result<(),FoliaError> {
+        if let Some(processor) = properties.processor {
+            let prockey = self.add_processor(processor)?;
+            self.active_processor = Some(prockey);
+        }
         for (annotationtype, set) in properties.declare.iter() {
             let dec_key = self.declare(*annotationtype, &set, &None,&None)?;
             if set.is_some() {
@@ -412,9 +438,14 @@ impl Document {
         Ok(())
     }
 
+    pub fn activate_processor(&mut self, processor_key: ProcKey) {
+        self.active_processor = Some(processor_key);
+    }
+
 
     ///Add a declaration. Returns the key. If the declaration already exists it simply returns the
-    ///key of the existing one.
+    ///key of the existing one. If there is an active processor defined, it will automatically be
+    ///associated with the declaration.
     pub fn declare(&mut self, annotationtype: AnnotationType, set: &Option<String>, alias: &Option<String>, format: &Option<String>) -> Result<DecKey,FoliaError> {
         //first we simply check the index
         if let Some(found_key) = <Self as Store<Declaration,DecKey>>::id_to_key(self,Declaration::index_id(annotationtype, &set.as_ref().map(String::as_str)  ).as_str()) {
@@ -422,6 +453,7 @@ impl Document {
         }
 
         //If not found, we search for a default
+        let mut declaration_key: Option<DecKey> = None;
         if let Some(default_key) = self.declarationstore.get_default_key(annotationtype) {
             if let Some(declaration) = self.get_declaration(default_key) {
                 if set.is_some() {
@@ -429,19 +461,31 @@ impl Document {
                     //in conflict
                     if let Some(declared_set) = &declaration.set {
                         if *declared_set == *set.as_ref().unwrap() {
-                            return Ok(default_key);
+                            declaration_key = Some(default_key);
                         }
                     }
                 } else {
                     //no set defined, that means we inherit the default set
-                    return Ok(default_key);
+                    declaration_key = Some(default_key);
                 }
             }
         }
 
-        //if we reach this point we have no defaults and add a new declaration
-        let added_key = self.add_declaration(Declaration::new(annotationtype, set.clone(), alias.clone(), format.clone()))?;
-        Ok(added_key)
+        if declaration_key.is_none() {
+            //we have no defaults and add a new declaration
+            match self.add_declaration(Declaration::new(annotationtype, set.clone(), alias.clone(), format.clone())) {
+                Ok(k) => { declaration_key = Some(k) },
+                Err(e) => return Err(e)
+            }
+        }
+        if let Some(prockey) = self.active_processor {
+            if let Some(mut declaration) = self.get_mut_declaration(declaration_key.expect("get deckey")) {
+                if !declaration.processors.contains(&prockey) {
+                    declaration.processors.push(prockey);
+                }
+            }
+        }
+        Ok(declaration_key.expect("get_deckey"))
     }
 
     //************** High-level method for adding annotations ********************
@@ -741,6 +785,7 @@ impl Store<ElementData,ElementKey> for Document {
         let mut class_key: Option<ClassKey> = None;
         let mut processor_key: Option<ProcKey> = None;
         let mut subset_key: Option<SubsetKey> = None;
+        let mut test_declaration_has_processor: bool = false;
 
         //encode the element for storage
         if let Some(annotationtype) = element.elementtype.annotationtype() {
@@ -758,7 +803,11 @@ impl Store<ElementData,ElementKey> for Document {
             }
 
             if let Some(declaration) = self.get_declaration(deckey) {
-                processor_key = declaration.default_processor() //returns an Option, may be overriden later if a specific processor is et
+                processor_key = declaration.default_processor(); //returns an Option, may be overriden later if a specific processor is et
+                if processor_key.is_none() && self.active_processor.is_some() {
+                    processor_key = self.active_processor;
+                    test_declaration_has_processor = !declaration.processors.contains(&processor_key.expect("proc key"));
+                }
             }
         } else {
             match element.elementtype {
@@ -794,10 +843,23 @@ impl Store<ElementData,ElementKey> for Document {
             }
         }
 
+        //is there an explicitly provided processor? this overrides the earlier default
         if let Ok(Some(processor_id)) = element.processor() {
             if let Some(prockey) = <Self as Store<Processor,ProcKey>>::id_to_key(self, processor_id) {
                 processor_key = Some(prockey); //overrides the earlier-set default (if any)
+                test_declaration_has_processor = true;
             }
+        }
+
+        if test_declaration_has_processor && declaration_key.is_some() {
+            //test whether the declaration has the processor, add it if not
+            if let Some(declaration) = self.get_mut_declaration(declaration_key.expect("dec key")) {
+                if let Some(proc_key) = processor_key {
+                    if !declaration.processors.contains(&proc_key) {
+                        declaration.processors.push(proc_key);
+                    }
+                }
+            };
         }
 
         //remove encodable attributes

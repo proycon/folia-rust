@@ -231,17 +231,28 @@ fn test002_add_element_to() {
                                               .with_attrib(Attribute::Id("s.1".to_string()))
                                               ).expect("Addubg sentence");
 
-            doc.add_element_to(sentence,
+            let word1 = doc.add_element_to(sentence,
                                ElementData::new(ElementType::Word)
                               .with_attrib(Attribute::Id("word.1".to_string()))
                               .with_text("hello".to_string())
                               ).expect("Adding word 1");
 
-            doc.add_element_to(sentence,
+            let word2 = doc.add_element_to(sentence,
                                ElementData::new(ElementType::Word)
                                .with_attrib(Attribute::Id("word.2".to_string()))
                                .with_text("world".to_string())
                               ).expect("Adding word 2");
+
+            //sanity tests after adding:
+            assert_eq!(doc.get_element_key_by_id("word.1"), Some(word1));
+
+            if let Some(element) = doc.get_element(word2) {
+                assert_eq!(element.id(), Some("word.2"));
+                assert_eq!(element.text(&TextParameters::default()).expect("text"),"world");
+                assert_eq!(element.parent_key(), Some(sentence));
+            } else {
+                assert!(false, format!("Element could not be retrieved"));
+            }
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
@@ -259,17 +270,28 @@ fn test002b_annotate_structure() {
                                         .with_attrib(Attribute::Id("s.1".to_string()))
                                         ).expect("Adding sentence");
 
-            doc.annotate(sentence,
+            let word1 = doc.annotate(sentence,
                          ElementData::new(ElementType::Word)
                          .with_attrib(Attribute::Id("word.1".to_string()))
                          .with_text("hello".to_string())
                         ).expect("Adding word 1");
 
-            doc.annotate(sentence,
+            let word2 = doc.annotate(sentence,
                          ElementData::new(ElementType::Word)
                          .with_attrib(Attribute::Id("word.2".to_string()))
                          .with_text("world".to_string())
                         ).expect("Adding word 2");
+
+            //sanity tests after adding:
+            assert_eq!(doc.get_element_key_by_id("word.1"), Some(word1));
+
+            if let Some(element) = doc.get_element(word2) {
+                assert_eq!(element.id(), Some("word.2"));
+                assert_eq!(element.text(&TextParameters::default()).expect("text"),"world");
+                assert_eq!(element.parent_key(), Some(sentence));
+            } else {
+                assert!(false, format!("Element could not be retrieved"));
+            }
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));
@@ -881,9 +903,9 @@ fn test015_get_layer() {
 
 #[test]
 fn test016_add_provenance() {
-    match Document::new("example", DocumentProperties::default()) {
+    let processor = Processor::new("test".to_string()).with_id("test.proc".to_owned()).autofill();
+    match Document::new("example", DocumentProperties::default().with_processor(processor)) {
         Ok(mut doc) => {
-            //TODO
             let root: ElementKey = 0;
             let sentence = doc.annotate(root,
                                         ElementData::new(ElementType::Sentence)
@@ -896,11 +918,23 @@ fn test016_add_provenance() {
                          .with_text("hello".to_string())
                         ).expect("Adding word 1");
 
-            doc.annotate(sentence,
+            let word2 = doc.annotate(sentence,
                          ElementData::new(ElementType::Word)
                          .with_attrib(Attribute::Id("word.2".to_string()))
                          .with_text("world".to_string())
                         ).expect("Adding word 2");
+
+            //sanity tests after adding
+
+            //check if processor is rightly associated with the document and is active
+            if let Some(proc) = doc.get_processor_by_id("test.proc") {
+                assert!(doc.active_processor.is_some());
+                assert_eq!(doc.active_processor, proc.key);
+            } else {
+                assert!(false, format!("Processor was not found"));
+            }
+
+
         },
         Err(err) => {
             assert!(false, format!("Instantiation failed with error: {}",err));

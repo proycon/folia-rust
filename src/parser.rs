@@ -42,6 +42,7 @@ impl Document {
                             metadata: Metadata::default(),
                             submetadata: HashMap::default(),
                             autodeclare: properties.autodeclare,
+                            active_processor: None,
         };
 
         //parse root
