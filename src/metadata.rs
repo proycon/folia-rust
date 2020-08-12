@@ -31,7 +31,7 @@ pub struct Declaration {
 }
 
 impl Declaration {
-    ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()``.
+    ///Creates a new declaration, which can for instance be passed to ``Document.add_declaration()`` or the higher-lever ``Document.declare()``.
     pub fn new(annotationtype: AnnotationType, set: Option<String>, alias: Option<String>, format: Option<String>) -> Declaration {
         Declaration { annotationtype: annotationtype, set: set, alias: alias, processors: vec![] , format: format, classes: None, key: None, subclasses: None, subsets: None }
     }
@@ -504,6 +504,7 @@ impl Processor {
         }
         self
     }
+
     ///attempts to automatically fill the processor's fields based on the environment
     pub fn autofill(self) -> Processor {
         let host: String = env::var("HOST").unwrap_or_default();

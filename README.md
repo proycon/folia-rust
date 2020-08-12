@@ -111,6 +111,22 @@ if let Some(element) = doc.get_element_by_id("example.s.1.w.1") {
 }
 ```
 
+### Declarations
+
+All annotation types need to be declared in FoLiA, but the library does that for you automatically as long as you don't
+set ``DocumentProperties.autodeclare`` to ``false``. Explicit declarations are done using ``Document.declare()``. Here
+is a simple set-less declaration:
+
+```rust
+doc.declare(folia::AnnotationType::SENTENCE, &None, &None, &None);
+```
+
+Here a more elaborate one:
+
+```rust
+doc.declare(folia::AnnotationType::POS, Some("https://somewhere/my/pos/set".to_string()), &None, &None);
+```
+
 ### Provenance
 
 FoLiA v2 comes with extensive provenance support, so this library implements that as well. You can associate an active
@@ -121,7 +137,8 @@ processor by setting it in ``folia::DocumentProperties``:
     let doc =  Document::new("example", DocumentProperties::default().with_processor(processor)).expect("document");
 ```
 
-Switching processors on-the-fly can be done with ``doc.active_processor(processor_key)``.
+Switching processors on-the-fly can be done with ``doc.active_processor(processor_key)``. Any declarations made after
+activating a processor will automatically assign that processor.
 
 ## Benchmarks
 
