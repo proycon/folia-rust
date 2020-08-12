@@ -508,7 +508,8 @@ impl Processor {
     pub fn autofill(self) -> Processor {
         let host: String = env::var("HOST").unwrap_or_default();
         let user: String = env::var("USER").unwrap_or_default();
-        let command: String = env::args().collect();
+        let args: Vec<String> = env::args().collect();
+        let command: String = args.join(" ");
         let begindatetime: NaiveDateTime = NaiveDateTime::from_timestamp(
             std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).expect("Unable to get time").as_secs() as i64, 0
         );
