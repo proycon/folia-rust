@@ -398,9 +398,13 @@ impl Document {
     ///Add an element to the provenance chain
     ///Returns the key
     pub fn add_processor(&mut self, processor: Processor) -> Result<ProcKey, FoliaError> {
+        let pending_subprocessors: Vec<Processor> = processor.pending_processors.replace(vec!());
         let child_key = self.add(processor, None);
         if let Ok(child_key) = child_key {
             self.provenancestore.chain.push(child_key);
+            for subprocessor in pending_subprocessors {
+                self.add_subprocessor(child_key, subprocessor)?;
+            }
         }
         child_key
     }
@@ -408,9 +412,13 @@ impl Document {
     ///Add a processor as a subprocessor
     ///Returns the key
     pub fn add_subprocessor(&mut self, parent_key: ProcKey, processor: Processor) -> Result<ProcKey, FoliaError> {
+        let pending_subprocessors: Vec<Processor> = processor.pending_processors.replace(vec!());
         let child_key = self.add(processor, None);
         if let Ok(child_key) = child_key {
             self.attach_processor(parent_key, child_key)?;
+            for subprocessor in pending_subprocessors {
+                self.add_subprocessor(child_key, subprocessor)?;
+            }
         }
         child_key
     }

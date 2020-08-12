@@ -3,6 +3,7 @@ use std::fmt;
 use std::borrow::Cow;
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::cell::RefCell;
 use chrono::NaiveDateTime;
 use rand::prelude::*;
 
@@ -377,7 +378,7 @@ pub struct Processor {
     pub metadata: Metadata,
     pub key: Option<ProcKey>,
     ///This field is reserved for construction time only
-    pub pending_processors: Vec<Processor>,
+    pub pending_processors: RefCell<Vec<Processor>>,
 }
 
 impl Processor {
@@ -406,7 +407,7 @@ impl Processor {
             parent: None,
             metadata: Metadata::default(),
             key: None,
-            pending_processors: vec!(),
+            pending_processors: RefCell::new(vec!()),
         }
     }
 
@@ -435,7 +436,7 @@ impl Processor {
             parent: None,
             metadata: Metadata::default(),
             key: None,
-            pending_processors: vec!(),
+            pending_processors: RefCell::new(vec!()),
         }
     }
 
@@ -496,8 +497,11 @@ impl Processor {
         self.processors.push(key);
         self
     }
-    pub fn with_new_subprocessor(mut self, processor: Processor) -> Processor {
-        self.pending_processors.push(processor);
+    pub fn with_new_subprocessor(self, processor: Processor) -> Processor {
+        {
+            let mut pprocs = self.pending_processors.borrow_mut();
+            pprocs.push(processor);
+        }
         self
     }
     ///attempts to automatically fill the processor's fields based on the environment
