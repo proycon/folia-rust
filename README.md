@@ -56,7 +56,7 @@ for word in doc.select(selector, folia::Recursion::Always) {
 }
 ```
 
-We can create a document from scratch, all new elements can be using the high-level ``annotate()`` method:
+We can create a document from scratch, all new elements can be added using the high-level ``annotate()`` method:
 
 ```rust
 let doc = folia::Document::new("example", folia::DocumentProperties::default()).expect("instantiating folia");
@@ -110,6 +110,18 @@ if let Some(element) = doc.get_element_by_id("example.s.1.w.1") {
 
 }
 ```
+
+### Provenance
+
+FoLiA v2 comes with extensive provenance support, so this library implements that as well. You can associate an active
+processor by setting it in ``folia::DocumentProperties``:
+
+```rust
+    let processor = Processor::new("test".to_string()).autofill();
+    let doc =  Document::new("example", DocumentProperties::default().with_processor(processor)).expect("document");
+```
+
+Switching processors on-the-fly can be done with ``doc.active_processor(processor_key)``.
 
 ## Benchmarks
 
