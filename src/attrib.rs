@@ -364,6 +364,9 @@ impl Attribute {
                         _ => Err(FoliaError::ParseError(format!("Invalid space value: '{}'", value)))
                     }
                 },
+                b"typegroup" => { //used for explicit mode, does not need to be parsed
+                    Ok(Attribute::Ignore)
+                },
                 attrib_key => {
                     if attrib_key.contains(&58) { //58 is a colon, we assume alien namespaces and ignore it
                         Ok(Attribute::Ignore)

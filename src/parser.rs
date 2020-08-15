@@ -60,7 +60,8 @@ impl Document {
                                     }
                                     b"version" => {
                                         doc.version = attrib.unescape_and_decode_value(&reader).expect("Parsing version")
-                                    }
+                                    },
+                                    b"generator" | b"form " => {},  //we can ignore these
                                     _ => {}
                                 };
                             }
