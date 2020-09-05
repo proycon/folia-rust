@@ -294,7 +294,7 @@ impl Attribute {
                     Ok(Attribute::Text(value))
                 },
                 b"datetime" => {
-                    match NaiveDateTime::parse_from_str(&value, "%Y-%m-%dT%H:%M:$S") {
+                    match NaiveDateTime::parse_from_str(&value, "%Y-%m-%dT%H:%M:%S") {
                         Ok(dt) => Ok(Attribute::DateTime(dt)),
                         Err(e) => Err(FoliaError::ParseError(format!("Unable to parse datetime {} -> {}",value, e)))
                     }
