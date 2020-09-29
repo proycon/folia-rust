@@ -86,6 +86,7 @@ impl Document {
         let mut parsedeclarations = false;
         let mut parseprovenance = false;
         let mut submetadata: Option<String> = None;
+        let mut submetadata_type: Option<String> = None;
         let mut text: Option<String> = None;
         let mut meta_id: Option<String> = None;
         let mut declaration_key: Option<DecKey> = None;
@@ -161,9 +162,8 @@ impl Document {
                             parseprovenance = true;
                         },
                         (Some(ns), b"submetadata") if ns == NSFOLIA => {
-                            let mut submetadata_type: Option<String> = None;
                             for attrib in e.attributes() {
-                                let attrib = attrib.expect("unwrapping annotator attribute");
+                                let attrib = attrib.expect("unwrapping submetadata attribute");
                                 if let Ok(value) = attrib.unescape_and_decode_value(&reader) {
                                     match attrib.key {
                                         b"xml:id" => {
@@ -264,6 +264,9 @@ impl Document {
                                 if let Some(submetadata_id) = &submetadata {
                                     let submetadata_opt: Option<&mut Metadata> = doc.submetadata.get_mut(submetadata_id);
                                     if let Some(submetadata) = submetadata_opt {
+                                        if submetadata.metadatatype.is_none() && submetadata_type.is_some() {
+                                            submetadata.metadatatype = submetadata_type.clone();
+                                        }
                                         submetadata.data.insert(meta_id.clone(), text.clone());
                                     }
                                 } else {
