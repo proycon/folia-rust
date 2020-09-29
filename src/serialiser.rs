@@ -213,7 +213,7 @@ impl Document {
         let mut last_start: String = "<ROOT>".to_string();
         for item in self.select_data_by_key(root_key,Selector::all_data(),Recursion::Always, true, false) {
             while item.depth < previous_depth {
-                if let Some((end,elementtype,tagstring)) = stack.pop() {
+                if let Some((end,elementtype,_tagstring)) = stack.pop() {
                     writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
                     if !ElementGroup::TextMarkup.contains(elementtype) {
                         writer.write_event(Event::Text(BytesText::from_plain(NL))).map_err(to_serialisation_error)?;
@@ -300,7 +300,7 @@ impl Document {
         }
 
         //don't forget the final closing elements
-        while let Some((end, _elementtype, tagstring)) = stack.pop() {
+        while let Some((end, _elementtype, _tagstring)) = stack.pop() {
             writer.write_event(Event::End(end)).map_err(to_serialisation_error)?;
             //eprintln!("[DEBUG] <-- Popped final end tag {}", tagstring.as_str());
         }

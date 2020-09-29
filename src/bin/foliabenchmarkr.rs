@@ -15,7 +15,7 @@ pub struct Rusage(libc::rusage);
 pub type Errno = os::raw::c_int;
 
 fn get_resource_usage(who: os::raw::c_int) -> Result<libc::rusage, Errno> {
-    let mut data = unsafe { mem::uninitialized() };
+    let mut data = unsafe { mem::MaybeUninit::uninit().assume_init() };
 
     let result = unsafe { libc::getrusage(who, &mut data) };
 
@@ -106,6 +106,7 @@ fn test(test_id: &str, filename: &str) {
             for _element in doc.select(selector, Recursion::Always) {
                 count += 1;
             }
+            println!("{}",count);
             m.end(test_id, filename, "Parse XML from file into full memory representation");
             doc.id(); //just to make sure the compiler doesn't optimise doc away (not sure if needed but better safe than sorry)
         },

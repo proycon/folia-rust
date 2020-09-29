@@ -61,7 +61,6 @@ impl<'a> Element<'a> {
     ///Returns the text content of a given element
     pub fn text_by_key(&self, set: DecKey, textclass: ClassKey, strict: bool, retaintokenisation: bool, previousdelimiter: Option<String>) -> Result<String,FoliaError> {
         let doc = self.document().ok_or(FoliaError::KeyError("Element has no associated document".to_string()))?;
-        let key = self.key().ok_or(FoliaError::KeyError("Element has no key".to_string()))?;
 
         let properties = doc.props(self.elementtype());
 

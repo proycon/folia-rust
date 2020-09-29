@@ -29,7 +29,7 @@ pub trait Storable<Key> {
     }
 
     ///Set the key of the current item (if supported by the item)
-    fn assign_key(&mut self, key: Key) {
+    fn assign_key(&mut self, _key: Key) {
         //does nothing by default, override in implementations
     }
 
@@ -49,7 +49,7 @@ pub trait Store<T,Key> where T: Storable<Key>,
     fn iter(&self) -> std::slice::Iter<Option<Box<T>>>;
     fn index(&self) -> &HashMap<String,Key>;
 
-    fn encode(&mut self, mut item: T, context: Option<Key>) -> Result<T,FoliaError> {
+    fn encode(&mut self, item: T, _context: Option<Key>) -> Result<T,FoliaError> {
        Ok(item) //we assume the item does not need to be decoded by default
     }
 

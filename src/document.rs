@@ -487,7 +487,7 @@ impl Document {
             }
         }
         if let Some(prockey) = self.active_processor {
-            if let Some(mut declaration) = self.get_mut_declaration(declaration_key.expect("get deckey")) {
+            if let Some(declaration) = self.get_mut_declaration(declaration_key.expect("get deckey")) {
                 if !declaration.processors.contains(&prockey) {
                     declaration.processors.push(prockey);
                 }
@@ -826,7 +826,7 @@ impl Store<ElementData,ElementKey> for Document {
 
                         let annotationtype = parent.elementtype.annotationtype().expect(format!("Unwrapping annotation type of parent {}", element.elementtype).as_str() );
                         let deckey = self.declare(annotationtype, &element.set().unwrap().map(|s| s.to_string()),  &None, &None)?;
-                        declaration_key  = Some(deckey);;
+                        declaration_key  = Some(deckey);
 
                         if let Some(declaration) = self.get_mut_declaration(deckey) {
                             if let Ok(Some(class)) = element.class() {

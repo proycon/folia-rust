@@ -78,10 +78,10 @@ impl From<quick_xml::Error> for FoliaError {
     }
 }
 
-impl Error for FoliaError {
-    fn description(&self) -> &str {
+impl FoliaError {
+    fn as_str(&self) -> &str {
         match *self {
-            FoliaError::IoError(ref err) => err.description(),
+            FoliaError::IoError(ref _err) => "IO Error",
             FoliaError::XmlError(ref _err) => "XML Error",
             FoliaError::ParseError(ref _err) => "Parse Error",
             FoliaError::SerialisationError(ref _err) => "Serialisation Error",
@@ -96,6 +96,9 @@ impl Error for FoliaError {
             FoliaError::IndexError => "invalid index",
         }
     }
+}
+
+impl Error for FoliaError {
 
     fn cause(&self)  -> Option<&dyn Error> {
         match *self {
@@ -131,7 +134,7 @@ impl fmt::Display for FoliaError {
             FoliaError::QueryError(ref err) |
             FoliaError::TypeError(ref err) |
             FoliaError::KeyError(ref err) => {
-                write!(f, "[{}] {}", self.description(),  err)
+                write!(f, "[{}] {}", self.as_str(),  err)
             }
             FoliaError::IndexError => fmt::Display::fmt("invalid index", f),
         }
