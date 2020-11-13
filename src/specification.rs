@@ -1456,7 +1456,7 @@ impl Properties {
                 properties.xlink = false;
                 properties.textcontainer = false;
                 properties.phoncontainer = false;
-                properties.subset = Some("modality");
+                properties.subset = Some("mod");
                 properties.auth = true;
                 properties.primaryelement = true;
                 properties.auto_generate_id = false;
