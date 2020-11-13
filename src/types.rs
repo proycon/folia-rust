@@ -675,7 +675,6 @@ impl std::str::FromStr for ElementType {
           "metric" =>  Ok(ElementType::Metric),
           "modalities" =>  Ok(ElementType::ModalitiesLayer),
           "modality" =>  Ok(ElementType::Modality),
-          "modality" =>  Ok(ElementType::ModalityFeature),
           "morpheme" =>  Ok(ElementType::Morpheme),
           "morphology" =>  Ok(ElementType::MorphologyLayer),
           "new" =>  Ok(ElementType::New),
