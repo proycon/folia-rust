@@ -27,7 +27,7 @@ pub type Subset = String;
 #[derive(Copy,Clone,PartialEq,Eq,PartialOrd,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents the type of a FoLiA element.
 //foliaspec:elementtype
-pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
+pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Cue, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalitiesLayer, Modality, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, Scope, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
 #[derive(Copy,Clone,PartialEq,Debug,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents groups of element types that share similar characteristics.
@@ -39,13 +39,13 @@ impl ElementGroup {
     pub fn elementtypes(&self) -> &'static [ElementType] {
         //foliaspec:elementgroup_elementtypes_map(self)
         match self {
-            ElementGroup::Layer => &[ElementType::ChunkingLayer,ElementType::SpanRelationLayer,ElementType::CoreferenceLayer,ElementType::DependenciesLayer,ElementType::EntitiesLayer,ElementType::MorphologyLayer,ElementType::ObservationLayer,ElementType::PhonologyLayer,ElementType::SemanticRolesLayer,ElementType::SentimentLayer,ElementType::StatementLayer,ElementType::SyntaxLayer,ElementType::TimingLayer],
+            ElementGroup::Layer => &[ElementType::ChunkingLayer,ElementType::SpanRelationLayer,ElementType::CoreferenceLayer,ElementType::DependenciesLayer,ElementType::EntitiesLayer,ElementType::MorphologyLayer,ElementType::ObservationLayer,ElementType::PhonologyLayer,ElementType::SemanticRolesLayer,ElementType::SentimentLayer,ElementType::StatementLayer,ElementType::SyntaxLayer,ElementType::TimingLayer,ElementType::ModalitiesLayer],
             ElementGroup::Content => &[ElementType::TextContent,ElementType::PhonContent,ElementType::Content],
             ElementGroup::CorrectionChild => &[ElementType::Current,ElementType::New,ElementType::Original,ElementType::Suggestion],
             ElementGroup::HigherOrder => &[ElementType::Relation,ElementType::Alternative,ElementType::AlternativeLayers,ElementType::SpanRelation,ElementType::Correction,ElementType::Comment,ElementType::Description,ElementType::External,ElementType::Feature,ElementType::Metric,ElementType::String,ElementType::ForeignData,ElementType::Gap],
             ElementGroup::Inline => &[ElementType::DomainAnnotation,ElementType::ErrorDetection,ElementType::LangAnnotation,ElementType::LemmaAnnotation,ElementType::PosAnnotation,ElementType::SenseAnnotation,ElementType::SubjectivityAnnotation],
-            ElementGroup::Span => &[ElementType::Chunk,ElementType::CoreferenceChain,ElementType::Dependency,ElementType::Entity,ElementType::Observation,ElementType::Predicate,ElementType::SemanticRole,ElementType::Sentiment,ElementType::Statement,ElementType::SyntacticUnit,ElementType::TimeSegment],
-            ElementGroup::SpanRole => &[ElementType::CoreferenceLink,ElementType::DependencyDependent,ElementType::Headspan,ElementType::StatementRelation,ElementType::Source,ElementType::Target],
+            ElementGroup::Span => &[ElementType::Chunk,ElementType::CoreferenceChain,ElementType::Modality,ElementType::Dependency,ElementType::Entity,ElementType::Observation,ElementType::Predicate,ElementType::SemanticRole,ElementType::Sentiment,ElementType::Statement,ElementType::SyntacticUnit,ElementType::TimeSegment],
+            ElementGroup::SpanRole => &[ElementType::CoreferenceLink,ElementType::DependencyDependent,ElementType::Headspan,ElementType::StatementRelation,ElementType::Source,ElementType::Target,ElementType::Cue,ElementType::Scope],
             ElementGroup::Structure => &[ElementType::Caption,ElementType::Cell,ElementType::Definition,ElementType::Division,ElementType::Entry,ElementType::Event,ElementType::Example,ElementType::Figure,ElementType::Head,ElementType::Hiddenword,ElementType::Label,ElementType::Linebreak,ElementType::List,ElementType::ListItem,ElementType::Note,ElementType::Paragraph,ElementType::Part,ElementType::Quote,ElementType::Reference,ElementType::Row,ElementType::Sentence,ElementType::Speech,ElementType::Table,ElementType::TableHead,ElementType::Term,ElementType::Text,ElementType::Utterance,ElementType::Whitespace,ElementType::Word],
             ElementGroup::Subtoken => &[ElementType::Morpheme,ElementType::Phoneme],
             ElementGroup::TextMarkup => &[ElementType::TextMarkupCorrection,ElementType::TextMarkupError,ElementType::TextMarkupGap,ElementType::TextMarkupString,ElementType::TextMarkupStyle,ElementType::Hyphbreak,ElementType::TextMarkupReference],
@@ -65,7 +65,7 @@ impl ElementGroup {
 ///Defines all annotation types (as part of the AnnotationType enumeration)
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)
-pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN }
+pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN, MODALITY }
 
 impl AnnotationType {
     ///Maps annotation types to strings
@@ -99,6 +99,7 @@ impl AnnotationType {
           AnnotationType::LINEBREAK => "linebreak",
           AnnotationType::LIST => "list",
           AnnotationType::METRIC => "metric",
+          AnnotationType::MODALITY => "modality",
           AnnotationType::MORPHOLOGICAL => "morphological",
           AnnotationType::NOTE => "note",
           AnnotationType::OBSERVATION => "observation",
@@ -162,6 +163,7 @@ impl AnnotationType {
             "linebreak" => Some(AnnotationType::LINEBREAK),
             "list" => Some(AnnotationType::LIST),
             "metric" => Some(AnnotationType::METRIC),
+            "modality" => Some(AnnotationType::MODALITY),
             "morphological" => Some(AnnotationType::MORPHOLOGICAL),
             "note" => Some(AnnotationType::NOTE),
             "observation" => Some(AnnotationType::OBSERVATION),
@@ -226,6 +228,7 @@ impl AnnotationType {
           AnnotationType::LINEBREAK => "br",
           AnnotationType::LIST => "list",
           AnnotationType::METRIC => "metric",
+          AnnotationType::MODALITY => "modality",
           AnnotationType::MORPHOLOGICAL => "morpheme",
           AnnotationType::NOTE => "note",
           AnnotationType::OBSERVATION => "observation",
@@ -267,6 +270,7 @@ impl AnnotationType {
             AnnotationType::COREFERENCE => Some(ElementType::CoreferenceLayer),
             AnnotationType::DEPENDENCY => Some(ElementType::DependenciesLayer),
             AnnotationType::ENTITY => Some(ElementType::EntitiesLayer),
+            AnnotationType::MODALITY => Some(ElementType::ModalitiesLayer),
             AnnotationType::MORPHOLOGICAL => Some(ElementType::MorphologyLayer),
             AnnotationType::OBSERVATION => Some(ElementType::ObservationLayer),
             AnnotationType::PHONOLOGICAL => Some(ElementType::PhonologyLayer),
@@ -329,6 +333,7 @@ impl AnnotationType {
             AnnotationType::LINEBREAK => ElementType::Linebreak,
             AnnotationType::LIST => ElementType::List,
             AnnotationType::METRIC => ElementType::Metric,
+            AnnotationType::MODALITY => ElementType::Modality,
             AnnotationType::MORPHOLOGICAL => ElementType::Morpheme,
             AnnotationType::NOTE => ElementType::Note,
             AnnotationType::OBSERVATION => ElementType::Observation,
@@ -402,6 +407,8 @@ impl ElementType {
             ElementType::Linebreak => Some(AnnotationType::LINEBREAK),
             ElementType::List => Some(AnnotationType::LIST),
             ElementType::Metric => Some(AnnotationType::METRIC),
+            ElementType::ModalitiesLayer => Some(AnnotationType::MODALITY),
+            ElementType::Modality => Some(AnnotationType::MODALITY),
             ElementType::Morpheme => Some(AnnotationType::MORPHOLOGICAL),
             ElementType::MorphologyLayer => Some(AnnotationType::MORPHOLOGICAL),
             ElementType::New => Some(AnnotationType::CORRECTION),
@@ -477,6 +484,7 @@ impl ElementType {
           ElementType::CoreferenceLayer => "coreferences",
           ElementType::CoreferenceLink => "coreferencelink",
           ElementType::Correction => "correction",
+          ElementType::Cue => "cue",
           ElementType::Current => "current",
           ElementType::Definition => "def",
           ElementType::DependenciesLayer => "dependencies",
@@ -512,6 +520,8 @@ impl ElementType {
           ElementType::List => "list",
           ElementType::ListItem => "item",
           ElementType::Metric => "metric",
+          ElementType::ModalitiesLayer => "modalities",
+          ElementType::Modality => "modality",
           ElementType::ModalityFeature => "modality",
           ElementType::Morpheme => "morpheme",
           ElementType::MorphologyLayer => "morphology",
@@ -532,6 +542,7 @@ impl ElementType {
           ElementType::Reference => "ref",
           ElementType::Relation => "relation",
           ElementType::Row => "row",
+          ElementType::Scope => "scope",
           ElementType::SemanticRole => "semrole",
           ElementType::SemanticRolesLayer => "semroles",
           ElementType::SenseAnnotation => "sense",
@@ -626,6 +637,7 @@ impl std::str::FromStr for ElementType {
           "coreferences" =>  Ok(ElementType::CoreferenceLayer),
           "coreferencelink" =>  Ok(ElementType::CoreferenceLink),
           "correction" =>  Ok(ElementType::Correction),
+          "cue" =>  Ok(ElementType::Cue),
           "current" =>  Ok(ElementType::Current),
           "def" =>  Ok(ElementType::Definition),
           "dependencies" =>  Ok(ElementType::DependenciesLayer),
@@ -661,6 +673,8 @@ impl std::str::FromStr for ElementType {
           "list" =>  Ok(ElementType::List),
           "item" =>  Ok(ElementType::ListItem),
           "metric" =>  Ok(ElementType::Metric),
+          "modalities" =>  Ok(ElementType::ModalitiesLayer),
+          "modality" =>  Ok(ElementType::Modality),
           "modality" =>  Ok(ElementType::ModalityFeature),
           "morpheme" =>  Ok(ElementType::Morpheme),
           "morphology" =>  Ok(ElementType::MorphologyLayer),
@@ -681,6 +695,7 @@ impl std::str::FromStr for ElementType {
           "ref" =>  Ok(ElementType::Reference),
           "relation" =>  Ok(ElementType::Relation),
           "row" =>  Ok(ElementType::Row),
+          "scope" =>  Ok(ElementType::Scope),
           "semrole" =>  Ok(ElementType::SemanticRole),
           "semroles" =>  Ok(ElementType::SemanticRolesLayer),
           "sense" =>  Ok(ElementType::SenseAnnotation),

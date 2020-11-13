@@ -457,6 +457,32 @@ impl Properties {
                 properties.label = "Correction";
                 properties
             },
+            ElementType::Cue => {
+                let mut properties = Properties::default();
+                properties.xmltag = "cue";
+                properties.annotationtype = None;
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.occurrences = 1;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = None;
+                properties.printable = true;
+                properties.speakable = true;
+                properties.hidden = false;
+                properties.xlink = false;
+                properties.textcontainer = false;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = false;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties.label = "Cue";
+                properties
+            },
             ElementType::Current => {
                 let mut properties = Properties::default();
                 properties.xmltag = "current";
@@ -1362,6 +1388,57 @@ impl Properties {
                 properties.label = "Metric";
                 properties
             },
+            ElementType::ModalitiesLayer => {
+                let mut properties = Properties::default();
+                properties.xmltag = "modalities";
+                properties.annotationtype = Some(AnnotationType::MODALITY);
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Modality)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ID ];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = None;
+                properties.printable = false;
+                properties.speakable = false;
+                properties.hidden = false;
+                properties.xlink = false;
+                properties.textcontainer = false;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = false;
+                properties.auto_generate_id = false;
+                properties.setonly = true;
+                properties.wrefable = false;
+                properties
+            },
+            ElementType::Modality => {
+                let mut properties = Properties::default();
+                properties.xmltag = "modality";
+                properties.annotationtype = Some(AnnotationType::MODALITY);
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Cue), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Scope), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::Target)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = None;
+                properties.printable = true;
+                properties.speakable = true;
+                properties.hidden = false;
+                properties.xlink = false;
+                properties.textcontainer = false;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = true;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties.label = "Modality";
+                properties
+            },
             ElementType::ModalityFeature => {
                 let mut properties = Properties::default();
                 properties.xmltag = "";
@@ -1875,6 +1952,32 @@ impl Properties {
                 properties.setonly = false;
                 properties.wrefable = false;
                 properties.label = "Table Row";
+                properties
+            },
+            ElementType::Scope => {
+                let mut properties = Properties::default();
+                properties.xmltag = "scope";
+                properties.annotationtype = None;
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Cue), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::Target), AcceptedData::AcceptElementType(ElementType::WordReference)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.occurrences = 1;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = None;
+                properties.printable = true;
+                properties.speakable = true;
+                properties.hidden = false;
+                properties.xlink = false;
+                properties.textcontainer = false;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = false;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties.label = "Scope";
                 properties
             },
             ElementType::SemanticRole => {
