@@ -65,7 +65,7 @@ impl ElementGroup {
 ///Defines all annotation types (as part of the AnnotationType enumeration)
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)
-pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN, MODALITY }
+pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN, MODALITY, EXTERNAL }
 
 impl AnnotationType {
     ///Maps annotation types to strings
@@ -89,6 +89,7 @@ impl AnnotationType {
           AnnotationType::ERRORDETECTION => "errordetection",
           AnnotationType::EVENT => "event",
           AnnotationType::EXAMPLE => "example",
+          AnnotationType::EXTERNAL => "external",
           AnnotationType::FIGURE => "figure",
           AnnotationType::GAP => "gap",
           AnnotationType::HEAD => "head",
@@ -153,6 +154,7 @@ impl AnnotationType {
             "errordetection" => Some(AnnotationType::ERRORDETECTION),
             "event" => Some(AnnotationType::EVENT),
             "example" => Some(AnnotationType::EXAMPLE),
+            "external" => Some(AnnotationType::EXTERNAL),
             "figure" => Some(AnnotationType::FIGURE),
             "gap" => Some(AnnotationType::GAP),
             "head" => Some(AnnotationType::HEAD),
@@ -218,6 +220,7 @@ impl AnnotationType {
           AnnotationType::ERRORDETECTION => "errordetection",
           AnnotationType::EVENT => "event",
           AnnotationType::EXAMPLE => "ex",
+          AnnotationType::EXTERNAL => "external",
           AnnotationType::FIGURE => "figure",
           AnnotationType::GAP => "gap",
           AnnotationType::HEAD => "head",
@@ -323,6 +326,7 @@ impl AnnotationType {
             AnnotationType::ERRORDETECTION => ElementType::ErrorDetection,
             AnnotationType::EVENT => ElementType::Event,
             AnnotationType::EXAMPLE => ElementType::Example,
+            AnnotationType::EXTERNAL => ElementType::External,
             AnnotationType::FIGURE => ElementType::Figure,
             AnnotationType::GAP => ElementType::Gap,
             AnnotationType::HEAD => ElementType::Head,
@@ -397,6 +401,7 @@ impl ElementType {
             ElementType::ErrorDetection => Some(AnnotationType::ERRORDETECTION),
             ElementType::Event => Some(AnnotationType::EVENT),
             ElementType::Example => Some(AnnotationType::EXAMPLE),
+            ElementType::External => Some(AnnotationType::EXTERNAL),
             ElementType::Figure => Some(AnnotationType::FIGURE),
             ElementType::Gap => Some(AnnotationType::GAP),
             ElementType::Head => Some(AnnotationType::HEAD),
