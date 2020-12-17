@@ -948,6 +948,32 @@ impl Properties {
                 properties.label = "Figure";
                 properties
             },
+            ElementType::FontFeature => {
+                let mut properties = Properties::default();
+                properties.xmltag = "";
+                properties.annotationtype = None;
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = None;
+                properties.printable = false;
+                properties.speakable = false;
+                properties.hidden = false;
+                properties.xlink = false;
+                properties.textcontainer = false;
+                properties.phoncontainer = false;
+                properties.subset = Some("font");
+                properties.auth = true;
+                properties.primaryelement = true;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties.label = "Feature";
+                properties
+            },
             ElementType::ForeignData => {
                 let mut properties = Properties::default();
                 properties.xmltag = "foreign-data";
@@ -1133,7 +1159,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-hbr";
                 properties.annotationtype = Some(AnnotationType::HYPHENATION);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -2134,6 +2160,32 @@ impl Properties {
                 properties.wrefable = false;
                 properties
             },
+            ElementType::SizeFeature => {
+                let mut properties = Properties::default();
+                properties.xmltag = "";
+                properties.annotationtype = None;
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = None;
+                properties.printable = false;
+                properties.speakable = false;
+                properties.hidden = false;
+                properties.xlink = false;
+                properties.textcontainer = false;
+                properties.phoncontainer = false;
+                properties.subset = Some("size");
+                properties.auth = true;
+                properties.primaryelement = true;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties.label = "Feature";
+                properties
+            },
             ElementType::Source => {
                 let mut properties = Properties::default();
                 properties.xmltag = "source";
@@ -2680,7 +2732,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-correction";
                 properties.annotationtype = Some(AnnotationType::CORRECTION);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -2705,7 +2757,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-error";
                 properties.annotationtype = Some(AnnotationType::ERRORDETECTION);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -2730,7 +2782,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-gap";
                 properties.annotationtype = Some(AnnotationType::GAP);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -2755,7 +2807,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-ref";
                 properties.annotationtype = Some(AnnotationType::REFERENCE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -2780,7 +2832,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-str";
                 properties.annotationtype = Some(AnnotationType::STRING);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
@@ -2805,7 +2857,7 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t-style";
                 properties.annotationtype = Some(AnnotationType::STYLE);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::FontFeature), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::SizeFeature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
                 properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];

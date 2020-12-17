@@ -27,7 +27,7 @@ pub type Subset = String;
 #[derive(Copy,Clone,PartialEq,Eq,PartialOrd,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents the type of a FoLiA element.
 //foliaspec:elementtype
-pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Cue, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalitiesLayer, Modality, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, Scope, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
+pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Cue, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, FontFeature, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalitiesLayer, Modality, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, Scope, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, SizeFeature, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
 #[derive(Copy,Clone,PartialEq,Debug,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents groups of element types that share similar characteristics.
@@ -49,7 +49,7 @@ impl ElementGroup {
             ElementGroup::Structure => &[ElementType::Caption,ElementType::Cell,ElementType::Definition,ElementType::Division,ElementType::Entry,ElementType::Event,ElementType::Example,ElementType::Figure,ElementType::Head,ElementType::Hiddenword,ElementType::Label,ElementType::Linebreak,ElementType::List,ElementType::ListItem,ElementType::Note,ElementType::Paragraph,ElementType::Part,ElementType::Quote,ElementType::Reference,ElementType::Row,ElementType::Sentence,ElementType::Speech,ElementType::Table,ElementType::TableHead,ElementType::Term,ElementType::Text,ElementType::Utterance,ElementType::Whitespace,ElementType::Word],
             ElementGroup::Subtoken => &[ElementType::Morpheme,ElementType::Phoneme],
             ElementGroup::TextMarkup => &[ElementType::TextMarkupCorrection,ElementType::TextMarkupError,ElementType::TextMarkupGap,ElementType::TextMarkupString,ElementType::TextMarkupStyle,ElementType::Hyphbreak,ElementType::TextMarkupReference],
-            ElementGroup::Feature => &[ElementType::ActorFeature,ElementType::BegindatetimeFeature,ElementType::EnddatetimeFeature,ElementType::FunctionFeature,ElementType::HeadFeature,ElementType::LevelFeature,ElementType::ModalityFeature,ElementType::PolarityFeature,ElementType::StrengthFeature,ElementType::StyleFeature,ElementType::SynsetFeature,ElementType::TimeFeature,ElementType::ValueFeature],
+            ElementGroup::Feature => &[ElementType::ActorFeature,ElementType::BegindatetimeFeature,ElementType::EnddatetimeFeature,ElementType::FunctionFeature,ElementType::HeadFeature,ElementType::LevelFeature,ElementType::ModalityFeature,ElementType::PolarityFeature,ElementType::StrengthFeature,ElementType::StyleFeature,ElementType::SynsetFeature,ElementType::TimeFeature,ElementType::ValueFeature,ElementType::FontFeature,ElementType::SizeFeature],
         }
 
         //leave the above line empty for foliaspec to detect the end!
@@ -508,6 +508,7 @@ impl ElementType {
           ElementType::External => "external",
           ElementType::Feature => "feat",
           ElementType::Figure => "figure",
+          ElementType::FontFeature => "font",
           ElementType::ForeignData => "foreign-data",
           ElementType::FunctionFeature => "function",
           ElementType::Gap => "gap",
@@ -554,6 +555,7 @@ impl ElementType {
           ElementType::Sentence => "s",
           ElementType::Sentiment => "sentiment",
           ElementType::SentimentLayer => "sentiments",
+          ElementType::SizeFeature => "size",
           ElementType::Source => "source",
           ElementType::SpanRelation => "spanrelation",
           ElementType::SpanRelationLayer => "spanrelations",
@@ -661,6 +663,7 @@ impl std::str::FromStr for ElementType {
           "external" =>  Ok(ElementType::External),
           "feat" =>  Ok(ElementType::Feature),
           "figure" =>  Ok(ElementType::Figure),
+          "font" =>  Ok(ElementType::FontFeature),
           "foreign-data" =>  Ok(ElementType::ForeignData),
           "function" =>  Ok(ElementType::FunctionFeature),
           "gap" =>  Ok(ElementType::Gap),
@@ -707,6 +710,7 @@ impl std::str::FromStr for ElementType {
           "s" =>  Ok(ElementType::Sentence),
           "sentiment" =>  Ok(ElementType::Sentiment),
           "sentiments" =>  Ok(ElementType::SentimentLayer),
+          "size" =>  Ok(ElementType::SizeFeature),
           "source" =>  Ok(ElementType::Source),
           "spanrelation" =>  Ok(ElementType::SpanRelation),
           "spanrelations" =>  Ok(ElementType::SpanRelationLayer),
