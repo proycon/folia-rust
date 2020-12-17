@@ -1,6 +1,6 @@
 [package]
 name = "folia"
-version = "0.0.6"
+version = "0.0.7"
 description = "High-performance library for handling the FoLiA XML format (Format for Linguistic Annotation)"
 authors = ["Maarten van Gompel <proycon@anaproy.nl>"]
 homepage = "https://proycon.github.io/folia"
