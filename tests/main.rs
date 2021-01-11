@@ -229,7 +229,7 @@ fn test002_add_element_to() {
             let sentence = doc.add_element_to(root,
                                               ElementData::new(ElementType::Sentence)
                                               .with_attrib(Attribute::Id("s.1".to_string()))
-                                              ).expect("Addubg sentence");
+                                              ).expect("Adding sentence");
 
             let word1 = doc.add_element_to(sentence,
                                ElementData::new(ElementType::Word)
