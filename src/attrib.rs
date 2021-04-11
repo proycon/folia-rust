@@ -19,7 +19,7 @@ use crate::store::*;
 #[derive(Debug,Copy,Clone,PartialEq)]
 ///Attribute Type
 pub enum AttribType { //not from foliaspec because we add more individual attributes that are not grouped together like in the specification
-    NONE, ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF, ORIGINAL, LINENR, PAGENR, NEWPAGE, XLINKTYPE
+    NONE, ID, SET, CLASS, ANNOTATOR, ANNOTATORTYPE, CONFIDENCE, N, DATETIME, BEGINTIME, ENDTIME, SRC, SPEAKER, TEXTCLASS, METADATA, IDREF, SPACE, PROCESSOR, HREF, FORMAT, SUBSET, TEXT, TYPE, AUTH, OFFSET, REF, ORIGINAL, LINENR, PAGENR, NEWPAGE, XLINKTYPE, TAG
 }
 
 impl Into<&str> for AttribType {
@@ -57,6 +57,7 @@ impl Into<&str> for AttribType {
             AttribType::NEWPAGE => "newpage",
             AttribType::ORIGINAL => "original",
             AttribType::XLINKTYPE => "xlink:type",
+            AttribType::TAG => "tag",
         }
     }
 }

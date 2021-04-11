@@ -27,7 +27,7 @@ pub type Subset = String;
 #[derive(Copy,Clone,PartialEq,Eq,PartialOrd,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents the type of a FoLiA element.
 //foliaspec:elementtype
-pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Cue, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, FontFeature, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalitiesLayer, Modality, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, Scope, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, SizeFeature, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupReference, TextMarkupString, TextMarkupStyle, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
+pub enum ElementType { ActorFeature, Alternative, AlternativeLayers, BegindatetimeFeature, Caption, Cell, Chunk, ChunkingLayer, Comment, Content, CoreferenceChain, CoreferenceLayer, CoreferenceLink, Correction, Cue, Current, Definition, DependenciesLayer, Dependency, DependencyDependent, Description, Division, DomainAnnotation, EnddatetimeFeature, EntitiesLayer, Entity, Entry, ErrorDetection, Event, Example, External, Feature, Figure, FontFeature, ForeignData, FunctionFeature, Gap, Head, HeadFeature, Headspan, Hiddenword, Hyphbreak, Label, LangAnnotation, LemmaAnnotation, LevelFeature, Linebreak, LinkReference, List, ListItem, Metric, ModalitiesLayer, Modality, ModalityFeature, Morpheme, MorphologyLayer, New, Note, Observation, ObservationLayer, Original, Paragraph, Part, PhonContent, Phoneme, PhonologyLayer, PolarityFeature, PosAnnotation, Predicate, Quote, Reference, Relation, Row, Scope, SemanticRole, SemanticRolesLayer, SenseAnnotation, Sentence, Sentiment, SentimentLayer, SizeFeature, Source, SpanRelation, SpanRelationLayer, Speech, Statement, StatementLayer, StatementRelation, StrengthFeature, String, StyleFeature, SubjectivityAnnotation, Suggestion, SynsetFeature, SyntacticUnit, SyntaxLayer, Table, TableHead, Target, Term, Text, TextContent, TextMarkupCorrection, TextMarkupError, TextMarkupGap, TextMarkupHSpace, TextMarkupLanguage, TextMarkupReference, TextMarkupString, TextMarkupStyle, TextMarkupWhitespace, TimeFeature, TimeSegment, TimingLayer, Utterance, ValueFeature, Whitespace, Word, WordReference }
 
 #[derive(Copy,Clone,PartialEq,Debug,Hash,EnumIter,Serialize,Deserialize)]
 ///This represents groups of element types that share similar characteristics.
@@ -48,7 +48,7 @@ impl ElementGroup {
             ElementGroup::SpanRole => &[ElementType::CoreferenceLink,ElementType::DependencyDependent,ElementType::Headspan,ElementType::StatementRelation,ElementType::Source,ElementType::Target,ElementType::Cue,ElementType::Scope],
             ElementGroup::Structure => &[ElementType::Caption,ElementType::Cell,ElementType::Definition,ElementType::Division,ElementType::Entry,ElementType::Event,ElementType::Example,ElementType::Figure,ElementType::Head,ElementType::Hiddenword,ElementType::Label,ElementType::Linebreak,ElementType::List,ElementType::ListItem,ElementType::Note,ElementType::Paragraph,ElementType::Part,ElementType::Quote,ElementType::Reference,ElementType::Row,ElementType::Sentence,ElementType::Speech,ElementType::Table,ElementType::TableHead,ElementType::Term,ElementType::Text,ElementType::Utterance,ElementType::Whitespace,ElementType::Word],
             ElementGroup::Subtoken => &[ElementType::Morpheme,ElementType::Phoneme],
-            ElementGroup::TextMarkup => &[ElementType::TextMarkupCorrection,ElementType::TextMarkupError,ElementType::TextMarkupGap,ElementType::TextMarkupString,ElementType::TextMarkupStyle,ElementType::Hyphbreak,ElementType::TextMarkupReference],
+            ElementGroup::TextMarkup => &[ElementType::TextMarkupCorrection,ElementType::TextMarkupError,ElementType::TextMarkupGap,ElementType::TextMarkupString,ElementType::TextMarkupStyle,ElementType::Hyphbreak,ElementType::TextMarkupReference,ElementType::TextMarkupWhitespace,ElementType::TextMarkupHSpace,ElementType::TextMarkupLanguage],
             ElementGroup::Feature => &[ElementType::ActorFeature,ElementType::BegindatetimeFeature,ElementType::EnddatetimeFeature,ElementType::FunctionFeature,ElementType::HeadFeature,ElementType::LevelFeature,ElementType::ModalityFeature,ElementType::PolarityFeature,ElementType::StrengthFeature,ElementType::StyleFeature,ElementType::SynsetFeature,ElementType::TimeFeature,ElementType::ValueFeature,ElementType::FontFeature,ElementType::SizeFeature],
         }
 
@@ -65,7 +65,7 @@ impl ElementGroup {
 ///Defines all annotation types (as part of the AnnotationType enumeration)
 //foliaspec:annotationtype
 //Defines all annotation types (as part of the AnnotationType enumeration)
-pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN, MODALITY, EXTERNAL }
+pub enum AnnotationType { TEXT, TOKEN, DIVISION, PARAGRAPH, HEAD, LIST, FIGURE, WHITESPACE, LINEBREAK, SENTENCE, POS, LEMMA, DOMAIN, SENSE, SYNTAX, CHUNKING, ENTITY, CORRECTION, ERRORDETECTION, PHON, SUBJECTIVITY, MORPHOLOGICAL, EVENT, DEPENDENCY, TIMESEGMENT, GAP, QUOTE, NOTE, REFERENCE, RELATION, SPANRELATION, COREFERENCE, SEMROLE, METRIC, LANG, STRING, TABLE, STYLE, PART, UTTERANCE, ENTRY, TERM, DEFINITION, EXAMPLE, PHONOLOGICAL, PREDICATE, OBSERVATION, SENTIMENT, STATEMENT, ALTERNATIVE, RAWCONTENT, COMMENT, DESCRIPTION, HYPHENATION, HIDDENTOKEN, MODALITY, EXTERNAL, HSPACE }
 
 impl AnnotationType {
     ///Maps annotation types to strings
@@ -125,10 +125,11 @@ impl AnnotationType {
           AnnotationType::TABLE => "table",
           AnnotationType::TERM => "term",
           AnnotationType::TEXT => "text",
+          AnnotationType::HSPACE => "hspace",
           AnnotationType::STYLE => "style",
+          AnnotationType::WHITESPACE => "whitespace",
           AnnotationType::TIMESEGMENT => "timesegment",
           AnnotationType::UTTERANCE => "utterance",
-          AnnotationType::WHITESPACE => "whitespace",
           AnnotationType::TOKEN => "token",
         }
 
@@ -190,10 +191,11 @@ impl AnnotationType {
             "table" => Some(AnnotationType::TABLE),
             "term" => Some(AnnotationType::TERM),
             "text" => Some(AnnotationType::TEXT),
+            "hspace" => Some(AnnotationType::HSPACE),
             "style" => Some(AnnotationType::STYLE),
+            "whitespace" => Some(AnnotationType::WHITESPACE),
             "timesegment" => Some(AnnotationType::TIMESEGMENT),
             "utterance" => Some(AnnotationType::UTTERANCE),
-            "whitespace" => Some(AnnotationType::WHITESPACE),
             "token" => Some(AnnotationType::TOKEN),
             _ => None
         }
@@ -256,6 +258,7 @@ impl AnnotationType {
           AnnotationType::TABLE => "table",
           AnnotationType::TERM => "term",
           AnnotationType::TEXT => "t",
+          AnnotationType::HSPACE => "t-hspace",
           AnnotationType::STYLE => "t-style",
           AnnotationType::TIMESEGMENT => "timesegment",
           AnnotationType::UTTERANCE => "utt",
@@ -362,6 +365,7 @@ impl AnnotationType {
             AnnotationType::TABLE => ElementType::Table,
             AnnotationType::TERM => ElementType::Term,
             AnnotationType::TEXT => ElementType::TextContent,
+            AnnotationType::HSPACE => ElementType::TextMarkupHSpace,
             AnnotationType::STYLE => ElementType::TextMarkupStyle,
             AnnotationType::TIMESEGMENT => ElementType::TimeSegment,
             AnnotationType::UTTERANCE => ElementType::Utterance,
@@ -452,9 +456,12 @@ impl ElementType {
             ElementType::TextMarkupCorrection => Some(AnnotationType::CORRECTION),
             ElementType::TextMarkupError => Some(AnnotationType::ERRORDETECTION),
             ElementType::TextMarkupGap => Some(AnnotationType::GAP),
+            ElementType::TextMarkupHSpace => Some(AnnotationType::HSPACE),
+            ElementType::TextMarkupLanguage => Some(AnnotationType::LANG),
             ElementType::TextMarkupReference => Some(AnnotationType::REFERENCE),
             ElementType::TextMarkupString => Some(AnnotationType::STRING),
             ElementType::TextMarkupStyle => Some(AnnotationType::STYLE),
+            ElementType::TextMarkupWhitespace => Some(AnnotationType::WHITESPACE),
             ElementType::TimeSegment => Some(AnnotationType::TIMESEGMENT),
             ElementType::TimingLayer => Some(AnnotationType::TIMESEGMENT),
             ElementType::Utterance => Some(AnnotationType::UTTERANCE),
@@ -580,9 +587,12 @@ impl ElementType {
           ElementType::TextMarkupCorrection => "t-correction",
           ElementType::TextMarkupError => "t-error",
           ElementType::TextMarkupGap => "t-gap",
+          ElementType::TextMarkupHSpace => "t-hspace",
+          ElementType::TextMarkupLanguage => "t-lang",
           ElementType::TextMarkupReference => "t-ref",
           ElementType::TextMarkupString => "t-str",
           ElementType::TextMarkupStyle => "t-style",
+          ElementType::TextMarkupWhitespace => "t-whitespace",
           ElementType::TimeFeature => "time",
           ElementType::TimeSegment => "timesegment",
           ElementType::TimingLayer => "timing",
@@ -735,9 +745,12 @@ impl std::str::FromStr for ElementType {
           "t-correction" =>  Ok(ElementType::TextMarkupCorrection),
           "t-error" =>  Ok(ElementType::TextMarkupError),
           "t-gap" =>  Ok(ElementType::TextMarkupGap),
+          "t-hspace" =>  Ok(ElementType::TextMarkupHSpace),
+          "t-lang" =>  Ok(ElementType::TextMarkupLanguage),
           "t-ref" =>  Ok(ElementType::TextMarkupReference),
           "t-str" =>  Ok(ElementType::TextMarkupString),
           "t-style" =>  Ok(ElementType::TextMarkupStyle),
+          "t-whitespace" =>  Ok(ElementType::TextMarkupWhitespace),
           "time" =>  Ok(ElementType::TimeFeature),
           "timesegment" =>  Ok(ElementType::TimeSegment),
           "timing" =>  Ok(ElementType::TimingLayer),

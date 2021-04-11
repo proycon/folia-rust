@@ -128,7 +128,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::MorphologyLayer), AcceptedData::AcceptElementType(ElementType::PhonologyLayer)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -154,7 +154,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -206,7 +206,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -232,7 +232,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" | ");
@@ -258,7 +258,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -284,7 +284,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Chunk), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -309,7 +309,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::METADATA,AttribType::N ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -335,7 +335,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA,AttribType::TAG ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -361,7 +361,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::CoreferenceLink), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[AcceptedData::AcceptElementType(ElementType::CoreferenceLink)];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -387,7 +387,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::CoreferenceChain), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -412,7 +412,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LevelFeature), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::ModalityFeature), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::TimeFeature), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -438,7 +438,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Current), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ErrorDetection), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::New), AcceptedData::AcceptElementType(ElementType::Original), AcceptedData::AcceptElementType(ElementType::Suggestion)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -464,7 +464,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -490,7 +490,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -515,7 +515,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -541,7 +541,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Dependency), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -566,7 +566,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::DependencyDependent), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[AcceptedData::AcceptElementType(ElementType::DependencyDependent), AcceptedData::AcceptElementType(ElementType::Headspan)];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -592,7 +592,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -618,7 +618,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::METADATA,AttribType::N ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -644,7 +644,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n\n");
@@ -670,7 +670,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -722,7 +722,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entity), AcceptedData::AcceptElementType(ElementType::ForeignData)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -747,7 +747,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -773,7 +773,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Definition), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Term), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -799,7 +799,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -825,7 +825,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::ActorFeature), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::BegindatetimeFeature), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::EnddatetimeFeature), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -851,7 +851,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -877,7 +877,7 @@ impl Properties {
                 properties.accepted_data = &[];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::SRC ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -929,7 +929,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Caption), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1032,7 +1032,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Content), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1058,7 +1058,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1110,7 +1110,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1136,7 +1136,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -1162,7 +1162,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -1188,7 +1188,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1214,7 +1214,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 1;
                 properties.textdelimiter = None;
@@ -1240,7 +1240,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 1;
                 properties.textdelimiter = None;
@@ -1292,7 +1292,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -1318,7 +1318,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::IDREF ];
+                properties.optional_attribs = &[ AttribType::IDREF,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1343,7 +1343,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Caption), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::ListItem), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1369,7 +1369,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Label), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n");
@@ -1395,7 +1395,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::ValueFeature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1421,7 +1421,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Modality)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1446,7 +1446,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Cue), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PolarityFeature), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Scope), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::StrengthFeature), AcceptedData::AcceptElementType(ElementType::Target)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1498,7 +1498,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::FunctionFeature), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Morpheme), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -1524,7 +1524,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Morpheme)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1549,7 +1549,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1574,7 +1574,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1600,7 +1600,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1626,7 +1626,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Observation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1651,7 +1651,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1676,7 +1676,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Head), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1702,7 +1702,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -1725,10 +1725,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "ph";
                 properties.annotationtype = Some(AnnotationType::PHON);
-                properties.accepted_data = &[];
+                properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1754,7 +1754,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::FunctionFeature), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Phoneme), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -1780,7 +1780,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Phoneme)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1831,7 +1831,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::HeadFeature), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 1;
                 properties.textdelimiter = None;
@@ -1857,7 +1857,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::SemanticRole), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1883,7 +1883,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -1909,7 +1909,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -1935,7 +1935,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -1961,7 +1961,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Cell), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n");
@@ -1987,7 +1987,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Cue), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::Target), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2013,7 +2013,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2039,7 +2039,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Predicate), AcceptedData::AcceptElementType(ElementType::SemanticRole)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2064,7 +2064,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::SynsetFeature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2090,7 +2090,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -2116,7 +2116,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PolarityFeature), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::StrengthFeature), AcceptedData::AcceptElementType(ElementType::Target), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2142,7 +2142,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Sentiment)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2193,7 +2193,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2219,7 +2219,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2245,7 +2245,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::SpanRelation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2270,7 +2270,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n\n");
@@ -2296,7 +2296,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Headspan), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Source), AcceptedData::AcceptElementType(ElementType::StatementRelation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2322,7 +2322,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Statement)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2347,7 +2347,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2399,7 +2399,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2451,7 +2451,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric)];
                 properties.required_data = &[];
                 properties.required_attribs = &[ AttribType::CLASS ];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 1;
                 properties.textdelimiter = None;
@@ -2477,7 +2477,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementGroup(ElementGroup::Span), AcceptedData::AcceptElementGroup(ElementGroup::Structure), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::N ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ID,AttribType::N,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2528,7 +2528,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::SyntacticUnit), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2554,7 +2554,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::SyntacticUnit)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2579,7 +2579,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Row), AcceptedData::AcceptElementType(ElementType::TableHead)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -2605,7 +2605,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Row)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -2631,7 +2631,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 1;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2657,7 +2657,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Utterance), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n");
@@ -2683,7 +2683,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Division), AcceptedData::AcceptElementType(ElementType::Entry), AcceptedData::AcceptElementType(ElementType::Event), AcceptedData::AcceptElementType(ElementType::Example), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Figure), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::List), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Paragraph), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::Table), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Whitespace), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("\n\n\n");
@@ -2706,10 +2706,10 @@ impl Properties {
                 let mut properties = Properties::default();
                 properties.xmltag = "t";
                 properties.annotationtype = Some(AnnotationType::TEXT);
-                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::METADATA,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2735,7 +2735,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -2760,7 +2760,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -2785,7 +2785,57 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = Some("");
+                properties.printable = true;
+                properties.speakable = false;
+                properties.hidden = false;
+                properties.xlink = true;
+                properties.textcontainer = true;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = false;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties
+            },
+            ElementType::TextMarkupHSpace => {
+                let mut properties = Properties::default();
+                properties.xmltag = "t-hspace";
+                properties.annotationtype = Some(AnnotationType::HSPACE);
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = Some("");
+                properties.printable = true;
+                properties.speakable = false;
+                properties.hidden = false;
+                properties.xlink = true;
+                properties.textcontainer = true;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = false;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties
+            },
+            ElementType::TextMarkupLanguage => {
+                let mut properties = Properties::default();
+                properties.xmltag = "t-lang";
+                properties.annotationtype = Some(AnnotationType::LANG);
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -2810,7 +2860,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -2835,7 +2885,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -2860,7 +2910,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::FontFeature), AcceptedData::AcceptElementType(ElementType::Linebreak), AcceptedData::AcceptElementType(ElementType::SizeFeature)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -2873,6 +2923,31 @@ impl Properties {
                 properties.subset = None;
                 properties.auth = true;
                 properties.primaryelement = true;
+                properties.auto_generate_id = false;
+                properties.setonly = false;
+                properties.wrefable = false;
+                properties
+            },
+            ElementType::TextMarkupWhitespace => {
+                let mut properties = Properties::default();
+                properties.xmltag = "t-whitespace";
+                properties.annotationtype = Some(AnnotationType::WHITESPACE);
+                properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::TextMarkup), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::Linebreak)];
+                properties.required_data = &[];
+                properties.required_attribs = &[];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
+                properties.occurrences = 0;
+                properties.occurrences_per_set = 0;
+                properties.textdelimiter = Some("");
+                properties.printable = true;
+                properties.speakable = false;
+                properties.hidden = false;
+                properties.xlink = true;
+                properties.textcontainer = true;
+                properties.phoncontainer = false;
+                properties.subset = None;
+                properties.auth = true;
+                properties.primaryelement = false;
                 properties.auto_generate_id = false;
                 properties.setonly = false;
                 properties.wrefable = false;
@@ -2911,7 +2986,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::ActorFeature), AcceptedData::AcceptElementType(ElementType::BegindatetimeFeature), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::EnddatetimeFeature), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::LinkReference), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::WordReference)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2937,7 +3012,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::TimeSegment)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ID ];
+                properties.optional_attribs = &[ AttribType::ID,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
@@ -2962,7 +3037,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Gap), AcceptedData::AcceptElementType(ElementType::Hiddenword), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Note), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Quote), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::Sentence), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent), AcceptedData::AcceptElementType(ElementType::Word)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -3014,7 +3089,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::Relation)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some("");
@@ -3040,7 +3115,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementGroup(ElementGroup::Layer), AcceptedData::AcceptElementGroup(ElementGroup::Inline), AcceptedData::AcceptElementType(ElementType::Alternative), AcceptedData::AcceptElementType(ElementType::AlternativeLayers), AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Correction), AcceptedData::AcceptElementType(ElementType::Description), AcceptedData::AcceptElementType(ElementType::External), AcceptedData::AcceptElementType(ElementType::Feature), AcceptedData::AcceptElementType(ElementType::ForeignData), AcceptedData::AcceptElementType(ElementType::Metric), AcceptedData::AcceptElementType(ElementType::Part), AcceptedData::AcceptElementType(ElementType::PhonContent), AcceptedData::AcceptElementType(ElementType::Reference), AcceptedData::AcceptElementType(ElementType::Relation), AcceptedData::AcceptElementType(ElementType::String), AcceptedData::AcceptElementType(ElementType::TextContent)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TEXTCLASS ];
+                properties.optional_attribs = &[ AttribType::ANNOTATOR,AttribType::BEGINTIME,AttribType::CLASS,AttribType::CONFIDENCE,AttribType::DATETIME,AttribType::ENDTIME,AttribType::ID,AttribType::METADATA,AttribType::N,AttribType::SPACE,AttribType::SPEAKER,AttribType::SRC,AttribType::TAG,AttribType::TEXTCLASS ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = Some(" ");
@@ -3066,7 +3141,7 @@ impl Properties {
                 properties.accepted_data = &[AcceptedData::AcceptElementType(ElementType::Comment), AcceptedData::AcceptElementType(ElementType::Description)];
                 properties.required_data = &[];
                 properties.required_attribs = &[];
-                properties.optional_attribs = &[ AttribType::IDREF ];
+                properties.optional_attribs = &[ AttribType::IDREF,AttribType::TAG ];
                 properties.occurrences = 0;
                 properties.occurrences_per_set = 0;
                 properties.textdelimiter = None;
