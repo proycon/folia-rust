@@ -2,7 +2,7 @@
 [![Docs](https://docs.rs/folia/badge.svg)](https://docs.rs/folia/)
 [![Build Status](https://travis-ci.com/proycon/folia-rust.svg?branch=master)](https://travis-ci.com/proycon/folia-rust)
 [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/folia-rust)](http://applejack.science.ru.nl/languagemachines/)
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 
 
 This is a high-performance Rust library for handling the [FoLiA XML format](https://proycon.github.io/folia), a rich format
